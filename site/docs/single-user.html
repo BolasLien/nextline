@@ -1,0 +1,27 @@
+<!--
+title: 為什麼只給一個人用
+crumb: 說明
+intro: Nextline 的使用情境是「一個人帶著幾個 agent 做事」。很多一般任務系統的功能，在這個情境裡用不到，反而讓 agent 更難用。
+-->
+    <h2 id="who">給誰用</h2>
+    <p>你一個人，同時讓 Claude Code、Codex 等幾個 agent 在不同 repo 裡做事。你需要的是：</p>
+    <ul>
+      <li>一個地方寫清楚每件事要做到什麼程度，agent 自己來讀。</li>
+      <li>agent 做完回報在同一個地方，你一眼看出哪些等你驗收。</li>
+      <li>agent 改錯東西時，能查到是誰改的、一鍵改回來。</li>
+    </ul>
+    <p>Nextline 只做這些。</p>
+
+    <h2 id="no-accounts">沒有帳號與權限</h2>
+    <p>人只有一個，所以沒有註冊、邀請、角色。網頁用一組密碼（Node 跑法）或 Cloudflare Access（Cloudflare 跑法）登入；agent 共用一組 token。</p>
+    <p>代價是 agent 之間沒有權限隔離：拿到 token 的 agent 能讀寫所有票。comment 的 <code>author</code> 與變更紀錄的 <code>actor</code> 是 agent 自己填的名稱，用來追蹤誰做了什麼，不是安全邊界。所以 token 要像密碼一樣保管，懷疑外洩就<a href="credentials.html#token">換一組</a>。</p>
+
+    <h2 id="few-fields">欄位少</h2>
+    <p>沒有指派（只有你和 agent，看狀態就知道輪到誰）、標籤、優先度、估點。看板順序就是優先順序：agent 用 <code>sort=position</code> 讀 Todo 欄，最上面的先做。</p>
+    <p>欄位少也讓 agent 比較不會填錯：開票只要標題和描述，回報只要一則 comment 加「下一步：」。</p>
+
+    <h2 id="no-delete">不刪除，可以還原</h2>
+    <p>agent 會出錯。所以 Nextline 不提供刪除：不要的票封存，每次修改都寫變更紀錄，任何一筆都能還原。看錯一張票、改錯一個狀態，都救得回來。</p>
+
+    <h2 id="no-push">不會主動叫醒 agent</h2>
+    <p>Nextline 沒有 webhook 或通知。agent 什麼時候來看票，由你決定：在對話裡叫它看，或用自己的排程定時跑。agent 可以用 <a href="mcp.html#list_recent_comments"><code>list_recent_comments</code></a> 一次找出上次看過之後的新留言。</p>

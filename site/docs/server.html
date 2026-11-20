@@ -1,0 +1,47 @@
+<!--
+title: 架在伺服器上（HTTPS）
+crumb: 操作指南
+intro: 讓手機或別台電腦也能用：Node 仍然只聽本機，由反向代理負責 HTTPS。
+-->
+    <h2 id="how">做法</h2>
+    <p>Nextline 不直接對外提供 HTTP。HTTPS 交給同一台機器上的反向代理（下面用 Caddy 示範），Node 照樣綁 <code>127.0.0.1</code>，只讓代理連進來。</p>
+```sh
+export NEXTLINE_DATA_DIR=/srv/nextline-data
+export NEXTLINE_PUBLIC_URL=https://nextline.example.com
+export NEXTLINE_TRUSTED_PROXIES=127.0.0.1
+npm run selfhost:init
+npm start
+```
+    <ul>
+      <li><code>NEXTLINE_PUBLIC_URL</code> 是對外網址，只能有協定、主機與連接埠（不能有路徑）。</li>
+      <li><code>NEXTLINE_TRUSTED_PROXIES</code> 是代理的<strong>精確 IP</strong>，逗號分隔；不接受萬用字元或網段。設成 HTTPS 網址卻沒設這個，服務會拒絕啟動。</li>
+      <li>反過來，<code>NEXTLINE_HOST</code> 不是本機位址、卻沒有設 HTTPS 網址與代理時，也會拒絕啟動。</li>
+    </ul>
+
+    <h2 id="caddy">Caddy 設定範例</h2>
+    <p>網域要先指到這台伺服器：</p>
+```caddyfile
+nextline.example.com {
+  reverse_proxy 127.0.0.1:3000 {
+    header_up Host nextline.example.com
+    header_up X-Forwarded-Host nextline.example.com
+    header_up X-Forwarded-Proto https
+  }
+}
+```
+    <p>repo 的 <code>docs/deploy/</code> 有可直接用的 <code>public.Caddyfile</code>（公開網域）、<code>local.Caddyfile</code>（沒有網域時用 <code>localhost:8443</code> 和自簽憑證演練）與 <code>supervisord.conf</code>（程序掛掉自動重啟）。</p>
+
+    <h2 id="rules">代理要符合的規則</h2>
+    <ul>
+      <li>只接受來自指定代理 IP 的連線，而且 <code>Host</code> 要等於設定的網域、<code>X-Forwarded-Proto</code> 要剛好是 <code>https</code>。</li>
+      <li>不看 <code>Forwarded</code>、<code>X-Forwarded-For</code>，公開網址也不從標頭推算。</li>
+      <li>防火牆只讓代理連 Node 的連接埠，不要對外開。</li>
+      <li>HTTPS 模式下登入 cookie 會加上 Secure。</li>
+    </ul>
+
+    <h2 id="verify">確認</h2>
+```sh
+curl --fail https://nextline.example.com/health
+```
+    <p>回 <code>{"ok":true,"db":"ok"}</code> 就好。接著把 agent 的 MCP 網址換成 <code>https://nextline.example.com/mcp</code>。</p>
+    <div class="note">完整的 Caddy＋Supervisor 演練步驟（含自簽 CA、停機備份、程序重啟）在 repo 的 <a href="https://github.com/BolasLien/nextline/blob/main/docs/self-host.md">docs/self-host.md</a>。這份範例實測的是程序意外結束後自動重啟，沒有驗證整台主機重開或公開網域自動申請憑證。</div>

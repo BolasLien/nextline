@@ -1,0 +1,40 @@
+<!--
+title: Sprint
+crumb: 參考 › REST API
+intro: 依時間區段把票分期。網頁不顯示 Sprint，只有 API 與 MCP 可以用。
+-->
+    <div class="note">網頁介面沒有 Sprint。需要依週期整理票的 agent 或腳本可以用這組 API；MCP 對應的是 <code>list_cycles</code> 與 <code>save_issue</code> 的 <code>cycle</code>。</div>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>方法與路徑</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/sprints</code></td><td>列出，依編號新到舊；回 <code>{ "sprints": [...] }</code></td></tr>
+        <tr><td><code>POST /api/sprints</code></td><td>新增，回 <code>201</code></td></tr>
+        <tr><td><code>GET /api/sprints/:id</code></td><td>讀一個</td></tr>
+        <tr><td><code>PATCH /api/sprints/:id</code></td><td>修改名稱與起訖時間</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="fields">欄位</h2>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>欄位</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>數字</td></tr>
+        <tr><td><code>number</code></td><td>第幾期，不可重複</td></tr>
+        <tr><td><code>name</code></td><td>名稱，可以是 <code>null</code></td></tr>
+        <tr><td><code>starts_at</code>、<code>ends_at</code></td><td>起訖時間（ISO），結束要晚於開始</td></tr>
+        <tr><td><code>linear_id</code></td><td>搬資料用的外部 id</td></tr>
+        <tr><td><code>created_at</code></td><td>建立時間</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="create">新增</h2>
+    <p>內容：<code>number</code>、<code>starts_at</code>、<code>ends_at</code> 必填；<code>name</code>、<code>linear_id</code>、<code>created_at</code> 選填。編號重複回 <code>409</code>。</p>
+```sh
+curl -X POST http://127.0.0.1:3000/api/sprints \
+  -H "Authorization: Bearer $NEXTLINE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"number":1,"starts_at":"2026-11-16T00:00:00Z","ends_at":"2026-11-23T00:00:00Z"}'
+```
+
+    <h2 id="update">修改</h2>
+    <p>內容：<code>name</code>（<code>null</code> 清掉）、<code>starts_at</code>、<code>ends_at</code>。票要放進 Sprint，用票的 <code>sprint_id</code>。</p>

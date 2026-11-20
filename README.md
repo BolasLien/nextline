@@ -8,6 +8,8 @@ Nextline 是給「一個人＋幾個 AI agent」一起用的任務看板。人�
 - 給 agent 的 REST API 與遠端 MCP（工具名稱與參數照 Linear MCP）
 - 兩種跑法共用同一份核心：Node＋SQLite 自架，或 Cloudflare Workers＋D1
 
+完整文件（安裝、agent 連線、REST API 與 MCP 參考）在官網與文件站，原始檔在 `site/`，`npm run build:site` 建到 `dist/site/` 後直接開 `dist/site/index.html`。
+
 限制：只給單一使用者用，沒有註冊與多人帳號；所有 agent 共用一組 token，沒有個別權限。自架不需要 Cloudflare 帳號、Wrangler 或 macOS Keychain。
 
 ## 本機啟動

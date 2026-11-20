@@ -1,0 +1,124 @@
+<!--
+title: MCP 工具
+crumb: 參考
+intro: 遠端 MCP server，給 Claude Code、Codex 這類 agent 讀寫票。常用工具的名稱與參數照 Linear MCP。
+-->
+    <h2 id="connect">連線</h2>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>項目</th><th>值</th></tr></thead>
+      <tbody>
+        <tr><td>網址</td><td>Node 本機 <code>http://127.0.0.1:3000/mcp</code>；放到伺服器或 Cloudflare 時換成自己的 <code>https://…/mcp</code></td></tr>
+        <tr><td>傳輸</td><td>Streamable HTTP，只收 <code>POST</code>（<code>GET</code>、<code>DELETE</code> 回 <code>405</code>）</td></tr>
+        <tr><td>驗證</td><td><code>Authorization: Bearer &lt;token&gt;</code>，跟 <a href="api.html#auth">REST API</a> 同一組；沒有有效 token 回 <code>401</code></td></tr>
+        <tr><td>狀態</td><td>無狀態：不發 session id，每個請求各自處理，回 JSON（不開 SSE）</td></tr>
+      </tbody>
+    </table></div>
+    <p>client 設定見<a href="claude-code.html">連上 Claude Code</a>、<a href="codex.html">連上 Codex</a>。</p>
+
+    <h2 id="results">回傳格式</h2>
+    <ul>
+      <li>成功時 <code>content[0].text</code> 是 JSON 字串。</li>
+      <li>找不到、參數不對、名稱重複時 <code>isError: true</code>，<code>text</code> 是中文錯誤說明。</li>
+      <li>票號參數（<code>id</code>、<code>issueId</code>、<code>blockedBy</code> 等）收 <code>NX-12</code>、<code>12</code> 或舊編號，不分大小寫；回傳的票 <code>id</code> 一律是 <code>NX-&lt;n&gt;</code>，舊編號在 <code>legacyIdentifier</code>。</li>
+      <li>id 都是字串（<code>projectId</code>、<code>cycleId</code>、comment 的 <code>id</code> 是數字字串）。</li>
+    </ul>
+
+    <h2 id="tools">工具一覽</h2>
+    <div class="table-wrap"><table class="ref wrap-first">
+      <thead><tr><th>工具</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#list_issues"><code>list_issues</code></a></td><td>列出票</td></tr>
+        <tr><td><a href="#get_issue"><code>get_issue</code></a></td><td>讀一張票（含描述與 blocked by）</td></tr>
+        <tr><td><a href="#save_issue"><code>save_issue</code></a></td><td>開票或修改票</td></tr>
+        <tr><td><a href="#list_issue_events"><code>list_issue_events</code></a></td><td>變更紀錄</td></tr>
+        <tr><td><a href="#revert_issue_event"><code>revert_issue_event</code></a></td><td>還原一筆變更</td></tr>
+        <tr><td><a href="#list_comments"><code>list_comments</code></a></td><td>一張票的 comment</td></tr>
+        <tr><td><a href="#list_recent_comments"><code>list_recent_comments</code></a></td><td>跨票列出新的 comment</td></tr>
+        <tr><td><a href="#save_comment"><code>save_comment</code></a></td><td>寫或改 comment</td></tr>
+        <tr><td><a href="#list_projects"><code>list_projects</code></a></td><td>列出 Project</td></tr>
+        <tr><td><a href="#get_project"><code>get_project</code></a></td><td>讀一個 Project</td></tr>
+        <tr><td><a href="#save_project"><code>save_project</code></a></td><td>新增或修改 Project</td></tr>
+        <tr><td><a href="#list_cycles"><code>list_cycles</code></a></td><td>列出 Sprint（Linear 叫 Cycle）</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="list_issues"><code>list_issues</code></h2>
+    <p>列出票，預設依更新時間新到舊、不含已封存的票。回 <code>{ issues, hasNextPage, cursor? }</code>；每張票不含 <code>description</code>，要看內容用 <code>get_issue</code>。</p>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>參數</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>state</code></td><td>狀態名稱，或 Linear 的 state type（<code>backlog</code>、<code>unstarted</code>、<code>started</code>、<code>completed</code>、<code>canceled</code>），不分大小寫；可逗號分隔。<code>started</code> 同時查 In Progress 與 In Review。沒做完的票：<code>Backlog,Todo,In Progress,In Review</code></td></tr>
+        <tr><td><code>orderBy</code></td><td><code>updatedAt</code>（預設）或 <code>position</code>（看板順序）</td></tr>
+        <tr><td><code>project</code></td><td>Project 名稱（不分大小寫）或 id；<code>none</code> 是沒有 Project</td></tr>
+        <tr><td><code>cycle</code></td><td>Sprint 編號、名稱或 id（數字先當編號）；<code>none</code> 是沒有 Sprint</td></tr>
+        <tr><td><code>updatedAt</code></td><td>這個時間之後更新的：ISO 時間、<code>YYYY-MM-DD</code>，或相對時間 <code>-P1D</code>、<code>-P2W</code>、<code>-PT12H</code></td></tr>
+        <tr><td><code>includeArchived</code></td><td><code>true</code> 才包含已封存的票（預設 <code>false</code>）</td></tr>
+        <tr><td><code>limit</code></td><td>預設 50，最多 200（超過以 200 計）</td></tr>
+        <tr><td><code>cursor</code></td><td>上一頁回傳的 <code>cursor</code></td></tr>
+        <tr><td><code>team</code></td><td>相容用，忽略</td></tr>
+      </tbody>
+    </table></div>
+    <p>每張票的欄位：<code>id</code>、<code>legacyIdentifier</code>、<code>title</code>、<code>status</code>、<code>statusType</code>、<code>project</code>（名稱）、<code>projectId</code>、<code>cycle</code>（編號）、<code>cycleId</code>、<code>dueDate</code>、<code>position</code>、<code>createdAt</code>、<code>updatedAt</code>、<code>completedAt</code>、<code>canceledAt</code>、<code>archivedAt</code>。In Review 的 <code>statusType</code> 跟 Linear 一樣是 <code>started</code>。</p>
+
+    <h2 id="get_issue"><code>get_issue</code></h2>
+    <p>參數 <code>id</code>（必填）。回票的全部欄位，含 <code>description</code> 與 <code>relations.blockedBy</code>／<code>relations.blocks</code>（每項有 <code>id</code>、<code>legacyIdentifier</code>、<code>title</code>、<code>status</code>）。</p>
+
+    <h2 id="save_issue"><code>save_issue</code></h2>
+    <p>不帶 <code>id</code> 是開票（要 <code>title</code>），帶 <code>id</code> 是修改，只改有帶的欄位。回存完的票（同 <code>get_issue</code>）。所有參照（Project、Sprint、各個票號）會先檢查都存在才寫入，任何一個不存在就整個不寫。</p>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>參數</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>要修改的票號；開票時不帶</td></tr>
+        <tr><td><code>title</code></td><td>開票必填</td></tr>
+        <tr><td><code>description</code></td><td>Markdown，整份替換</td></tr>
+        <tr><td><code>state</code></td><td>狀態名稱或 state type（<code>started</code> 存成 In Progress）；開票預設 Backlog</td></tr>
+        <tr><td><code>project</code></td><td>Project 名稱或 id；<code>null</code> 移出</td></tr>
+        <tr><td><code>cycle</code></td><td>Sprint 編號、名稱或 id；<code>null</code> 移出</td></tr>
+        <tr><td><code>dueDate</code></td><td><code>YYYY-MM-DD</code>；<code>null</code> 清掉</td></tr>
+        <tr><td><code>before</code>、<code>after</code>、<code>position</code></td><td>看板位置，一次只能帶一個，見<a href="api-issues.html#order">看板排序</a>；新票與換欄的票預設放最上面</td></tr>
+        <tr><td><code>blockedBy</code>、<code>blocks</code></td><td>票號陣列，只新增關係</td></tr>
+        <tr><td><code>removeBlockedBy</code>、<code>removeBlocks</code></td><td>票號陣列，拿掉關係</td></tr>
+        <tr><td><code>archived</code></td><td><code>true</code> 封存、<code>false</code> 取消封存；只能修改時帶</td></tr>
+        <tr><td><code>actor</code></td><td>誰改的，寫進變更紀錄；預設 <code>mcp</code></td></tr>
+        <tr><td><code>team</code></td><td>相容用，忽略</td></tr>
+      </tbody>
+    </table></div>
+    <p>改到的每個欄位都寫一筆變更紀錄，做錯了用 <code>revert_issue_event</code> 還原。要人看過的票送 <code>In Review</code>。</p>
+
+    <h2 id="list_issue_events"><code>list_issue_events</code></h2>
+    <p>參數 <code>issueId</code>（必填）。回 <code>{ events }</code>，舊到新；每筆有 <code>id</code>、<code>issueId</code>、<code>field</code>、<code>from</code>、<code>to</code>、<code>actor</code>、<code>revertOf</code>、<code>revertedBy</code>、<code>createdAt</code>。欄位意思見<a href="api-events.html#list">變更紀錄</a>。</p>
+
+    <h2 id="revert_issue_event"><code>revert_issue_event</code></h2>
+    <p>參數 <code>issueId</code>、<code>eventId</code>（必填）、<code>actor</code>（預設 <code>mcp</code>）。回 <code>{ issue, event, revertedEvent }</code>：還原後的票、新寫的「還原了第 N 筆」、被還原的那筆。不能還原時（已經還原過、之後同一欄位又被改過、現在的值已經不同）以 <code>isError</code> 回中文說明，規則見<a href="api-events.html#revert-errors">不能還原的情況</a>。</p>
+
+    <h2 id="list_comments"><code>list_comments</code></h2>
+    <p>參數 <code>issueId</code>（必填）。回 <code>{ comments }</code>，舊到新；每則有 <code>id</code>、<code>issueId</code>、<code>author</code>、<code>body</code>、<code>createdAt</code>、<code>updatedAt</code>。</p>
+
+    <h2 id="list_recent_comments"><code>list_recent_comments</code></h2>
+    <p>跨所有票列出某個時間之後新增的 comment，舊到新，包含 Done、Canceled 與已封存的票。適合 agent 一次找出「上次看過之後誰在哪些票留言」。</p>
+    <ul>
+      <li><code>createdAt</code>（必填）：ISO 時間、<code>YYYY-MM-DD</code> 或相對時間（例如 <code>-P1D</code>）。</li>
+      <li><code>limit</code>（預設 50、最多 200）、<code>cursor</code>。</li>
+    </ul>
+    <p>回 <code>{ comments, hasNextPage, cursor? }</code>，每則格式同 <code>list_comments</code>。</p>
+
+    <h2 id="save_comment"><code>save_comment</code></h2>
+    <p>不帶 <code>id</code> 是在 <code>issueId</code> 的票上新增，帶 <code>id</code> 是修改那則的內容。</p>
+    <ul>
+      <li><code>body</code>（必填）：Markdown。最後一行寫「下一步：…」，看板卡片就會顯示。</li>
+      <li><code>issueId</code>：新增時必填。</li>
+      <li><code>author</code>：誰寫的，預設 <code>mcp</code>。建議帶 agent 自己的名稱。</li>
+    </ul>
+    <p>agent 寫的 comment 不會改票的狀態；網頁使用者回覆待驗收的票才會把票交回 In Progress（見<a href="api-comments.html#hand-back">回覆待驗收的票會交回 agent</a>）。</p>
+
+    <h2 id="list_projects"><code>list_projects</code></h2>
+    <p>參數 <code>query</code>（名稱包含這段文字，不分大小寫）；<code>state</code>、<code>team</code> 相容用、忽略。回 <code>{ projects }</code>，釘選的在最上面，其餘照 <code>lastActivityAt</code> 新到舊；每個有 <code>id</code>、<code>name</code>、<code>createdAt</code>、<code>updatedAt</code>、<code>pinnedAt</code>、<code>lastActivityAt</code>，不含 <code>description</code>。</p>
+
+    <h2 id="get_project"><code>get_project</code></h2>
+    <p>參數 <code>query</code>（必填，名稱或 id）。回 Project，含 <code>description</code>。</p>
+
+    <h2 id="save_project"><code>save_project</code></h2>
+    <p>不帶 <code>id</code> 是新增（要 <code>name</code>，不可重複），帶 <code>id</code>（名稱或 id）是修改。參數：<code>name</code>、<code>description</code>、<code>pinned</code>（<code>true</code> 釘選、<code>false</code> 取消，只能修改時帶）；<code>state</code> 相容用、忽略。回存完的 Project。</p>
+
+    <h2 id="list_cycles"><code>list_cycles</code></h2>
+    <p>參數 <code>type</code>：<code>current</code>、<code>previous</code>、<code>next</code>，不帶就是全部；<code>teamId</code> 相容用、忽略。回 <code>{ cycles }</code>，依編號新到舊，每個有 <code>id</code>、<code>number</code>、<code>name</code>、<code>startsAt</code>、<code>endsAt</code>。</p>

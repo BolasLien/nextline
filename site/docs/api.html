@@ -1,0 +1,94 @@
+<!--
+title: 認證與錯誤格式
+crumb: 參考
+intro: REST API 的共通規則：網址、token、請求與回應格式、票號、分頁與錯誤。網頁和 MCP 背後用的都是同一套。
+-->
+    <h2 id="base">網址</h2>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>跑法</th><th>API 網址</th></tr></thead>
+      <tbody>
+        <tr><td>Node 本機</td><td><code>http://127.0.0.1:3000/api</code></td></tr>
+        <tr><td>Node 放在 HTTPS 代理後面</td><td><code>https://你的網域/api</code></td></tr>
+        <tr><td>Cloudflare Workers</td><td><code>https://&lt;你的 Worker&gt;.workers.dev/api</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>文件裡的範例都用 Node 本機的網址。</p>
+
+    <h2 id="auth">認證</h2>
+    <p>每個請求都要帶 token：</p>
+```sh
+curl -H "Authorization: Bearer $NEXTLINE_API_TOKEN" http://127.0.0.1:3000/api/issues
+```
+    <ul>
+      <li>token 怎麼來：Node 跑法用 <code>npm run --silent selfhost:token</code> 產生（見<a href="first-issue.html#token">產生 token</a>）；Cloudflare 跑法是 Worker secret <code>API_TOKEN</code>。</li>
+      <li>沒帶、帶錯、或已經換掉的舊 token，一律回 <code>401</code>。</li>
+      <li><code>/api</code> 只收 token，不收網頁登入的 cookie；網頁也不收 token。</li>
+      <li>只有一組 token，所有 agent 共用、權限相同。<code>author</code>、<code>actor</code> 是記錄用的文字，不是身分驗證。</li>
+    </ul>
+
+    <h2 id="format">請求與回應</h2>
+    <ul>
+      <li>請求內容與回應都是 JSON（<code>Content-Type: application/json</code>）。</li>
+      <li>時間是 ISO 8601，存進去前一律轉成 UTC，例如 <code>2026-11-02T08:29:53.024Z</code>。日期（<code>due_date</code>）是 <code>YYYY-MM-DD</code>。</li>
+      <li><code>PATCH</code> 只改有帶的欄位；可以清空的欄位帶 <code>null</code>。</li>
+      <li>沒有刪除：不要的票改成 <code>Canceled</code> 或<a href="api-issues.html#archive">封存</a>。</li>
+    </ul>
+
+    <h2 id="ref">票號 <code>:ref</code></h2>
+    <p>路徑裡的 <code>:ref</code> 收 <code>NX-12</code> 或 <code>12</code>，不分大小寫。從其他系統搬進來的票如果有舊編號（<code>legacy_identifier</code>，格式像 <code>ABC-150</code>），也可以用舊編號查。</p>
+
+    <h2 id="paging">分頁</h2>
+    <p>列表類的路徑用 <code>limit</code>（預設 50、最多 200）與 <code>offset</code>。回應帶 <code>has_more</code>，是 <code>true</code> 就把 <code>offset</code> 加上 <code>limit</code> 再拿下一頁：</p>
+```json
+{ "issues": [ ... ], "limit": 50, "offset": 0, "has_more": true }
+```
+
+    <h2 id="errors">錯誤</h2>
+    <p>錯誤一律是 <code>{ "error": "說明" }</code>，說明是中文：</p>
+    <div class="table-wrap"><table class="ref wrap-first">
+      <thead><tr><th>狀態碼</th><th>什麼時候</th></tr></thead>
+      <tbody>
+        <tr><td><code>400</code></td><td>內容不是 JSON 物件、缺必填欄位、值的格式不對、參照的 Project 或票不存在</td></tr>
+        <tr><td><code>401</code></td><td>沒有有效的 token</td></tr>
+        <tr><td><code>404</code></td><td>票、comment、Project 不存在，或沒有這個路徑</td></tr>
+        <tr><td><code>405</code></td><td>這個路徑不支援這個方法；<code>Allow</code> 標頭列出支援的方法</td></tr>
+        <tr><td><code>409</code></td><td>資料重複（例如 Project 名稱），或變更紀錄不能還原；會多帶相關資料的 id，見各頁說明</td></tr>
+      </tbody>
+    </table></div>
+```json
+{ "error": "status 必須是 Backlog、Todo、In Progress、In Review、Done、Canceled 其中之一" }
+```
+
+    <h2 id="health">健康檢查</h2>
+    <p><code>GET /health</code> 不用 token，只回服務與資料庫是否正常，不帶任何資料：</p>
+```json
+{ "ok": true, "db": "ok" }
+```
+    <p>資料庫讀不到時回 <code>503</code> 與 <code>{ "ok": false, "db": "error" }</code>。</p>
+
+    <h2 id="index">所有路徑</h2>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>方法與路徑</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/issues</code></td><td><a href="api-issues.html#list">列出票</a></td></tr>
+        <tr><td><code>POST /api/issues</code></td><td><a href="api-issues.html#create">開票</a></td></tr>
+        <tr><td><code>GET /api/issues/:ref</code></td><td><a href="api-issues.html#get">讀一張票</a></td></tr>
+        <tr><td><code>PATCH /api/issues/:ref</code></td><td><a href="api-issues.html#update">修改票</a></td></tr>
+        <tr><td><code>GET /api/issues/:ref/comments</code></td><td><a href="api-comments.html#list">列出一張票的 comment</a></td></tr>
+        <tr><td><code>POST /api/issues/:ref/comments</code></td><td><a href="api-comments.html#create">寫 comment</a></td></tr>
+        <tr><td><code>GET /api/comments</code></td><td><a href="api-comments.html#recent">跨票列出新的 comment</a></td></tr>
+        <tr><td><code>GET /api/comments/:id</code></td><td><a href="api-comments.html#get">讀一則 comment</a></td></tr>
+        <tr><td><code>PATCH /api/comments/:id</code></td><td><a href="api-comments.html#update">改 comment</a></td></tr>
+        <tr><td><code>GET /api/issues/:ref/events</code></td><td><a href="api-events.html#list">變更紀錄</a></td></tr>
+        <tr><td><code>POST /api/issues/:ref/events/:id/revert</code></td><td><a href="api-events.html#revert">還原一筆變更</a></td></tr>
+        <tr><td><code>GET /api/issues/:ref/blockers</code></td><td><a href="api-blockers.html">blocked by 與 blocks</a></td></tr>
+        <tr><td><code>POST /api/issues/:ref/blockers</code></td><td><a href="api-blockers.html#add">加 blocked by</a></td></tr>
+        <tr><td><code>DELETE /api/issues/:ref/blockers/:blockerRef</code></td><td><a href="api-blockers.html#remove">拿掉 blocked by</a></td></tr>
+        <tr><td><code>GET /api/projects</code></td><td><a href="api-projects.html#list">列出 Project</a></td></tr>
+        <tr><td><code>POST /api/projects</code></td><td><a href="api-projects.html#create">新增 Project</a></td></tr>
+        <tr><td><code>GET /api/projects/:id</code></td><td><a href="api-projects.html#get">讀一個 Project</a></td></tr>
+        <tr><td><code>PATCH /api/projects/:id</code></td><td><a href="api-projects.html#update">修改、釘選 Project</a></td></tr>
+        <tr><td><code>GET</code>／<code>POST /api/sprints</code></td><td><a href="api-sprints.html">Sprint</a></td></tr>
+        <tr><td><code>GET</code>／<code>PATCH /api/sprints/:id</code></td><td><a href="api-sprints.html">Sprint</a></td></tr>
+      </tbody>
+    </table></div>

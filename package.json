@@ -19,6 +19,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply nextline --remote",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run test:d1",
     "build:app": "vite build --config vite.app.config.ts",
+    "build:site": "node scripts/build-site.mjs",
     "start": "node dist/server/main.mjs",
     "selfhost:init": "node dist/server/cli.mjs init",
     "selfhost:password": "node dist/server/cli.mjs reset-password",

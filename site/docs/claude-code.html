@@ -1,0 +1,47 @@
+<!--
+title: 連上 Claude Code
+crumb: 操作指南
+intro: 把 Nextline 加成 Claude Code 的遠端 MCP server，token 從環境變數讀，不寫進設定檔。
+-->
+    <h2 id="before">先準備</h2>
+    <ol>
+      <li>Nextline 已經在跑（見<a href="install.html">安裝與第一次登入</a>）。</li>
+      <li>產生 token 並放進環境變數 <code>NEXTLINE_API_TOKEN</code>，例如寫在 <code>~/.zshenv</code>（見<a href="first-issue.html#token">產生 token</a>）。</li>
+    </ol>
+
+    <h2 id="add">加入 MCP server</h2>
+    <p>用<strong>單引號</strong>，讓 <code>${NEXTLINE_API_TOKEN}</code> 原樣存進設定，連線時才由 Claude Code 展開，token 不會寫進 <code>~/.claude.json</code>：</p>
+```sh
+claude mcp add --transport http --scope user nextline http://127.0.0.1:3000/mcp \
+  --header 'Authorization: Bearer ${NEXTLINE_API_TOKEN}'
+```
+    <p>或寫在專案的 <code>.mcp.json</code>：</p>
+```json
+{
+  "mcpServers": {
+    "nextline": {
+      "type": "http",
+      "url": "http://127.0.0.1:3000/mcp",
+      "headers": { "Authorization": "Bearer ${NEXTLINE_API_TOKEN}" }
+    }
+  }
+}
+```
+    <p>Nextline 放在伺服器或 Cloudflare 上時，把網址換成自己的 <code>https://…/mcp</code>。</p>
+
+    <h2 id="check">確認連上了</h2>
+```sh
+claude mcp list
+```
+    <p>看到 <code>nextline</code> 是 connected 就好。工具名稱是 <code>mcp__nextline__list_issues</code>、<code>mcp__nextline__save_issue</code> 等，完整清單見 <a href="mcp.html">MCP 工具</a>。</p>
+    <p>連不上時先看：token 環境變數在啟動 Claude Code 的那個 shell 裡有沒有值；token 是不是被重新產生過（舊的會立刻失效，回 <code>401</code>）。</p>
+
+    <h2 id="use">試一次</h2>
+    <p>在對話裡直接說，例如：</p>
+    <ul>
+      <li>「列出 Nextline 上 Todo 的票」</li>
+      <li>「讀 NX-3，照描述做完，comment 寫做了什麼和下一步，送待驗收」</li>
+    </ul>
+    <p>建議 agent 寫 comment 時帶 <code>author</code>、改票時帶 <code>actor</code>（例如 <code>my-repo agent</code>），變更紀錄才分得出是誰改的；沒帶會記成 <code>mcp</code>。</p>
+
+    <p>參考：<a href="https://code.claude.com/docs/en/mcp">Claude Code 的 MCP 文件</a>（<code>--header</code> 與 headers 的 <code>${VAR}</code> 展開）。</p>

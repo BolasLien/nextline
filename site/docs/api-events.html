@@ -1,0 +1,97 @@
+<!--
+title: 變更紀錄與還原
+crumb: 參考 › REST API
+intro: 票的每個欄位改了什麼、誰改的都有紀錄。任何一筆都可以還原，像按一次復原。
+-->
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>方法與路徑</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/issues/:ref/events</code></td><td>一張票的變更紀錄，舊到新</td></tr>
+        <tr><td><code>POST /api/issues/:ref/events/:id/revert</code></td><td>還原第 <code>:id</code> 筆</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="what">哪些修改會記</h2>
+    <ul>
+      <li>記：標題、描述、狀態、Project、Sprint、到期日、blocked by、封存。一個請求改了幾個欄位就寫幾筆，跟修改一起成功或一起失敗。</li>
+      <li>不記：開票本身（起始值看票的 <code>created_at</code>）、只調整看板位置、值沒有真的變的欄位、comment。</li>
+    </ul>
+
+    <h2 id="list">列出變更紀錄</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-get">GET</span><span class="path">/api/issues/:ref/events</span>
+        <span class="ep-desc">回 <code>{ "events": [...] }</code>，舊到新。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>每一筆</h4>
+          <div class="param"><code>id</code><span class="type">number</span><p>第幾筆。</p></div>
+          <div class="param"><code>issue_number</code><span class="type">number</span></div>
+          <div class="param"><code>field</code><span class="type">string</span><p><code>title</code>、<code>description</code>、<code>status</code>、<code>project</code>、<code>sprint</code>、<code>due_date</code>、<code>blocked_by</code>、<code>archived</code>。</p></div>
+          <div class="param"><code>from_value</code>、<code>to_value</code><span class="type">string | null</span><p>舊值、新值，都是文字。<code>project</code>、<code>sprint</code> 是 id；<code>blocked_by</code> 是擋住這張票的票號數字（加入是 <code>null</code> → <code>"3"</code>，移除反過來）；<code>archived</code> 是封存時間。</p></div>
+          <div class="param"><code>actor</code><span class="type">string</span><p>誰改的。</p></div>
+          <div class="param"><code>revert_of_event_id</code><span class="type">number | null</span><p>這筆是「還原了第 N 筆」時的 N。</p></div>
+          <div class="param"><code>reverted_by_event_id</code><span class="type">number | null</span><p>這筆已經被還原時，是還原它的那一筆。</p></div>
+          <div class="param"><code>created_at</code><span class="type">ISO 時間</span></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  http://127.0.0.1:3000/api/issues/NX-13/events</pre>
+          <h4>回應 200</h4>
+<pre>{
+  <span class="k">"events"</span>: [
+    {
+      <span class="k">"id"</span>: 87,
+      <span class="k">"issue_number"</span>: 13,
+      <span class="k">"field"</span>: "status",
+      <span class="k">"from_value"</span>: "Todo",
+      <span class="k">"to_value"</span>: "In Review",
+      <span class="k">"actor"</span>: "my-agent",
+      <span class="k">"revert_of_event_id"</span>: null,
+      <span class="k">"reverted_by_event_id"</span>: null,
+      <span class="k">"created_at"</span>: "2026-11-20T09:12:40.118Z"
+    }
+  ]
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="revert">還原一筆變更</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-post">POST</span><span class="path">/api/issues/:ref/events/:id/revert</span>
+        <span class="ep-desc">把第 <code>:id</code> 筆的欄位改回 <code>from_value</code>，寫一筆新的紀錄（<code>revert_of_event_id = :id</code>），並把第 <code>:id</code> 筆標成已還原。全部在同一次寫入完成。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>內容（可以不帶）</h4>
+          <div class="param"><code>actor</code><span class="type">string</span><p>誰還原的，預設 <code>api</code>。</p></div>
+          <h4 style="margin-top:16px">回應 200</h4>
+          <div class="param"><code>issue</code><p>還原後的票。</p></div>
+          <div class="param"><code>event</code><p>新寫的那筆。</p></div>
+          <div class="param"><code>reverted_event</code><p>被還原的那筆。</p></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -X POST -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  -H "Content-Type: application/json" \
+  -d '{"actor":"my-agent"}' \
+  http://127.0.0.1:3000/api/issues/NX-13/events/87/revert</pre>
+          <h4>回應 409</h4>
+<pre>{
+  <span class="k">"error"</span>: "第 87 筆已經在第 90 筆還原過了",
+  <span class="k">"reverted_by_event_id"</span>: 90
+}</pre>
+        </div>
+      </div>
+    </div>
+    <p>還原狀態跟一般改狀態一樣：<code>completed_at</code>／<code>canceled_at</code> 會跟著改，票放到那一欄最上面。</p>
+    <h3 id="revert-errors">不能還原的情況</h3>
+    <div class="table-wrap"><table class="ref wrap-first">
+      <thead><tr><th>狀態碼</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td><code>404</code></td><td>票不存在，或那筆紀錄不屬於這張票</td></tr>
+        <tr><td><code>409</code></td><td>已經還原過；多帶 <code>reverted_by_event_id</code></td></tr>
+        <tr><td><code>409</code></td><td>之後同一個欄位又被改過（<code>blocked_by</code> 只看同一張擋住的票）；多帶 <code>conflict_event_id</code>。已經被還原掉的變更、以及「還原」本身不算，所以先還原後面那筆，就能再還原前面那筆</td></tr>
+        <tr><td><code>409</code></td><td>欄位現在的值已經不是那筆改完的值</td></tr>
+      </tbody>
+    </table></div>

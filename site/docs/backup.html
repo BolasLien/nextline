@@ -1,0 +1,45 @@
+<!--
+title: 備份、還原與更新
+crumb: 操作指南
+intro: Node 跑法的資料只有一個 SQLite 檔。備份用一致性快照，還原一律寫到新資料夾，不會蓋掉舊資料。
+-->
+    <h2 id="backup">備份</h2>
+    <p>目的地資料夾必須還不存在。服務開著也可以備份：</p>
+```sh
+export NEXTLINE_DATA_DIR="$HOME/.local/share/nextline"
+mkdir -p "$HOME/nextline-backups"
+npm run selfhost:backup -- "$HOME/nextline-backups/backup-01"
+```
+    <ul>
+      <li>成功會顯示「備份完成，完整性與關聯驗證通過」，資料夾裡有一個 <code>nextline.sqlite</code>。</li>
+      <li>用 SQLite 的線上備份，已提交的寫入都會包含。不要直接 <code>cp</code> 正在用的資料庫檔。</li>
+      <li>備份裡有密碼雜湊、token 雜湊與登入 session，跟正式資料一樣要放在私人的地方。</li>
+    </ul>
+
+    <h2 id="restore">還原</h2>
+    <p>先停掉服務（前景執行就按 Ctrl+C），再還原到<strong>另一個新的</strong>資料夾：</p>
+```sh
+npm run selfhost:restore -- "$HOME/nextline-backups/backup-01" "$HOME/.local/share/nextline-restored-01"
+export NEXTLINE_DATA_DIR="$HOME/.local/share/nextline-restored-01"
+npm run selfhost:init
+npm start
+```
+    <p>舊備份的資料表版本會由 <code>selfhost:init</code> 自動升級。確認方式：<code>curl --fail http://127.0.0.1:3000/health</code>，登入看一張已知的票、comment、變更紀錄，再讓 agent 用 MCP 讀同一張票。</p>
+    <div class="note warn">還原後，密碼與 token 會回到備份當時的版本，之前撤銷的 token 可能重新有效。如果是因為外洩而還原，開放使用前先<a href="credentials.html">重設密碼並換 token</a>。</div>
+
+    <h2 id="update">更新到新版本</h2>
+    <ol class="steps">
+      <li>記下目前的版本（<code>git rev-parse HEAD</code>）與資料夾位置。把新版本放到<strong>另一個</strong>程式資料夾，執行 <code>npm ci</code>、<code>npm run build</code>；舊的程式資料夾先留著。</li>
+      <li>停掉服務，照上面做一次備份。備份成功前不要更新。</li>
+      <li>在新程式資料夾設定同一個 <code>NEXTLINE_DATA_DIR</code>，執行 <code>npm run selfhost:init</code>，再 <code>npm start</code>。</li>
+      <li>檢查 <code>/health</code>、登入、已知的票與 comment、API 與 MCP 讀寫。都正常才恢復使用。</li>
+    </ol>
+    <p>新版本有問題時：停掉新服務，回到舊程式資料夾，把更新前的備份還原到另一個新資料夾，再用舊程式啟動。<strong>不能只退回程式</strong>卻繼續讀已經升級過的資料庫。</p>
+
+    <h2 id="migrations">資料表升級怎麼保護資料</h2>
+    <ul>
+      <li><code>selfhost:init</code> 在一個交易裡套用所有還沒套用的升級；任何一步失敗就整批撤回，資料不會停在一半。</li>
+      <li>每個升級檔都記下 SHA-256。資料庫比程式新、或已套用的升級檔被改過，都會拒絕啟動。</li>
+      <li>還原後如果已經有新寫入，回到舊快照會失去這些資料；沒有自動合併。</li>
+    </ul>
+    <p>Linux 主機搭配 Supervisor 的停機、備份、重啟指令見 repo 的 <a href="https://github.com/BolasLien/nextline/blob/main/docs/self-host.md">docs/self-host.md</a>。</p>

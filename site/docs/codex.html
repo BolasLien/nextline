@@ -1,0 +1,27 @@
+<!--
+title: 連上 Codex
+crumb: 操作指南
+intro: 在 Codex 的設定檔加一段，token 從環境變數讀。
+-->
+    <h2 id="before">先準備</h2>
+    <ol>
+      <li>Nextline 已經在跑（見<a href="install.html">安裝與第一次登入</a>）。</li>
+      <li>產生 token 並放進環境變數 <code>NEXTLINE_API_TOKEN</code>（見<a href="first-issue.html#token">產生 token</a>）。</li>
+    </ol>
+
+    <h2 id="config">設定</h2>
+    <p>在 <code>~/.codex/config.toml</code> 加上：</p>
+```toml
+[mcp_servers.nextline]
+url = "http://127.0.0.1:3000/mcp"
+bearer_token_env_var = "NEXTLINE_API_TOKEN"
+```
+    <p>Codex 會讀這個環境變數，自己加上 <code>Authorization: Bearer …</code>。Nextline 放在伺服器或 Cloudflare 上時，把網址換成自己的 <code>https://…/mcp</code>。</p>
+
+    <h2 id="check">確認連上了</h2>
+```sh
+codex mcp list
+```
+    <p>可用的工具與參數見 <a href="mcp.html">MCP 工具</a>。改票時帶 <code>actor</code>、寫 comment 時帶 <code>author</code>，變更紀錄才分得出是哪個 agent 改的。</p>
+
+    <p>參考：<a href="https://learn.chatgpt.com/docs/extend/mcp?surface=cli">Codex 的 MCP 文件</a>（<code>bearer_token_env_var</code>）。</p>

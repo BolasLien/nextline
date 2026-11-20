@@ -36,4 +36,10 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
     languageOptions: { ...tseslint.configs.disableTypeChecked.languageOptions, globals: globals.browser, sourceType: 'script' },
   },
+  // 官網與文件站（site/assets/）的小互動，原樣複製到 dist/site/，不經過 TypeScript。
+  {
+    files: ['site/**/*.js'],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: { ...tseslint.configs.disableTypeChecked.languageOptions, globals: globals.browser, sourceType: 'script' },
+  },
 );

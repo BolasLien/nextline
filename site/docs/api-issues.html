@@ -1,0 +1,206 @@
+<!--
+title: 票
+crumb: 參考 › REST API
+intro: 開票、查票、改狀態、調整看板順序、封存。網頁和 MCP 背後用的都是這組 API。
+-->
+    <div class="note">每個請求都要帶 <code>Authorization: Bearer &lt;token&gt;</code>，見<a href="api.html">認證與錯誤格式</a>。</div>
+
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>方法與路徑</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/issues</code></td><td>列出票，預設依更新時間新到舊</td></tr>
+        <tr><td><code>POST /api/issues</code></td><td>開一張票，自動編號 <code>NX-&lt;n&gt;</code></td></tr>
+        <tr><td><code>GET /api/issues/:ref</code></td><td>讀一張票，含 blocked by 與 blocks</td></tr>
+        <tr><td><code>PATCH /api/issues/:ref</code></td><td>修改，只改有帶的欄位；也用來調整看板順序與封存</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="fields">票的欄位</h2>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>欄位</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>number</code></td><td>編號（數字）</td></tr>
+        <tr><td><code>identifier</code></td><td>票號，<code>NX-&lt;number&gt;</code></td></tr>
+        <tr><td><code>legacy_identifier</code></td><td>從其他系統搬來的舊編號，沒有是 <code>null</code></td></tr>
+        <tr><td><code>title</code></td><td>標題</td></tr>
+        <tr><td><code>description</code></td><td>描述，Markdown</td></tr>
+        <tr><td><code>status</code></td><td><code>Backlog</code>、<code>Todo</code>、<code>In Progress</code>、<code>In Review</code>（待驗收）、<code>Done</code>、<code>Canceled</code></td></tr>
+        <tr><td><code>position</code></td><td>同一欄裡的順序，小的在上（見<a href="#order">看板排序</a>）</td></tr>
+        <tr><td><code>project_id</code></td><td>Project id，沒有是 <code>null</code></td></tr>
+        <tr><td><code>sprint_id</code></td><td>Sprint id，沒有是 <code>null</code></td></tr>
+        <tr><td><code>due_date</code></td><td>到期日 <code>YYYY-MM-DD</code>，沒有是 <code>null</code></td></tr>
+        <tr><td><code>created_at</code>、<code>updated_at</code></td><td>建立、最後修改時間</td></tr>
+        <tr><td><code>completed_at</code>、<code>canceled_at</code></td><td>改成 <code>Done</code>／<code>Canceled</code> 時自動填，改成其他狀態就清掉</td></tr>
+        <tr><td><code>archived_at</code></td><td>封存時間，沒封存是 <code>null</code></td></tr>
+        <tr><td><code>next_step</code></td><td>只能讀：最新一則 comment 裡「下一步：」後面的文字；最新那則沒寫就是 <code>null</code>。看板卡片顯示這一句</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="list">列出票</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-get">GET</span><span class="path">/api/issues</span>
+        <span class="ep-desc">參數可以組合。沒帶參數就是全部沒封存的票。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>查詢參數</h4>
+          <div class="param"><code>status</code><span class="type">string</span><p>六種狀態之一；可逗號分隔（<code>Todo,In Review</code>）或重複帶（<code>status=Todo&amp;status=Done</code>）。</p></div>
+          <div class="param"><code>sort</code><span class="type">updated | position</span><p><code>updated</code>（預設）是更新時間新到舊；<code>position</code> 是看板順序：先依狀態欄，欄內由上到下。</p></div>
+          <div class="param"><code>project</code><span class="type">id | none</span><p><code>none</code> 是沒有 Project 的票。</p></div>
+          <div class="param"><code>sprint</code><span class="type">id | none</span><p><code>none</code> 是沒有 Sprint 的票。</p></div>
+          <div class="param"><code>updated_since</code><span class="type">ISO 時間</span><p><code>updated_at</code> 大於等於這個時間。</p></div>
+          <div class="param"><code>updated_before</code><span class="type">ISO 時間</span><p><code>updated_at</code> 小於這個時間。</p></div>
+          <div class="param"><code>archived</code><span class="type">exclude | include | only</span><p>沒帶或 <code>exclude</code> 不含已封存的票；<code>include</code> 都要；<code>only</code> 只要已封存的。</p></div>
+          <div class="param"><code>limit</code>、<code>offset</code><span class="type">number</span><p><code>limit</code> 預設 50、最多 200；回應的 <code>has_more</code> 表示後面還有。</p></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  "http://127.0.0.1:3000/api/issues?status=Todo,In%20Review"</pre>
+          <h4>回應 200</h4>
+<pre>{
+  <span class="k">"issues"</span>: [
+    {
+      <span class="k">"identifier"</span>: "NX-12",
+      <span class="k">"number"</span>: 12,
+      <span class="k">"title"</span>: "月報表依分類畫圓餅圖",
+      <span class="k">"status"</span>: "In Review",
+      <span class="k">"next_step"</span>: "打開 /report 看 10 月的圓餅圖",
+      <span class="k">"updated_at"</span>: "2026-11-20T08:29:53.024Z",
+      <span class="c">…其他欄位見「票的欄位」</span>
+    }
+  ],
+  <span class="k">"limit"</span>: 50,
+  <span class="k">"offset"</span>: 0,
+  <span class="k">"has_more"</span>: false
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="create">開一張票</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-post">POST</span><span class="path">/api/issues</span>
+        <span class="ep-desc">回 <code>201</code> 與存好的票（格式同<a href="#get">讀一張票</a>）。沒帶 <code>status</code> 就是 Backlog；沒指定位置就放在那一欄最上面。開票不寫變更紀錄。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>內容</h4>
+          <div class="param"><code>title</code><span class="type">string · 必填</span></div>
+          <div class="param"><code>description</code><span class="type">markdown</span><p>預設空字串。</p></div>
+          <div class="param"><code>status</code><span class="type">string</span><p>預設 <code>Backlog</code>。直接開成 <code>Done</code>／<code>Canceled</code> 會自動填完成／取消時間。</p></div>
+          <div class="param"><code>project_id</code>、<code>sprint_id</code><span class="type">number</span><p>不存在回 <code>400</code>。</p></div>
+          <div class="param"><code>due_date</code><span class="type">YYYY-MM-DD</span></div>
+          <div class="param"><code>before</code>、<code>after</code>、<code>position</code><span class="type">票號 | number</span><p>看板位置，一次只能帶一個，見<a href="#order">看板排序</a>。</p></div>
+          <div class="param"><code>legacy_identifier</code><span class="type">string</span><p>搬資料用：舊系統的編號，例如 <code>ABC-150</code>（不能是 NX 編號）；已經有同一個舊編號回 <code>409</code>，帶既有票的 <code>number</code>、<code>identifier</code>。</p></div>
+          <div class="param"><code>created_at</code>、<code>updated_at</code>、<code>completed_at</code>、<code>canceled_at</code><span class="type">ISO 時間</span><p>搬資料用：保留原本的時間；沒帶就用現在。</p></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -X POST -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  -H "Content-Type: application/json" \
+  -d '{"title":"匯出 CSV","status":"Todo","project_id":2}' \
+  http://127.0.0.1:3000/api/issues</pre>
+          <h4>回應 201</h4>
+<pre>{
+  <span class="k">"identifier"</span>: "NX-13",
+  <span class="k">"number"</span>: 13,
+  <span class="k">"title"</span>: "匯出 CSV",
+  <span class="k">"description"</span>: "",
+  <span class="k">"status"</span>: "Todo",
+  <span class="k">"project_id"</span>: 2,
+  <span class="k">"next_step"</span>: null,
+  <span class="k">"blocked_by"</span>: [],
+  <span class="k">"blocks"</span>: [],
+  <span class="c">…</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="get">讀一張票</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-get">GET</span><span class="path">/api/issues/:ref</span>
+        <span class="ep-desc">票的所有欄位，再加上 <code>blocked_by</code>（擋住這張的票）與 <code>blocks</code>（這張擋住的票）。已封存的票也查得到。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>路徑參數</h4>
+          <div class="param"><code>:ref</code><span class="type">NX-12 | 12</span><p>也收舊編號，見<a href="api.html#ref">票號</a>。</p></div>
+          <h4 style="margin-top:16px">blocked_by／blocks 每一項</h4>
+          <div class="param"><code>identifier</code>、<code>number</code>、<code>legacy_identifier</code>、<code>title</code>、<code>status</code></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  http://127.0.0.1:3000/api/issues/NX-13</pre>
+          <h4>回應 200</h4>
+<pre>{
+  <span class="k">"identifier"</span>: "NX-13",
+  <span class="k">"title"</span>: "匯出 CSV",
+  <span class="k">"status"</span>: "Todo",
+  <span class="c">…</span>
+  <span class="k">"blocked_by"</span>: [
+    { <span class="k">"identifier"</span>: "NX-11", <span class="k">"number"</span>: 11,
+      <span class="k">"legacy_identifier"</span>: null,
+      <span class="k">"title"</span>: "建立資料表", <span class="k">"status"</span>: "In Progress" }
+  ],
+  <span class="k">"blocks"</span>: []
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="update">修改票</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-patch">PATCH</span><span class="path">/api/issues/:ref</span>
+        <span class="ep-desc">只改有帶的欄位，回改完的票（格式同<a href="#get">讀一張票</a>）。值真的有變的欄位各寫一筆<a href="api-events.html">變更紀錄</a>，跟修改一起成功或一起失敗。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>內容</h4>
+          <div class="param"><code>title</code><span class="type">string</span><p>不能是空的。</p></div>
+          <div class="param"><code>description</code><span class="type">markdown</span></div>
+          <div class="param"><code>status</code><span class="type">string</span><p>換欄又沒指定位置時，放到新那一欄最上面。</p></div>
+          <div class="param"><code>project_id</code>、<code>sprint_id</code><span class="type">number | null</span><p><code>null</code> 移出。</p></div>
+          <div class="param"><code>due_date</code><span class="type">YYYY-MM-DD | null</span><p><code>null</code> 清掉。</p></div>
+          <div class="param"><code>archived</code><span class="type">boolean</span><p>見<a href="#archive">封存</a>。</p></div>
+          <div class="param"><code>before</code>、<code>after</code>、<code>position</code><span class="type">票號 | number</span><p>看板位置。只改位置不寫變更紀錄、不更新 <code>updated_at</code>。</p></div>
+          <div class="param"><code>actor</code><span class="type">string</span><p>誰改的，寫進變更紀錄；預設 <code>api</code>。</p></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -X PATCH -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  -H "Content-Type: application/json" \
+  -d '{"status":"In Review","actor":"my-agent"}' \
+  http://127.0.0.1:3000/api/issues/NX-13</pre>
+          <h4>回應 200</h4>
+<pre>{
+  <span class="k">"identifier"</span>: "NX-13",
+  <span class="k">"status"</span>: "In Review",
+  <span class="k">"updated_at"</span>: "2026-11-20T09:12:40.118Z",
+  <span class="c">…</span>
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="order">看板排序</h2>
+    <p>同一欄（同一個狀態）裡 <code>position</code> 小的在上。開票和修改都可以指定位置，三種方式一次只能帶一個（帶兩個以上回 <code>400</code>）：</p>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>欄位</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>before</code></td><td>放在這張票的上面，例如 <code>"NX-3"</code></td></tr>
+        <tr><td><code>after</code></td><td>放在這張票的下面</td></tr>
+        <tr><td><code>position</code></td><td>直接給整數</td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><code>before</code>／<code>after</code> 的票要在同一欄（換欄時是新的那一欄），否則回 <code>400</code>；指定自己或不存在的票也回 <code>400</code>。</li>
+      <li>位置是間隔 1024 的整數；插到兩張中間取中間值，沒有空隙時整欄自動重新編號（順序不變）。</li>
+    </ul>
+
+    <h2 id="archive">封存</h2>
+    <p>Nextline 不做永久刪除。不要的票用 <code>PATCH {"archived": true}</code> 封存：看板、列表、Project 頁、側欄張數都不再算它；<code>{"archived": false}</code> 取消封存。</p>
+    <ul>
+      <li>封存會寫一筆變更紀錄（<code>field</code> 是 <code>archived</code>），可以用<a href="api-events.html#revert">還原</a>改回來。</li>
+      <li>封存不改狀態與位置，取消封存後回到原本那一欄原本的位置。</li>
+      <li>已經封存再送 <code>true</code> 不會有變化；開票時帶 <code>archived</code> 會被忽略。</li>
+      <li>列出已封存的票：<code>GET /api/issues?archived=only</code>。</li>
+    </ul>

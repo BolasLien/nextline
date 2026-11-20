@@ -15,6 +15,7 @@ Nextline：一個人＋幾個 AI agent 共用的任務系統。票號 `NX-<n>`�
 | `npm run dev:cloudflare` | 原 Worker＋Vite 開發流程：Wrangler :8787＋Vite http://127.0.0.1:5173；`.dev.vars` 設定見 docs/auth.md。`scripts/dev.mjs` |
 | `npm run dev:worker`／`npm run dev:app` | 只跑其中一個 |
 | `npm run build` | 前端到 `dist/client`，Node 入口與 CLI 到 `dist/server`。`wrangler dev`／`wrangler deploy` 會先自動跑（`wrangler.jsonc` 的 `build`） |
+| `npm run build:site` | 官網與文件站：`site/` 的頁面片段套上共用版面，輸出純靜態檔到 `dist/site/`（`scripts/build-site.mjs`，目錄在檔內 `NAV`）。內容以程式碼實際行為為準，不寫私人票號與內部說法（`scripts/build-site.test.mjs` 會擋） |
 | `npm run typecheck` | `tsc --noEmit`（含 worker、core、app、node） |
 | `npm run lint` | ESLint（typescript-eslint strictTypeChecked，含 `app/`） |
 | `npm test` | Vitest（worker、node、app）；SQLite、HTTP／MCP、備份升級測試 |
@@ -33,6 +34,7 @@ Nextline：一個人＋幾個 AI agent 共用的任務系統。票號 `NX-<n>`�
 | `PLAYWRIGHT_MODULE=… [CHROMIUM_PATH=…] [E2E_LABEL=before] node scripts/e2e/nx169.mjs` | 品牌方向 A「定線 Steady」（NX-169，:8799、`.scratch/e2e-nx169/`）：看板、票詳細、`/projects` × 1280／375 × 淺色／深色截圖且沒有整頁橫向捲動；色票（墨藍、青綠、冷灰）、字型 Inter／JetBrains Mono、圖示線寬 1.5、logo 兩條橫線、favicon、按鈕與空狀態文案。`E2E_LABEL=before` 只截圖（檔名加 `before-`，改版前對照）；截圖與結果在 `.scratch/screenshots/nx169/` |
 | `PLAYWRIGHT_MODULE=… [CHROMIUM_PATH=…] node scripts/e2e/nx239.mjs` | 「等我」只剩回覆（NX-239，:8800、`.scratch/e2e-nx239/`）：待驗收的預覽與整頁頂端是「等你回覆」＋回覆框，沒有通過／退回、手機底部列，comment 區不放第二個輸入框；最新 comment 有「要你決定：」＋編號選項時照原文列出（純文字），之後有新 comment 就不列；手機回覆作者 Bolas、移 In Progress、可復原；1280 預覽／整頁與 375 × 淺色／深色截圖且沒有橫向捲動；截圖與結果在 `.scratch/screenshots/nx239/` |
 | `PLAYWRIGHT_MODULE=… [CHROMIUM_PATH=…] node scripts/e2e/palette.mjs` | 指令面板與快捷鍵端對端測試（:8792、`.scratch/e2e-palette/`）：Cmd+K 打票號 → Enter 開預覽、BOL 舊票號、中文片段；開著預覽「改狀態成 In Progress」→ API → 列表頁 Cmd+Z 復原；Esc 先關最上層；G 接 I／B；輸入框裡 C 不開票；? 說明；側欄「搜尋」與最近用過；手機底部「搜尋」；截圖與結果在 `.scratch/screenshots/palette/` |
+| `PLAYWRIGHT_MODULE=… [CHROMIUM_PATH=…] node scripts/e2e/site.mjs` | 官網與文件站（:8801）：建站後每一頁 × 1280／375 × 淺色／深色量測沒有橫向溢出，操作搜尋、手機目錄、深淺色切換；截圖與結果在 `.scratch/screenshots/site/` |
 | `npm run db:migrate:local` | 本機 D1 套用 `migrations/` |
 | `npm run db:migrate:remote` | 遠端 D1 套用 `migrations/`（要先登入 Cloudflare） |
 | `npm run deploy` | `wrangler deploy` |

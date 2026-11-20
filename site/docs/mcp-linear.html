@@ -1,0 +1,47 @@
+<!--
+title: 和 Linear MCP 的差異
+crumb: 參考
+intro: 常用工具的名稱與參數照 Linear MCP，原本寫給 Linear 的 agent 指令多半換個工具前綴就能用。這頁列出不一樣的地方。
+-->
+    <h2 id="switch">從 Linear 換過來</h2>
+    <p>工具前綴換掉就好，例如 Claude Code 裡 <code>mcp__linear__list_issues</code> → <code>mcp__nextline__list_issues</code>。下表的參數 Nextline 不支援時，多半是<strong>直接忽略</strong>、不會報錯，所以 agent 不會因此壞掉，但也不會有效果。</p>
+    <div class="note warn">Nextline 沒有指派、標籤、優先度、估點、父子票、文件，也不能刪除。依賴這些欄位的流程要改寫。</div>
+
+    <h2 id="table">差異表</h2>
+    <div class="table-wrap"><table class="ref wrap-first">
+      <thead><tr><th>項目</th><th>Linear MCP</th><th>Nextline MCP</th></tr></thead>
+      <tbody>
+        <tr><td>票號</td><td>依 team 前綴</td><td>新票 <code>NX-&lt;n&gt;</code>；搬來的票用舊編號也查得到，回傳的 <code>id</code> 是 <code>NX-&lt;n&gt;</code>、舊編號在 <code>legacyIdentifier</code></td></tr>
+        <tr><td><code>team</code>、<code>teamId</code></td><td>開票必填；<code>list_cycles</code> 必填 <code>teamId</code></td><td>只有一個 team：可以照舊帶，會忽略</td></tr>
+        <tr><td>狀態</td><td>每個 team 自訂</td><td>固定六種；In Review（待驗收）的 type 是 <code>started</code></td></tr>
+        <tr><td><code>list_issues</code> 的 <code>state</code></td><td>一次一種</td><td>可逗號分隔一次查多種；<code>started</code> 展開成 In Progress、In Review</td></tr>
+        <tr><td><code>list_issues</code> 的 <code>project</code>、<code>cycle</code></td><td>不支援「沒有」</td><td>可帶 <code>none</code></td></tr>
+        <tr><td><code>list_issues</code> 的 <code>orderBy</code></td><td><code>createdAt</code>、<code>updatedAt</code></td><td><code>updatedAt</code>（預設）、<code>position</code>（看板順序）；不支援 <code>createdAt</code></td></tr>
+        <tr><td><code>list_issues</code> 的 <code>query</code>、<code>assignee</code>、<code>label</code>、<code>priority</code>、<code>createdAt</code> 等</td><td>支援</td><td>不支援，帶了會被忽略</td></tr>
+        <tr><td><code>list_issues</code> 的 <code>limit</code></td><td>最多 250</td><td>最多 200</td></tr>
+        <tr><td>封存</td><td><code>save_issue</code> 沒有封存參數</td><td><code>save_issue</code> 的 <code>archived</code>；<code>list_issues</code> 的 <code>includeArchived</code> 跟 Linear 一樣、預設 <code>false</code></td></tr>
+        <tr><td>看板順序</td><td>沒有對應參數</td><td><code>save_issue</code> 的 <code>before</code>、<code>after</code>、<code>position</code>；回傳的票有 <code>position</code></td></tr>
+        <tr><td><code>save_issue</code> 的 <code>assignee</code>、<code>labels</code>、<code>priority</code>、<code>estimate</code>、<code>parentId</code>、<code>relatedTo</code>、<code>duplicateOf</code>、<code>links</code>、<code>template</code> 等</td><td>支援</td><td>不支援，帶了會被忽略</td></tr>
+        <tr><td>改描述的一部分</td><td><code>patch</code></td><td>沒有，要整份 <code>description</code> 重送</td></tr>
+        <tr><td>誰改的</td><td>由 Linear 帳號決定</td><td><code>save_issue</code> 的 <code>actor</code>、<code>save_comment</code> 的 <code>author</code>，沒帶記成 <code>mcp</code></td></tr>
+        <tr><td>comment 回覆串</td><td><code>parentId</code></td><td>沒有回覆串</td></tr>
+        <tr><td><code>save_comment</code> 的對象</td><td>issue、project、document 等</td><td>只有票（<code>issueId</code>）</td></tr>
+        <tr><td>comment 的 <code>author</code></td><td>使用者物件</td><td>字串</td></tr>
+        <tr><td><code>get_issue</code> 的 relations</td><td>要帶 <code>includeRelations</code></td><td>一律附 <code>relations.blockedBy</code>、<code>relations.blocks</code></td></tr>
+        <tr><td>Project 參照</td><td>名稱、id、短代碼、slug</td><td>名稱或數字 id</td></tr>
+        <tr><td>Project 的狀態</td><td>有，可篩選與修改</td><td>沒有：<code>state</code> 照舊可以帶，會忽略；回傳沒有 <code>status</code>、<code>statusType</code></td></tr>
+        <tr><td>Project 的 <code>summary</code>、<code>lead</code>、<code>teams</code>、<code>startDate</code>、<code>targetDate</code>、<code>labels</code> 等</td><td>支援</td><td>不支援，帶了會被忽略</td></tr>
+        <tr><td><code>cycle</code> 參照</td><td>名稱、編號或 id</td><td>一樣，數字先當編號</td></tr>
+        <tr><td><code>list_cycles</code> 回傳</td><td>含 issue／scope 歷史</td><td>只有 <code>id</code>、<code>number</code>、<code>name</code>、<code>startsAt</code>、<code>endsAt</code></td></tr>
+        <tr><td><code>url</code>、<code>gitBranchName</code></td><td>有</td><td>沒有</td></tr>
+        <tr><td>刪除</td><td>有部分刪除工具</td><td>沒有；不要的票改成 Canceled 或封存</td></tr>
+        <tr><td>id 型別</td><td>字串</td><td>也是字串</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="extra">Nextline 多出來的工具</h2>
+    <ul>
+      <li><code>list_recent_comments</code>：列出某個時間之後所有票的新 comment。</li>
+      <li><code>list_issue_events</code>、<code>revert_issue_event</code>：看變更紀錄、一鍵還原單一欄位。</li>
+    </ul>
+    <p>參數細節見 <a href="mcp.html">MCP 工具</a>。</p>

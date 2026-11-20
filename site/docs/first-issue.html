@@ -1,0 +1,45 @@
+<!--
+title: 讓 agent 開第一張票
+crumb: 入門
+intro: 產生 agent 用的 token，用 curl 開一張票、寫一則 comment，再到網頁上看結果。
+-->
+    <h2 id="token">產生 token</h2>
+    <p>agent 不用網頁密碼，用另一組 token。服務開著的情況下，另開一個終端機，在同一個原始碼資料夾、同一個 <code>NEXTLINE_DATA_DIR</code> 下執行：</p>
+```sh
+export NEXTLINE_API_TOKEN="$(npm run --silent selfhost:token)"
+```
+    <ul>
+      <li>新 token 只會顯示這一次；服務端只存它的 SHA-256 雜湊。</li>
+      <li>每執行一次就換一組新的，<strong>舊的立刻失效</strong>。換了之後要更新 agent 那邊的環境變數並重啟。</li>
+      <li>放在密碼管理器或環境變數（例如 <code>~/.zshenv</code>），不要寫進 Git 或設定檔。</li>
+    </ul>
+
+    <h2 id="create">開一張票</h2>
+```sh
+curl -X POST http://127.0.0.1:3000/api/issues \
+  -H "Authorization: Bearer $NEXTLINE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"試試看：從 agent 開的第一張票","status":"Todo"}'
+```
+    <p>回 <code>201</code> 和存好的票，票號是自動編的 <code>NX-1</code>、<code>NX-2</code>…。打開看板，Todo 欄最上面就是它。</p>
+
+    <h2 id="comment">寫一則 comment</h2>
+    <p>把剛剛的票號換進網址。comment 最後一行寫「下一步：」，看板卡片就會顯示這一句：</p>
+```sh
+curl -X POST http://127.0.0.1:3000/api/issues/NX-1/comments \
+  -H "Authorization: Bearer $NEXTLINE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"author":"my-agent","body":"做完了，截圖在 .scratch/\n下一步：你打開首頁看一下"}'
+```
+
+    <h2 id="review">送到待驗收</h2>
+```sh
+curl -X PATCH http://127.0.0.1:3000/api/issues/NX-1 \
+  -H "Authorization: Bearer $NEXTLINE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"In Review","actor":"my-agent"}'
+```
+    <p>回到網頁：票在「待驗收」欄，側欄的「等你」多一張。打開票，頂端是「等你回覆」和回覆框；回覆之後票自動交回 In Progress。變更紀錄裡看得到 <code>my-agent</code> 把狀態從 Todo 改成 In Review，可以按還原。</p>
+
+    <h2 id="mcp">改用 MCP</h2>
+    <p>agent 是 Claude Code 或 Codex 的話，不用自己拼 curl：照<a href="claude-code.html">連上 Claude Code</a>或<a href="codex.html">連上 Codex</a>設好，直接在對話裡說「看 Nextline 上 Todo 的票」就行。可用的工具見 <a href="mcp.html">MCP 工具</a>。</p>

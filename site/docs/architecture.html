@@ -1,0 +1,45 @@
+<!--
+title: 一份核心、兩種跑法
+crumb: 說明
+intro: 同一份 API 與 MCP 程式，可以接 Node＋SQLite，也可以接 Cloudflare Workers＋D1。差別只在入口的登入方式與資料庫轉接。
+-->
+    <h2 id="diagram">架構</h2>
+```text
+            瀏覽器（人）                      agent（Claude Code、Codex…）
+                │                                     │
+       網頁、/app-api                          /api、/mcp
+     Node：密碼登入＋session                 Authorization: Bearer <token>
+     Cloudflare：Access                             │
+                └──────────────┬──────────────────────┘
+                               ▼
+                   共用核心（API 路由、MCP 工具）
+                               │
+              ┌────────────────┴────────────────┐
+        SQLite 轉接（Node）                D1 轉接（Workers）
+         nextline.sqlite                     Cloudflare D1
+```
+
+    <h2 id="same">一樣的地方</h2>
+    <ul>
+      <li>網頁呼叫的 <code>/app-api/*</code> 和 agent 呼叫的 <code>/api/*</code> 是同一套路由，路徑、參數、回應完全相同，只有驗證方式不同。後端加一個功能，人和 agent 同時拿到。</li>
+      <li>MCP 工具底層直接呼叫同一組 API 函式，所以 MCP 和 REST API 的行為一致（例如同樣寫變更紀錄、同樣的錯誤訊息）。</li>
+      <li>資料表與升級檔（<code>migrations/</code>）兩邊共用。</li>
+      <li>多筆寫入（例如改票加寫變更紀錄）在兩種資料庫都是同一個交易，失敗就整批撤回。</li>
+    </ul>
+
+    <h2 id="different">不一樣的地方</h2>
+    <div class="table-wrap"><table class="ref wrap-first">
+      <thead><tr><th></th><th>Node＋SQLite</th><th>Cloudflare Workers＋D1</th></tr></thead>
+      <tbody>
+        <tr><td>適合</td><td>自己的電腦、自己的主機</td><td>不想管主機，已經有 Cloudflare 帳號</td></tr>
+        <tr><td>人怎麼登入</td><td>密碼（<code>selfhost:init</code> 設定），12 小時 session</td><td>Cloudflare Access（只放行你的 email）</td></tr>
+        <tr><td>agent token</td><td><code>selfhost:token</code> 產生，資料庫只存雜湊</td><td>Worker secret <code>API_TOKEN</code></td></tr>
+        <tr><td>HTTPS</td><td>自己放反向代理（見<a href="server.html">架在伺服器上</a>）</td><td>Cloudflare 提供</td></tr>
+        <tr><td>備份</td><td><code>selfhost:backup</code>／<code>selfhost:restore</code></td><td>Nextline 沒有另外提供，用 Cloudflare D1 自己的備份功能</td></tr>
+        <tr><td>需要註冊服務</td><td>不用</td><td>Cloudflare 帳號</td></tr>
+      </tbody>
+    </table></div>
+    <p>兩種跑法之間沒有內建的資料搬移工具。</p>
+
+    <h2 id="verify">怎麼確認兩邊一致</h2>
+    <p><code>npm run verify</code> 會把同一份 API／MCP 測試分別跑在 Node SQLite 與真正的 workerd D1 上（後者用 Miniflare 啟動）。改了共用核心，兩邊都要通過。</p>

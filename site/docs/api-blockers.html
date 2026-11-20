@@ -1,0 +1,52 @@
+<!--
+title: blocked by
+crumb: 參考 › REST API
+intro: 標記「這張票要等那張做完」。關係記在被擋住的票上，加入與移除都寫進變更紀錄。
+-->
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>方法與路徑</th><th>做什麼</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/issues/:ref/blockers</code></td><td>擋住這張的票、這張擋住的票</td></tr>
+        <tr><td><code>POST /api/issues/:ref/blockers</code></td><td>加一張擋住這張的票</td></tr>
+        <tr><td><code>DELETE /api/issues/:ref/blockers/:blockerRef</code></td><td>拿掉</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2 id="list">列出</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-get">GET</span><span class="path">/api/issues/:ref/blockers</span>
+        <span class="ep-desc">回 <code>{ "blocked_by": [...], "blocks": [...] }</code>，每一項有 <code>identifier</code>、<code>number</code>、<code>legacy_identifier</code>、<code>title</code>、<code>status</code>。<a href="api-issues.html#get">讀一張票</a>也會帶這兩個欄位。</span></div>
+    </div>
+
+    <h2 id="add">加 blocked by</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-post">POST</span><span class="path">/api/issues/:ref/blockers</span>
+        <span class="ep-desc">新加入回 <code>201</code>，本來就有回 <code>200</code>；內容都是更新後的列表。</span></div>
+      <div class="ep-body">
+        <div class="params">
+          <h4>內容</h4>
+          <div class="param"><code>blocked_by</code><span class="type">票號 · 必填</span><p>擋住這張的票，<code>NX-3</code>、<code>3</code> 或舊編號。擋自己、或票不存在回 <code>400</code>。</p></div>
+          <div class="param"><code>actor</code><span class="type">string</span><p>預設 <code>api</code>。</p></div>
+        </div>
+        <div class="ex">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -X POST -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  -H "Content-Type: application/json" \
+  -d '{"blocked_by":"NX-11","actor":"my-agent"}' \
+  http://127.0.0.1:3000/api/issues/NX-13/blockers</pre>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="remove">拿掉 blocked by</h2>
+    <div class="endpoint">
+      <div class="ep-head"><span class="method m-delete">DELETE</span><span class="path">/api/issues/:ref/blockers/:blockerRef</span>
+        <span class="ep-desc">回更新後的列表。本來就沒有這個關係回 <code>404</code>。誰拿掉的用查詢參數 <code>?actor=</code> 帶（預設 <code>api</code>）。</span></div>
+      <div class="ep-body">
+        <div class="ex" style="grid-column:1 / -1">
+          <h4>請求</h4>
+<pre><span class="k">curl</span> -X DELETE -H <span class="c">"Authorization: Bearer $NEXTLINE_API_TOKEN"</span> \
+  "http://127.0.0.1:3000/api/issues/NX-13/blockers/NX-11?actor=my-agent"</pre>
+        </div>
+      </div>
+    </div>
