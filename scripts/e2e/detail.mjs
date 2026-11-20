@@ -355,6 +355,30 @@ try {
   const rc = (await api('GET', `/issues/${d.r1.identifier}/comments`)).comments;
   await inCol(d.r1, 'in-progress').waitFor({ timeout: 3000 });
   step('退回：comment 先寫進去（作者 Bolas、開頭「退回：」），狀態回 In Progress，看板跟著移', rc.at(-1).author === 'Bolas' && rc.at(-1).body.startsWith('退回：toast 在手機上'));
+  const rjEvents = (await api('GET', `/issues/${d.r1.identifier}/events`)).events.filter((e) => e.from_value === 'In Review' && e.to_value === 'In Progress');
+  const rjToast = page.locator('.nl-toast', { hasText: `${d.r1.identifier} 已退回` });
+  step('退回（NX-221）：變更紀錄只有一筆「In Review → In Progress」，toast 附復原', rjEvents.length === 1 && (await rjToast.getByRole('button', { name: '復原' }).count()) === 1, { events: rjEvents.length });
+  await dismissToasts(page);
+
+  // 12b. 待驗收的票寫 comment → 票自動交回 agent（In Progress），可復原（NX-221）
+  await card(d.r2).locator('.hit').click();
+  await page.waitForURL(`**/?peek=${d.r2.identifier}`);
+  await peek.locator('.nl-review').waitFor();
+  await peek.getByRole('textbox', { name: '寫 comment（Markdown）' }).fill('1.1 2.1 3.1');
+  await page.keyboard.press('ControlOrMeta+Enter');
+  await waitIssue(d.r2.identifier, (i) => i.status === 'In Progress', '回覆後移到 In Progress');
+  await inCol(d.r2, 'in-progress').waitFor({ timeout: 3000 });
+  const handToast = page.locator('.nl-toast', { hasText: `${d.r2.identifier} 已交回 agent` });
+  await handToast.waitFor();
+  const hEvents = (await api('GET', `/issues/${d.r2.identifier}/events`)).events.filter((e) => e.field === 'status');
+  step('待驗收寫 comment（NX-221）：API 變 In Progress、看板卡片移欄、驗收列消失、變更紀錄一筆（Bolas）、toast 附復原',
+    (await peek.locator('.nl-review').count()) === 0 && hEvents.length === 1 && hEvents[0].actor === 'Bolas' && hEvents[0].from_value === 'In Review' && (await handToast.getByRole('button', { name: '復原' }).count()) === 1,
+    { events: hEvents.map((e) => [e.from_value, e.to_value, e.actor]) });
+  await page.screenshot({ path: join(outDir, 'peek-1280-light-handback.png') });
+  await handToast.getByRole('button', { name: '復原' }).click();
+  await waitIssue(d.r2.identifier, (i) => i.status === 'In Review', '復原交回');
+  await inCol(d.r2, 'in-review').waitFor({ timeout: 3000 });
+  step('交回後按復原：回到待驗收，卡片回待驗收欄', (await peek.locator('.nl-review').count()) === 1);
   await dismissToasts(page);
 
   // 13. 截圖：待驗收的預覽（r2）

@@ -798,7 +798,19 @@ export async function createComment(db: Database, ref: string, request: Request)
     )
     .bind(issue.number, author, text, linearId, createdAt, updatedAt)
     .first<CommentRow>();
+  if (linearId === null) await handBackToAgent(db, issue, author);
   return json(row, 201);
+}
+
+// 人在待驗收（In Review）的票寫 comment，票自動交回 agent：移到 In Progress（NX-221）。
+// 跟「退回」一樣寫一筆 status 變更紀錄（actor＝comment 的 author），可以用還原改回去。
+// 「人」只有 Bolas；agent 用「阿澈」「<repo> agent」「mcp」等名稱，不觸發。搬家匯入（帶 linear_id）也不觸發。
+export const HUMAN_AUTHORS: readonly string[] = ['Bolas'];
+
+async function handBackToAgent(db: Database, issue: IssueRow, author: string): Promise<void> {
+  const who = author.trim();
+  if (issue.status !== 'In Review' || !HUMAN_AUTHORS.includes(who)) return;
+  await applyChanges(db, issue, { status: 'In Progress' }, who);
 }
 
 async function getCommentRow(db: Database, id: number): Promise<CommentRow> {

@@ -133,7 +133,7 @@
 | 方法與路徑 | 說明 |
 | --- | --- |
 | `GET /api/issues/:ref/comments` | 依 `created_at` 舊到新 |
-| `POST /api/issues/:ref/comments` | 內容 `author`（必填，誰寫的）、`body`（必填）、`linear_id`、`created_at`、`updated_at`（後三個搬家用）；`linear_id` 重複回 `409` |
+| `POST /api/issues/:ref/comments` | 內容 `author`（必填，誰寫的）、`body`（必填）、`linear_id`、`created_at`、`updated_at`（後三個搬家用）；`linear_id` 重複回 `409`。票在 `In Review` 而 `author` 是 `Bolas`（人）時，票同時移到 `In Progress`，寫一筆 `status` 變更紀錄（`actor` 是 `Bolas`，可還原）；agent 的 `author`（`阿澈`、`<repo> agent`、`mcp`、`api` 等）、帶 `linear_id` 的搬家資料、其他狀態的票都不動狀態（NX-221）。回傳仍是 comment |
 | `GET /api/comments?created_since=<ISO>` | 跨所有票列出這個時間（含）之後新增的 comment（NX-206），不論票的狀態，Done、Canceled、已封存的票都列。`created_since` 必填；`created_before`（不含）選填；`limit`（預設 50，最多 200）、`offset` 分頁。依 `created_at` 舊到新（同時間照 `id`）。回 `{ "comments": [...], "limit", "offset", "has_more" }`，每則是 comment 的欄位再加 `identifier`（票號 `NX-<n>`）。看的是新增時間：修改 comment 不會讓它出現在這裡 |
 | `GET /api/comments/:id` | 單則 |
 | `PATCH /api/comments/:id` | 內容 `body` |

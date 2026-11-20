@@ -71,7 +71,7 @@ Cloudflare 本機測試：`npm run dev:cloudflare` 前在 `.dev.vars` 放 `API_T
 | `list_issue_events` | `issueId`（必填） | `{ events }`，舊到新；每筆 `id`、`field`、`from`、`to`、`actor`、`revertOf`、`revertedBy`、`createdAt` |
 | `revert_issue_event` | `issueId`、`eventId`（必填）、`actor` | `{ issue, event, revertedEvent }`：還原後的票、新寫的「還原了第 N 筆」、被還原的那筆 |
 | `list_comments` | `issueId`（必填） | `{ comments }`，舊到新 |
-| `save_comment` | `id`（帶了是修改）、`issueId`（新增必填）、`body`（必填）、`author` | 存完的 comment |
+| `save_comment` | `id`（帶了是修改）、`issueId`（新增必填）、`body`（必填）、`author` | 存完的 comment。新增時票在 In Review 而 `author` 是 `Bolas`，票同時移到 In Progress（寫進變更紀錄，可還原）；agent 的 `author` 不觸發（NX-221） |
 | `list_recent_comments` | `createdAt`（必填）、`limit`、`cursor` | `{ comments, hasNextPage, cursor? }`：跨所有票這個時間（含）之後新增的 comment，舊到新，含 Done、Canceled、已封存的票；每則 `id`、`issueId`、`author`、`body`、`createdAt`、`updatedAt`（Nextline 自己的工具，NX-206） |
 | `list_projects` | `query`、`state`（忽略）、`team`（忽略） | `{ projects }`，釘選的在最上面（照釘選時間新到舊），其餘照 `lastActivityAt` 新到舊，不含 `description`；每個有 `pinnedAt`（`null`＝沒釘選）與 `lastActivityAt`（Project、底下的票、底下票的 comment 最新時間） |
 | `get_project` | `query`（必填，名稱或 id） | Project，含 `description` |

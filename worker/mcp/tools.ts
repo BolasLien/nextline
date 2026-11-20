@@ -561,7 +561,8 @@ export function registerTools(server: McpServer, db: Database): void {
   server.registerTool(
     'save_comment',
     {
-      description: '不帶 id 是在 issueId 的票上新增 comment，帶 id 是修改那則 comment 的內容。',
+      description:
+        '不帶 id 是在 issueId 的票上新增 comment，帶 id 是修改那則 comment 的內容。新增時票在 In Review 而 author 是 Bolas（人），票會同時移到 In Progress（寫進變更紀錄，可還原）；agent 的 author 不會改狀態。',
       inputSchema: {
         id: z.string().optional().describe('要修改的 comment id；新增時不要帶'),
         issueId: z.string().optional().describe('票號（新增時必填）'),

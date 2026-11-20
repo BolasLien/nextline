@@ -5,6 +5,7 @@
 //   失敗把票改回原本、出錯誤 toast（附「重試」）。
 // - 「復原」和變更紀錄的「還原」是同一套：找到那一筆變更，用 revert API 改回去（變更紀錄標「已還原」）。
 // - 退回一定要寫原因：先寫 comment，再改回 In Progress；原因空白時什麼都不送。
+// - 待驗收的票寫 comment（含退回），後端直接移到 In Progress（NX-221）；畫面跟著換，toast 附「復原」。
 // - 還原遇到 409（已經還原過、之後又改過、值已經不一樣），toast 說明 API 給的原因。
 // - 封存／取消封存（NX-160，不做永久刪除）：同樣先改畫面、toast 附「復原」，復原走同一套 revert。
 import { ApiError, type ApiClient } from '../api/client';
@@ -226,10 +227,10 @@ export function createEditActions(deps: EditDeps) {
     }
   }
 
-  // 寫 comment。空白不送；成功後重抓票（最新的「下一步」可能變了）。
-  async function comment(body: string): Promise<boolean> {
-    const text = body.trim();
-    if (text === '') return false;
+  // 送 comment 並重抓票（最新的「下一步」可能變了）。
+  // 待驗收的票寫 comment，後端會把票移到 In Progress（NX-221）；回傳移動前的票，讓呼叫端出可復原的 toast。
+  async function postComment(text: string): Promise<{ ok: false } | { ok: true; handedBack: IssueDetail | null }> {
+    const original = get();
     try {
       const created = await api.createComment(ref(), { author: ACTOR, body: text });
       deps.addComment(created);
@@ -238,11 +239,26 @@ export function createEditActions(deps: EditDeps) {
       } catch {
         // comment 已經存好；下一步晚一點重抓再更新
       }
-      return true;
+      const handedBack = original.status === 'In Review' && get().status === 'In Progress';
+      if (handedBack) refreshEvents();
+      return { ok: true, handedBack: handedBack ? original : null };
     } catch (e) {
       toast({ kind: 'error', message: `comment 送出失敗：${errorText(e)}。內容已保留。` });
-      return false;
+      return { ok: false };
     }
+  }
+
+  // 寫 comment。空白不送。
+  async function comment(body: string): Promise<boolean> {
+    const text = body.trim();
+    if (text === '') return false;
+    const res = await postComment(text);
+    if (!res.ok) return false;
+    const from = res.handedBack;
+    if (from !== null) {
+      toast({ message: `${from.identifier} 已交回 agent，移到「${STATUS_LABEL['In Progress']}」`, onUndo: () => undoField({ status: 'In Progress' }, from) });
+    }
+    return true;
   }
 
   function approve(): Promise<boolean> {
@@ -255,9 +271,16 @@ export function createEditActions(deps: EditDeps) {
     const text = reason.trim();
     if (text === '') return { ok: false, error: '退回原因必填：寫明需要修改的地方。' };
     const issue = get();
-    const posted = await comment(`退回：${text}`);
-    if (!posted) return { ok: false, error: 'comment 送出失敗。票仍在待驗收。' };
-    const moved = await edit({ status: 'In Progress' }, `${issue.identifier} 已退回「${STATUS_LABEL['In Progress']}」`);
+    const message = `${issue.identifier} 已退回「${STATUS_LABEL['In Progress']}」`;
+    const posted = await postComment(`退回：${text}`);
+    if (!posted.ok) return { ok: false, error: 'comment 送出失敗。票仍在待驗收。' };
+    // 後端寫 comment 時已經移到 In Progress（NX-221）：不再改一次，只出可復原的 toast。
+    const from = posted.handedBack;
+    if (from !== null) {
+      toast({ message, onUndo: () => undoField({ status: 'In Progress' }, from) });
+      return { ok: true };
+    }
+    const moved = await edit({ status: 'In Progress' }, message);
     return moved ? { ok: true } : { ok: false, error: '退回原因已寫入 comment，狀態變更失敗。' };
   }
 

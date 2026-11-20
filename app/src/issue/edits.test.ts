@@ -175,6 +175,18 @@ describe('驗收', () => {
     expect(s.now().status).toBe('In Progress');
   });
 
+  it('退回：後端寫 comment 時已移到 In Progress（NX-221），不再改一次；toast 可復原', async () => {
+    const s = setup();
+    s.api.getIssue.mockImplementation(() => Promise.resolve({ ...s.now(), status: 'In Progress' as const }));
+    const res = await s.actions.reject('要改');
+    expect(res.ok).toBe(true);
+    expect(s.api.updateIssue).not.toHaveBeenCalled();
+    expect(s.now().status).toBe('In Progress');
+    expect(s.toasts.map((t) => t.message)).toEqual(['NX-7 已退回「In Progress」']);
+    expect(s.toasts[0]?.onUndo).toBeTypeOf('function');
+    expect(s.refreshEvents).toHaveBeenCalled();
+  });
+
   it('退回時 comment 沒送出：狀態不動', async () => {
     const s = setup({ comment: () => Promise.reject(new ApiError(0, '連不上')) });
     const res = await s.actions.reject('要改');
@@ -192,6 +204,25 @@ describe('comment 與 blocked by', () => {
     expect(await s.actions.comment('下一步：Bolas 看截圖')).toBe(true);
     expect(s.comments[0]?.body).toBe('下一步：Bolas 看截圖');
     expect(s.api.getIssue).toHaveBeenCalledWith('NX-7');
+  });
+
+  it('待驗收的票寫 comment：後端移到 In Progress（NX-221），畫面跟著換，toast「復原」走變更紀錄還原', async () => {
+    const s = setup({ events: [event(5, 'status', 'In Review', 'In Progress')], revert: () => Promise.resolve(detail({ status: 'In Review' })) });
+    s.api.getIssue.mockImplementation(() => Promise.resolve({ ...s.now(), status: 'In Progress' as const }));
+    expect(await s.actions.comment('1.1 2.1 3.1')).toBe(true);
+    expect(s.now().status).toBe('In Progress');
+    expect(s.refreshEvents).toHaveBeenCalled();
+    expect(s.toasts[0]?.message).toBe('NX-7 已交回 agent，移到「In Progress」');
+    await s.toasts[0]?.onUndo?.();
+    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, ACTOR);
+    expect(s.now().status).toBe('In Review');
+  });
+
+  it('不是待驗收的票寫 comment：狀態不變、不出 toast', async () => {
+    const s = setup({ issue: detail({ status: 'Todo' }) });
+    expect(await s.actions.comment('看一下')).toBe(true);
+    expect(s.now().status).toBe('Todo');
+    expect(s.toasts).toHaveLength(0);
   });
 
   it('加入 blocked by：先出現在畫面，API 回來換成正式清單；toast 可復原（移除）', async () => {

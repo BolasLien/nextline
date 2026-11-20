@@ -157,7 +157,7 @@ Nextline
  ┌─────────┐       ┌──────┐      ┌─────────────┐   agent 做完     ┌────────┐ 人或 agent：通過 ┌──────┐
  │ Backlog │ ────▶ │ Todo │ ───▶ │ In Progress │ ──────────────▶ │ 待驗收  │ ──────────────▶ │ Done │
  └─────────┘ ◀──── └──────┘ ◀─── └─────────────┘ ◀────────────── └────────┘ ◀────────────── └──────┘
-                                       │          人：退回（必寫 comment）  移回（復原／還原）  ▲
+                                       │   人：退回（必寫 comment）／回覆 comment  移回（復原／還原）▲
                                        │                                                   │
                                        └──── 人或 agent：直接完成（跳過待驗收）────────────────┘
  任何狀態 ──人：取消──▶ Canceled         Done／Canceled ──人或 agent：重新打開──▶ Todo
@@ -188,7 +188,7 @@ agent             ─▶ Done 欄卡片標「claude-nextline 移到 Done・3 分
 | 停止 agent | session `active`／`awaiting_input`／`stale` | 狀態不變 | ✓ 票詳細頁「停止」 | ✗ | 徽章「停止中…」→ agent 下次呼叫 MCP 後「已停止」 |
 | 移除代做 agent | — | 狀態不變 | ✓ | ✗ | agent 頭像消失；沒結束的 session 送停止 |
 | 問人 | — | 狀態不變 | ✗ | ✓ | 徽章「等你回覆」；側欄「等你」+1；問題同時寫成 comment |
-| 回覆 agent | — | 狀態不變 | ✓ 寫 comment | ✓ | agent 讀到後徽章回「進行中」 |
+| 回覆 agent | 待驗收（其他狀態不變） | In Progress | ✓ 寫 comment（`author` 是 Bolas） | ✗ agent 寫的 comment 不觸發 | 待驗收的票：卡片回 In Progress、側欄「等你」−1；toast「已交回 agent」＋「復原」；變更紀錄記一筆（可還原）。其他狀態只多一則 comment（NX-221） |
 
 人和 agent 的分工：
 

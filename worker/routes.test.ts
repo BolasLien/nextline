@@ -148,6 +148,15 @@ describe('/app-api：寫入防 CSRF', () => {
     expect(patch.status).toBe(200);
   });
 
+  it('網頁寫 comment（Bolas）在待驗收的票 → 移到 In Progress（NX-221）', async () => {
+    const jwt = await signJwt(keys.privateKey);
+    await browser('POST', '/app-api/issues', { jwt, headers: sameOrigin, body: { title: '待驗收', status: 'In Review' } });
+    const posted = await browser('POST', '/app-api/issues/NX-1/comments', { jwt, headers: sameOrigin, body: { author: 'Bolas', body: '好' } });
+    expect(posted.status).toBe(201);
+    const issue: { status: string } = await (await browser('GET', '/app-api/issues/NX-1', { jwt })).json();
+    expect(issue.status).toBe('In Progress');
+  });
+
   it('讀取（GET）不需要 Origin', async () => {
     const res = await browser('GET', '/app-api/sprints', { jwt: await signJwt(keys.privateKey), headers: { 'Sec-Fetch-Site': 'same-origin' } });
     expect(res.status).toBe(200);
