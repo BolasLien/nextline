@@ -1,0 +1,42 @@
+/* 全站只用 docs/design/system/tokens.css 的變數；深淺色由 <html data-theme> 或系統設定決定。 */
+@import '../../../docs/design/system/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: var(--font-weight-regular) var(--font-size-md) / var(--line-height-normal) var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+button {
+  font-family: inherit;
+}
+a {
+  color: var(--color-link);
+}
+
+/* 長字串斷行（NX-161）：使用者與 agent 寫的文字（下一步、驗收列、看板卡片、Markdown 含 inline code、comment、變更紀錄）
+   裡的長路徑、網址沒有空白可以斷，窄螢幕會撐破版面。統一在這裡用 overflow-wrap: anywhere（連 flex 子項的最小寬度一起縮），
+   程式碼區塊 pre 與表格格子維持不斷行、各自橫向捲動（issue/markdown.css）。 */
+.md,
+.next-step,
+.nl-review .who,
+.nl-card .t,
+.nl-card .next,
+.cmt,
+.ttl-edit,
+.nl-hist .what,
+.nl-toast {
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,26 @@
+.nl-icon {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nl-icon--sm {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+.nl-logo {
+  flex: none;
+}
+.nl-logo .box {
+  fill: var(--color-logo-bg);
+}
+.nl-logo .human {
+  fill: var(--neutral-0);
+}
+.nl-logo .agent {
+  fill: var(--agent-300);
+}

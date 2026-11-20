@@ -1,0 +1,36 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nextline",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  // 部署到自己的 Cloudflare 帳號時，把下面 vars 與 d1_databases 的佔位值換成自己的（docs/auth.md）。
+  "workers_dev": true,
+  // 前端（app/，Vite + React）建置到 dist/client，由同一個 Worker 提供（docs/auth.md「新網頁」）。
+  // run_worker_first = true：每個請求都先進 Worker，/api、/app-api、/mcp、/health、/legacy 由 Worker 處理，
+  // 其他路徑先驗 Access JWT 再交給 ASSETS；找不到的檔案回 index.html（SPA fallback）。
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+  // wrangler dev／deploy 之前先建置前端，`npx wrangler deploy` 不會送出舊的 dist。
+  "build": {
+    "command": "npm run build",
+    "watch_dir": "app"
+  },
+  // 網頁路徑與 /app-api 驗 Cloudflare Access JWT 用（docs/auth.md）。空的時候一律拒絕。
+  // ACCESS_TEAM_DOMAIN：https://<team>.cloudflareaccess.com；ACCESS_AUD：Access application 的 AUD tag。
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "https://<your-team>.cloudflareaccess.com",
+    "ACCESS_AUD": "<your-access-aud>"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "nextline",
+      "database_id": "<your-d1-database-id>",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

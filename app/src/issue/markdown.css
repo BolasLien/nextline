@@ -1,0 +1,177 @@
+/* 描述與 comment 的 Markdown 排版（只用 tokens） */
+.md {
+  font-size: var(--font-size-md);
+  line-height: 1.7;
+  min-width: 0;
+}
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md h2,
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  line-height: var(--line-height-snug);
+  margin: 1.1em 0 0.4em;
+  font-weight: var(--font-weight-bold);
+}
+.md h2 {
+  font-size: var(--font-size-lg);
+}
+.md h3,
+.md h4,
+.md h5,
+.md h6 {
+  font-size: var(--font-size-md);
+}
+.md p {
+  margin: 0.55em 0;
+}
+.md ul,
+.md ol {
+  padding-left: 1.4em;
+  margin: 0.55em 0;
+}
+.md li + li {
+  margin-top: 0.2em;
+}
+.md pre {
+  background: var(--color-surface-2);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  max-width: 100%;
+  line-height: 1.55;
+}
+.md pre code {
+  background: none;
+  padding: 0;
+  overflow-wrap: normal;
+  white-space: pre;
+}
+.md code {
+  font-family: var(--font-mono);
+  background: var(--color-surface-2);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+.md blockquote {
+  margin: 0.7em 0;
+  padding: 2px 12px;
+  border-left: 3px solid var(--color-line-strong);
+  color: var(--color-text-muted);
+}
+.md hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 1em 0;
+}
+.md .table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.md table {
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin: 0.6em 0;
+  line-height: 1.5;
+}
+.md th,
+.md td {
+  border: 1px solid var(--color-line);
+  padding: 5px 9px;
+  vertical-align: top;
+  overflow-wrap: normal;
+}
+.md th {
+  background: var(--color-surface-2);
+}
+.md .align-center {
+  text-align: center;
+}
+.md .align-right {
+  text-align: right;
+}
+.md .task {
+  color: var(--color-text-muted);
+}
+.md .task.done {
+  color: var(--status-done-fg);
+}
+.md-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* 編輯／預覽 */
+.md-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+/* textarea 由 Markdown.tsx 的 autoGrow 撐到跟內容一樣高，不出現內捲軸 */
+.md-editor textarea.nl-input {
+  overflow: hidden;
+  resize: none;
+}
+/* 描述：至少 12 行（螢幕矮時最多半個畫面），一打開就看得到整段 */
+.md-editor--tall textarea.nl-input,
+.md-editor--tall .md-preview {
+  min-height: min(calc(12em * var(--line-height-normal) + 19px), 50vh);
+}
+/* 有 heading 時：標題在左、編輯／預覽在右，同一列 */
+.md-editor-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.md-editor-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+.md-editor-h .md-tabs {
+  align-self: center;
+}
+.md-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+}
+.md-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-sans);
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+.md-tabs button[aria-selected='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+.md-tabs button:focus-visible,
+.md-preview:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.md-preview {
+  min-height: 96px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1.5px var(--color-line);
+}

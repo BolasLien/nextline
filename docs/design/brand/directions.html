@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nextline 品牌方向</title>
+<!--
+  NX-146 品牌識別：三個方向並排比較。
+  單檔自包含：不連任何外部資源（字型、圖片、腳本都在這一頁）。
+  色碼都定義在下方 DIRS 資料裡，色票、看板示意與 logo 都從同一份資料取，畫面上看到的色碼就是實際用的色碼。
+  字體建議的英文字型（Inter、Nunito、Space Grotesk 等）沒有內嵌，本頁以 fallback 的系統字型顯示。
+-->
+<style>
+:root{color-scheme:light dark;
+--pg-bg:#f3f3f1;--pg-surface:#ffffff;--pg-text:#1b1c1e;--pg-muted:#5d6066;--pg-line:#dedfe2;--pg-accent:#1b1c1e;
+--pg-font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+--pg-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{
+--pg-bg:#111214;--pg-surface:#1a1b1e;--pg-text:#ebecee;--pg-muted:#a2a5ab;--pg-line:#2d2f33;--pg-accent:#ebecee}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--pg-bg);color:var(--pg-text);font:15px/1.65 var(--pg-font);overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+header.page{padding:40px 0 8px}
+header.page h1{font-size:1.75rem;line-height:1.3;margin:0 0 6px}
+header.page p{margin:0;color:var(--pg-muted)}
+.small{font-size:.86rem}
+.muted{color:var(--pg-muted)}
+h2{font-size:1.3rem;line-height:1.35;margin:0}
+h3{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--pg-muted);margin:0 0 12px;font-weight:700}
+code,.mono{font-family:var(--pg-mono);font-size:.86em}
+
+/* 推薦區 */
+.rec{background:var(--pg-surface);border:1px solid var(--pg-line);border-radius:14px;padding:22px;margin:24px 0}
+.rec .lead{font-size:1.1rem;font-weight:700;margin:0 0 8px}
+.rec ol{margin:8px 0 0;padding-left:1.3em}
+.rec li{margin:4px 0}
+.prin{display:grid;gap:10px;margin-top:18px}
+.prin-row{display:grid;grid-template-columns:minmax(0,1.1fr) repeat(3,minmax(0,1fr));gap:10px;align-items:start;border-top:1px solid var(--pg-line);padding-top:10px}
+.prin-row.head{border-top:0;padding-top:0;font-weight:700;font-size:.86rem;color:var(--pg-muted)}
+.prin-row .p{font-weight:700}
+.prin-row .c{font-size:.9rem}
+.prin-row .c b{display:none}
+.star{color:#c2562f;font-weight:800}
+@media (prefers-color-scheme:dark){.star{color:#f08a5d}}
+@media (max-width:760px){
+  .prin-row{grid-template-columns:1fr}
+  .prin-row.head{display:none}
+  .prin-row .c b{display:inline;font-weight:700;margin-right:4px}
+}
+
+/* 一眼比較 */
+.glance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 32px}
+.glance a{display:block;text-decoration:none;color:inherit;border-radius:14px;padding:20px;border:1px solid var(--line);background:var(--surface)}
+.glance svg{max-width:100%;height:auto}
+.glance .nm{font-weight:800;margin-top:12px;color:var(--text)}
+.glance .tg{font-size:.88rem;color:var(--muted)}
+@media (max-width:760px){.glance{grid-template-columns:1fr}}
+
+/* 方向區塊 */
+section.dir{border-radius:18px;margin:0 0 40px;padding:28px 22px;background:var(--bg);color:var(--text);font-family:var(--font);border:1px solid var(--line)}
+section.dir h3{color:var(--muted)}
+.dir-head{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:24px}
+.dir-head .kicker{font:700 .78rem/1 var(--mono);letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.dir-head h2{font-size:1.6rem;font-weight:var(--display-weight)}
+.dir-head .persona{margin:6px 0 0;font-size:1.02rem}
+.dir-head .slogan{font-size:.9rem;color:var(--muted);max-width:360px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.box{background:var(--surface);border:var(--box-border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--box-shadow);min-width:0}
+.span-12{grid-column:span 12}.span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-4{grid-column:span 4}.span-8{grid-column:span 8}
+@media (max-width:900px){.span-7,.span-5,.span-6,.span-4,.span-8{grid-column:span 12}}
+
+/* logo */
+.logo-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:12px}
+.logo-tile{border-radius:var(--radius);display:flex;align-items:center;justify-content:center;min-height:120px;padding:18px}
+.logo-tile.on-light{background:var(--logo-light-bg);border:1px solid var(--line)}
+.logo-tile.on-dark{background:var(--logo-dark-bg)}
+.logo-tile svg{max-width:100%;height:auto}
+.sizes{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-top:14px}
+.sizes figure{margin:0;text-align:center;font:11px/1.4 var(--mono);color:var(--muted)}
+.sizes .chip{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:10px;margin-bottom:4px}
+.sizes .chip.l{background:#ffffff;border:1px solid #e2e2e2}
+.sizes .chip.d{background:#151515}
+.tabmock{display:flex;align-items:center;gap:8px;background:#e8e8ea;border-radius:8px 8px 0 0;padding:7px 12px;font:12px/1 var(--pg-font);color:#333;max-width:220px}
+.tabmock.dark{background:#2a2a2d;color:#ddd}
+.logo-note{font-size:.88rem;color:var(--muted);margin:12px 0 0}
+@media (max-width:560px){.logo-row{grid-template-columns:1fr}}
+
+/* 色票 */
+.pal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pal .mode{border-radius:var(--radius);padding:12px;border:1px solid var(--line)}
+.pal .mode-t{font-size:.8rem;font-weight:700;margin-bottom:8px}
+.sw{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;margin:6px 0;font-size:.82rem;line-height:1.3}
+.sw i{width:28px;height:28px;border-radius:7px;display:block;border:1px solid rgb(127 127 127 / 25%)}
+.sw .hx{font-family:var(--pg-mono);font-size:.78rem;opacity:.75}
+.sw-g{margin-top:10px;font-size:.72rem;letter-spacing:.06em;font-weight:700;opacity:.7}
+@media (max-width:560px){.pal{grid-template-columns:1fr}}
+
+/* 字體 */
+.type-sample .big{font-size:2rem;line-height:1.25;font-weight:var(--display-weight);margin:0 0 6px}
+.type-sample .mid{font-size:1.05rem;margin:0 0 12px}
+.type-sample .num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1rem;margin:0 0 12px}
+.stack{font:12px/1.5 var(--pg-mono);color:var(--muted);background:var(--surface2);border-radius:8px;padding:8px 10px;margin:6px 0}
+.stack b{font-family:var(--pg-font);color:var(--text);font-weight:700}
+
+/* 圖示 */
+.icons{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.icons figure{margin:0;text-align:center;font-size:.78rem;color:var(--muted)}
+.icons .ic{display:flex;align-items:center;justify-content:center;height:56px;border-radius:var(--radius);background:var(--surface2);color:var(--text);margin-bottom:4px}
+.icons .ic svg{width:28px;height:28px}
+@media (max-width:560px){.icons{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* 語氣 */
+.voice{display:grid;gap:12px}
+.voice .v{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:center}
+.voice .lbl{font-size:.78rem;color:var(--muted);font-weight:700}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;font:inherit;font-weight:700;background:var(--primary);color:var(--primary-text);padding:8px 16px;border-radius:var(--radius-btn);box-shadow:var(--btn-shadow);border:var(--btn-border)}
+.empty{border:1.5px dashed var(--line-strong);border-radius:var(--radius);padding:12px 14px;color:var(--muted);font-size:.92rem}
+.err{border-left:4px solid var(--st-err);background:var(--err-soft);padding:10px 14px;border-radius:var(--radius);font-size:.92rem}
+.toast{display:inline-block;background:var(--toast-bg);color:var(--toast-text);padding:10px 14px;border-radius:var(--radius);font-size:.92rem;box-shadow:var(--box-shadow)}
+@media (max-width:420px){.voice .v{grid-template-columns:1fr;gap:4px}}
+
+/* 看板示意 */
+.board-wrap{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+.board-bar{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.board-bar .ttl{font-weight:800;font-size:.95rem}
+.board-bar .sp{flex:1}
+.board-bar .wait{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--st-wait)}
+.board-bar .wait span{background:var(--st-wait);color:var(--wait-text);border-radius:99px;padding:0 8px;font-size:.78rem}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px}
+@media (max-width:900px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.board{grid-template-columns:1fr}}
+.col{background:var(--col-bg);border-radius:var(--radius);padding:10px;min-width:0;border:var(--col-border)}
+.col.review{background:var(--review-bg);outline:var(--review-outline)}
+.col-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.86rem;margin:2px 2px 10px}
+.col-h .n{font:700 .74rem/1.6 var(--mono);background:var(--surface2);color:var(--muted);border-radius:99px;padding:0 7px}
+.col-h .sd{width:9px;height:9px;border-radius:var(--dot-radius);background:var(--c)}
+.card{background:var(--surface);border:var(--card-border);border-radius:var(--radius);padding:10px 11px;margin-bottom:8px;box-shadow:var(--card-shadow)}
+.card:last-child{margin-bottom:0}
+.card .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}
+.card .id{font:600 .72rem/1.4 var(--mono);color:var(--muted)}
+.card .proj{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.card .t{font-size:.86rem;line-height:1.45;font-weight:600;margin:0 0 8px}
+.card .who{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:.74rem;color:var(--muted)}
+.av{width:20px;height:20px;border-radius:var(--av-radius);display:inline-flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;flex:none}
+.av.h{background:var(--primary);color:var(--primary-text)}
+.av.a{background:var(--agent-soft);color:var(--agent)}
+.av.a svg{width:13px;height:13px}
+.who .arrow{opacity:.6}
+.who .nm{color:var(--text);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:var(--badge-radius);background:var(--b-bg);color:var(--b-fg)}
+.badge::before{content:"";width:7px;height:7px;border-radius:var(--dot-radius);background:var(--b-fg)}
+.b-run{--b-fg:var(--st-run);--b-bg:var(--st-run-soft)}
+.b-wait{--b-fg:var(--st-wait);--b-bg:var(--st-wait-soft)}
+.b-done{--b-fg:var(--st-done);--b-bg:var(--st-done-soft)}
+.b-err{--b-fg:var(--st-err);--b-bg:var(--err-soft)}
+.b-stale{--b-fg:var(--st-stale);--b-bg:var(--st-stale-soft)}
+.board-cap{font-size:.8rem;color:var(--muted);margin:8px 2px 0}
+.boards{display:grid;gap:16px}
+
+/* 各方向的個性（形狀、邊框、陰影） */
+.d-a,.d-a .lt,.d-a .dk{--radius:6px;--radius-lg:10px;--radius-btn:6px;--badge-radius:4px;--dot-radius:2px;--av-radius:5px;--display-weight:650;
+  --box-border:1px solid var(--line);--box-shadow:none;--card-border:1px solid var(--line);--card-shadow:0 1px 1px rgb(15 27 45 / 5%);
+  --col-border:0;--btn-shadow:none;--btn-border:0;--review-outline:0}
+.d-b,.d-b .lt,.d-b .dk{--radius:14px;--radius-lg:20px;--radius-btn:99px;--badge-radius:99px;--dot-radius:50%;--av-radius:50%;--display-weight:800;
+  --box-border:0;--box-shadow:0 1px 2px rgb(80 50 30 / 6%),0 6px 18px rgb(80 50 30 / 6%);--card-border:0;--card-shadow:0 1px 2px rgb(80 50 30 / 8%),0 3px 10px rgb(80 50 30 / 5%);
+  --col-border:0;--btn-shadow:0 2px 0 rgb(0 0 0 / 12%);--btn-border:0;--review-outline:2px dashed var(--st-wait)}
+.d-c,.d-c .lt,.d-c .dk{--radius:3px;--radius-lg:4px;--radius-btn:2px;--badge-radius:2px;--dot-radius:0;--av-radius:2px;--display-weight:850;
+  --box-border:2px solid var(--ink);--box-shadow:4px 4px 0 var(--ink);--card-border:2px solid var(--ink);--card-shadow:3px 3px 0 var(--ink);
+  --col-border:0;--btn-shadow:3px 3px 0 var(--ink);--btn-border:2px solid var(--ink);--review-outline:3px solid var(--st-wait)}
+.d-c .dir-head h2{font-size:2rem;letter-spacing:-.02em;text-transform:none}
+.d-c .col-h{text-transform:uppercase;letter-spacing:.04em}
+.d-c .card .t{font-weight:700}
+.d-b .col{padding:12px}
+footer{padding:12px 0 48px;color:var(--pg-muted);font-size:.84rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <h1>Nextline 品牌方向：三選一</h1>
+    <p>NX-146。三個方向用同一塊看板、同一批真實的票比較。往下捲依序是：推薦、三個 logo 對照、各方向的 logo／色彩／字體／圖示／語氣／看板（淺色、深色）。</p>
+  </header>
+
+  <div class="rec">
+    <p class="lead">推薦 B「接力」：它的 logo 本身就在講「人和 agent 一起推進」，畫面又最不像工程工具。</p>
+    <ol>
+      <li><b>logo 直接講產品主張。</b>實心圓是人、空心圓是 agent，兩個走在同一條線上往前。定位頁原則 1「人和 agent 對等」不用解釋，看圖就懂。</li>
+      <li><b>跟競品拉開距離。</b>Linear、Plane、GitHub Projects 都是冷色、工程感的介面。A「定線」最穩，但站在它們旁邊認不出來；B 的陶土色和米白底，一眼就看得出是 Nextline。</li>
+      <li><b>適合主推的人和市場。</b>一人公司每天要開好幾次看板，溫和的語氣比較耐看；繁中介面文字寫成像合作夥伴在講話，比工程用語親切。按月收費要讓人信任，所以狀態色維持標準的藍、琥珀、綠、紅，看狀態跟其他工具一樣準。</li>
+      <li><b>想要更搶眼可以改選 C。</b>C「換行」最有個性，把主色直接定義成「輪到你」，最貼近原則 2。代價是粗框和硬陰影會讓長時間使用的畫面比較吵，深色模式也比較刺眼。</li>
+    </ol>
+    <div class="prin" role="table" aria-label="三個方向對照定位頁的產品原則">
+      <div class="prin-row head" role="row"><div>定位頁原則</div><div>A 定線</div><div>B 接力</div><div>C 換行</div></div>
+      <div class="prin-row" role="row"><div class="p">1. 人和 agent 對等</div>
+        <div class="c"><b>A</b>兩條線代表人和 agent，要解釋才看得懂</div>
+        <div class="c"><b>B</b><span class="star">★</span> 實心圓（人）＋空心圓（agent）同一條線，看圖就懂</div>
+        <div class="c"><b>C</b>強調「下一步」，人和 agent 的關係沒有畫出來</div></div>
+      <div class="prin-row" role="row"><div class="p">2. 狀態一眼可見</div>
+        <div class="c"><b>A</b>狀態色最乾淨、密度最高</div>
+        <div class="c"><b>B</b>狀態用膠囊徽章＋色點；待驗收欄加虛線框</div>
+        <div class="c"><b>C</b><span class="star">★</span> 主色就是「等你」，最醒目</div></div>
+      <div class="prin-row" role="row"><div class="p">3. 看板是主畫面</div>
+        <div class="c"><b>A</b>一屏塞得下最多卡片</div>
+        <div class="c"><b>B</b><span class="star">★</span> 卡片和欄位的層次最好分，第一次看也不吃力</div>
+        <div class="c"><b>C</b>粗框讓卡片很搶眼，但卡片多時畫面比較擠</div></div>
+      <div class="prin-row" role="row"><div class="p">4. 看得到、停得了</div>
+        <div class="c"><b>A</b>停止圖示中性，不夠醒目</div>
+        <div class="c"><b>B</b>語氣會說清楚 agent 現在在做什麼</div>
+        <div class="c"><b>C</b>錯誤和停止的對比最強</div></div>
+      <div class="prin-row" role="row"><div class="p">5. 打開就能用</div>
+        <div class="c"><b>A</b>文字精準但偏冷，像說明書</div>
+        <div class="c"><b>B</b><span class="star">★</span> 空狀態直接告訴你第一步按 C</div>
+        <div class="c"><b>C</b>文字短又俏皮，第一次用的人可能要多想一下</div></div>
+    </div>
+  </div>
+
+  <div class="glance" id="glance"></div>
+  <div id="dirs"></div>
+
+  <footer>
+    看板上的票、負責人和代做 agent 都是 Nextline 裡真實的票；欄位和 session 狀態為了示範各種情況有調整，不是目前的實際狀態。英文字型建議（Inter、Nunito、Space Grotesk、JetBrains Mono、IBM Plex Mono）沒有內嵌，本頁用 fallback 的系統字型顯示。
+  </footer>
+</div>
+
+<script>
+// ---------- 三個方向的資料：色碼、字體、語氣、logo ----------
+const STATUS_LABEL = {run:'進行中', wait:'等你回覆', done:'完成', err:'出錯', stale:'太久沒更新'};
+
+const DIRS = [
+{
+  key:'a', letter:'A', name:'定線', en:'Steady',
+  persona:'冷靜專業：像一份排版精準的工作日誌，少說話、資訊密。',
+  slogan:'標語候選：你和你的 AI agent 共用一塊看板，每張票輪到誰，一眼就知道。',
+  logoIdea:'兩條橫線，上面短的是人，下面往右縮排、比較長的是 agent，像文字「換到下一行」繼續寫；整體放在方角容器裡，16px 也只剩兩條粗線，不會糊。',
+  light:{bg:'#F5F7FA',surface:'#FFFFFF',surface2:'#EEF1F5',line:'#E1E6ED','line-strong':'#C7CFDA',text:'#0F1B2D',muted:'#5B6675',
+    primary:'#1E3A5F','primary-text':'#FFFFFF',agent:'#0E8F80','agent-soft':'#DDF3EF',
+    'st-run':'#2563EB','st-wait':'#B45309','st-done':'#15803D','st-err':'#C62828','st-stale':'#6B7280'},
+  dark:{bg:'#0B111A',surface:'#121A26',surface2:'#1A2432',line:'#22303F','line-strong':'#334458',text:'#E6ECF2',muted:'#93A1B2',
+    primary:'#8FB3E0','primary-text':'#0B111A',agent:'#2DD4BF','agent-soft':'#123A37',
+    'st-run':'#6EA8FF','st-wait':'#F5B454','st-done':'#4ADE80','st-err':'#FF7A7A','st-stale':'#9CA3AF'},
+  palette:[['主色','primary','墨藍：品牌、人、主要按鈕'],['輔色','agent','青綠：agent'],['背景','bg',''],['表面','surface',''],['線條','line',''],['文字','text',''],['次要文字','muted','']],
+  fonts:{latin:'"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI"',cjk:'"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif',mono:'"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace',
+    note:'英文和數字用 Inter（中性、字距穩），字重 400／600；票號用 JetBrains Mono，數字等寬，欄位張數不會跳動。'},
+  icon:{sw:1.5,cap:'round',join:'round',r:2,note:'線寬 1.5px（24px 格），轉角半徑 2px，圓頭端點。細、精準，跟文字一樣重。'},
+  voice:{btn:'建立票',empty:'這一欄沒有票。',err:'儲存失敗：連線中斷。修改已保留，恢復連線後會自動送出。',toast:'NX-146 已移到「待驗收」。'},
+  logoLightBg:'#FFFFFF', logoDarkBg:'#0B111A'
+},
+{
+  key:'b', letter:'B', name:'接力', en:'Relay',
+  persona:'溫暖人味：像一起做事的夥伴，交棒清楚、說話客氣。',
+  slogan:'標語候選：一個人，帶一群 AI agent，把事做完。',
+  logoIdea:'實心圓是人，空心圓是 agent，兩個站在同一條往前的線上，線的尾端是箭頭。意思是「人和 agent 在同一條線上一起往前推」。16px 時剩兩個點和一條線，仍認得出來。',
+  light:{bg:'#FBF7F2',surface:'#FFFFFF',surface2:'#F4ECE3',line:'#EADFD3','line-strong':'#D6C6B5',text:'#2B211B',muted:'#75655A',
+    primary:'#C2562F','primary-text':'#FFFFFF',agent:'#5B4B9A','agent-soft':'#ECE8F7',
+    'st-run':'#2F6FB0','st-wait':'#B7791F','st-done':'#3D8B4F','st-err':'#B4232A','st-stale':'#8A7F76'},
+  dark:{bg:'#1A1512',surface:'#241D19',surface2:'#2E2520',line:'#3A302A','line-strong':'#54473E',text:'#F3EAE2',muted:'#B5A497',
+    primary:'#F08A5D','primary-text':'#1A1512',agent:'#B3A6E8','agent-soft':'#342C4D',
+    'st-run':'#7FB2E5','st-wait':'#F2C46D','st-done':'#7CC98E','st-err':'#FF8A80','st-stale':'#A89C92'},
+  palette:[['主色','primary','陶土橘：品牌、人、主要按鈕'],['輔色','agent','靛紫：agent'],['背景','bg','米白'],['表面','surface',''],['線條','line',''],['文字','text','深可可'],['次要文字','muted','']],
+  fonts:{latin:'"Nunito",ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI"',cjk:'"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif',mono:'"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace',
+    note:'英文和數字用 Nunito（圓角、親切），標題 800、內文 500；macOS 上 fallback 到 SF Pro Rounded。中文維持蘋方／思源黑體，不用圓體，長文才好讀。'},
+  icon:{sw:2,cap:'round',join:'round',r:5,note:'線寬 2px（24px 格），轉角半徑 5px，圓頭端點。圓潤、有手感，跟圓角卡片同一個語言。'},
+  voice:{btn:'開一張票',empty:'這裡還空著。按 C 開第一張票，交給自己或 agent 都可以。',err:'沒存到，網路好像斷了。你的修改還在，連上之後會再送一次。',toast:'交給 Claude Code 了，它開始動手時卡片會亮起來。'},
+  logoLightBg:'#FBF7F2', logoDarkBg:'#1A1512'
+},
+{
+  key:'c', letter:'C', name:'換行', en:'Return',
+  persona:'大膽有個性：像終端機裡的游標，直接、有節奏，主色只代表一件事：輪到你。',
+  slogan:'標語候選：下一行，輪到誰？',
+  logoIdea:'粗線畫的「↳」，就是文字編輯器裡的換行符號：這一行做完，往下一行接著做。放在螢光黃方塊裡，16px 時是一個黃方塊加一個粗勾，在分頁列上很好找。',
+  light:{bg:'#F4F4F0',surface:'#FFFFFF',surface2:'#EBEBE5',line:'#D5D5CC','line-strong':'#111111',text:'#111111',muted:'#55554F',ink:'#111111',
+    primary:'#FF5A1F','primary-text':'#111111',agent:'#111111','agent-soft':'#D4FF3F',
+    'st-run':'#1F5BFF','st-wait':'#E8470F','st-done':'#16884A','st-err':'#D6004C','st-stale':'#7A7A72'},
+  dark:{bg:'#0D0D0D',surface:'#171717',surface2:'#222222',line:'#333333','line-strong':'#F4F4F0',text:'#F4F4F0',muted:'#A8A8A0',ink:'#F4F4F0',
+    primary:'#FF6B35','primary-text':'#0D0D0D',agent:'#0D0D0D','agent-soft':'#D4FF3F',
+    'st-run':'#7A9BFF','st-wait':'#FF6B35','st-done':'#45D483','st-err':'#FF4F8B','st-stale':'#8F8F88'},
+  palette:[['主色','primary','訊號橘：「輪到你」＋主要按鈕'],['輔色','agent-soft','螢光黃：agent、logo'],['墨色','ink','粗框與硬陰影'],['背景','bg','紙白／純黑'],['表面','surface',''],['文字','text',''],['次要文字','muted','']],
+  fonts:{latin:'"Space Grotesk","Avenir Next","Futura",-apple-system,BlinkMacSystemFont,"Segoe UI"',cjk:'"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif',mono:'"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace',
+    note:'英文和數字用 Space Grotesk（幾何、有稜角），標題 800 以上、字距收緊；票號與張數用 JetBrains Mono 粗體，像終端機。中文用蘋方中黑以上，跟粗框撐得住。'},
+  icon:{sw:2.5,cap:'square',join:'miter',r:0,note:'線寬 2.5px（24px 格），直角、方頭端點。粗、硬，縮小到 16px 也不會斷。'},
+  voice:{btn:'開票 ↵',empty:'空的。下一行等你寫。',err:'斷線了。修改先留著，連上就送。',toast:'NX-146 → 待驗收。換你了。'},
+  logoLightBg:'#F4F4F0', logoDarkBg:'#0D0D0D'
+}];
+
+// ---------- logo：mark(目標色組) 回傳 32x32 的圖示 SVG 內容 ----------
+const MARK = {
+  a(t){ return `<rect width="32" height="32" rx="7" fill="${t.primary === '#8FB3E0' ? '#16304F' : '#1E3A5F'}"/>
+    <rect x="6" y="9" width="13" height="5" rx="1.5" fill="#FFFFFF"/>
+    <rect x="12" y="18" width="14" height="5" rx="1.5" fill="#2DD4BF"/>`; },
+  b(t){ return `<circle cx="8.5" cy="10" r="6" fill="${t.primary}"/>
+    <circle cx="23" cy="10" r="4.6" fill="none" stroke="${t.agent}" stroke-width="3.4"/>
+    <path d="M3 25H26" stroke="${t.text}" stroke-width="3.4" stroke-linecap="round"/>
+    <path d="M22 20.2L27.2 25L22 29.8" fill="none" stroke="${t.text}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>`; },
+  c(t){ return `<rect width="32" height="32" rx="3" fill="#D4FF3F"/>
+    <path d="M9 5V19H22" fill="none" stroke="#111111" stroke-width="4.5" stroke-linecap="square"/>
+    <path d="M18.5 12.5L25.5 19L18.5 25.5Z" fill="#111111"/>`; }
+};
+function markSvg(d, t, size){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 32 32" role="img" aria-label="${d.name} 圖示版">${MARK[d.key](t)}</svg>`;
+}
+function fullLogo(d, t, dark){
+  const fam = d.fonts.latin.replace(/"/g,"'") + ',sans-serif';
+  const word = {
+    a:`<text x="48" y="31" font-family="${fam}" font-size="26" font-weight="600" letter-spacing="-0.3" fill="${t.text}">Nextline</text>`,
+    b:`<text x="48" y="31" font-family="${fam}" font-size="27" font-weight="800" letter-spacing="0" fill="${t.text}">nextline</text>`,
+    c:`<text class="wm" x="48" y="31.5" font-family="${fam}" font-size="27" font-weight="800" letter-spacing="-1" fill="${t.text}">NEXTLINE</text>
+       <rect class="cur" x="200" y="12" width="12" height="21" fill="${t.primary}"/>`
+  }[d.key];
+  const w = d.key === 'c' ? 216 : 170;
+  return `<svg width="${w*1.3}" viewBox="0 0 ${w} 44" role="img" aria-label="${d.name} 完整版 logo${dark?'（深色背景）':''}">
+    <g transform="translate(4 6)">${MARK[d.key](t)}</g>${word}</svg>`;
+}
+
+// ---------- 圖示：同一組語意，依方向換線寬、端點、轉角 ----------
+function icon(d, name){
+  const s = d.icon, r = s.r;
+  const sq = s.cap === 'square';
+  const body = {
+    board:`<rect x="3" y="4" width="18" height="16" rx="${r}"/><path d="M9 4V20M15 4V20"/>`,
+    ticket:`<rect x="4" y="3" width="16" height="18" rx="${r}"/><path d="M8 8H16M8 12H16M8 16H12"/>`,
+    agent: sq ? `<rect x="4" y="8" width="16" height="12"/><path d="M12 3V8M9 13V15M15 13V15"/>`
+              : `<rect x="4" y="8" width="16" height="12" rx="${Math.max(r,2.5)}"/><path d="M12 4V8M9 13V14.5M15 13V14.5"/><circle cx="12" cy="3.2" r="0.6"/>`,
+    person: sq ? `<rect x="8.5" y="3.5" width="7" height="7"/><path d="M4.5 20.5V16H19.5V20.5"/>`
+               : `<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.6-3.6 3.6-5.8 7.5-5.8s6.9 2.2 7.5 5.8"/>`,
+    stop:`${sq?'<rect x="3" y="3" width="18" height="18"/>':'<circle cx="12" cy="12" r="9"/>'}<rect x="9" y="9" width="6" height="6" rx="${r/3}" fill="currentColor" stroke="none"/>`,
+    check: sq ? `<path d="M4 12.5L9.5 18L20 6"/>` : `<path d="M4.5 12.5l5 5L19.5 6.5"/>`
+  }[name];
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${s.sw}" stroke-linecap="${s.cap}" stroke-linejoin="${s.join}" aria-hidden="true">${body}</svg>`;
+}
+const ICON_NAMES = [['board','看板'],['ticket','票'],['agent','agent'],['person','等你'],['stop','停止'],['check','驗收']];
+
+// ---------- 看板資料：Nextline 裡真實的票 ----------
+const BOARD = [
+  {col:'待辦', c:'muted', cards:[
+    {id:'NX-148', t:'05 設計系統：design tokens 與元件規格', p:'Nextline 第二版', agent:'Claude Code'},
+    {id:'NX-149', t:'06 關鍵畫面高保真原型（桌面＋手機）', p:'Nextline 第二版', agent:'Claude Code'},
+    {id:'NX-143', t:'月報表：依分類畫圓餅圖', p:'記帳 App', agent:null}]},
+  {col:'進行中', c:'st-run', cards:[
+    {id:'NX-146', t:'03 品牌識別：logo、配色、字體、圖示與介面語氣', p:'Nextline 第二版', agent:'Claude Code', s:'run'},
+    {id:'NX-147', t:'04 資訊架構與核心流程：導覽、檢視切換、開票到驗收', p:'Nextline 第二版', agent:'Claude Code', s:'run'},
+    {id:'NX-129', t:'02 建立本機共同剪輯台', p:'旅遊剪片 Agent', agent:'Codex', s:'stale'},
+    {id:'NX-135', t:'03 Nextline 遠端 MCP：Claude Code 與 Codex 都能讀寫票', p:'Nextline 第一版', agent:'Codex', s:'err'}]},
+  {col:'待驗收', c:'st-wait', review:true, cards:[
+    {id:'NX-145', t:'02 產品定位：Nextline 是給誰的、解決什麼、跟 Linear 差在哪', p:'Nextline 第二版', agent:'阿澈', s:'wait'},
+    {id:'NX-141', t:'08 Nextline 網頁視覺改版：行動卡片版面', p:'Nextline 第一版', agent:'Claude Code', s:'wait'}]},
+  {col:'完成', c:'st-done', cards:[
+    {id:'NX-144', t:'01 調查報告：Nextline 要怎麼改到可商用', p:'Nextline 第二版', agent:'阿澈', s:'done'},
+    {id:'NX-137', t:'05 Nextline 從 Linear 搬入 10 月以後建立的票', p:'Nextline 第一版', agent:'Claude Code', s:'done'}]}
+];
+
+// ---------- 產生 CSS 變數 ----------
+function soft(hex, a){ // 狀態徽章底色：主色加透明度
+  const n = parseInt(hex.slice(1),16);
+  return `rgb(${n>>16} ${(n>>8)&255} ${n&255} / ${a}%)`;
+}
+function vars(t, dark){
+  const out = Object.entries(t).map(([k,v]) => `--${k}:${v}`);
+  const a = dark ? 22 : 13;
+  out.push(`--st-run-soft:${soft(t['st-run'],a)}`,`--st-wait-soft:${soft(t['st-wait'],a)}`,`--st-done-soft:${soft(t['st-done'],a)}`,
+    `--err-soft:${soft(t['st-err'],a)}`,`--st-stale-soft:${soft(t['st-stale'],a)}`,
+    `--col-bg:${dark ? soft('#FFFFFF',3) : soft('#000000',3)}`,`--review-bg:${soft(t['st-wait'], dark?10:7)}`,
+    `--toast-bg:${t.text}`,`--toast-text:${t.bg}`,`--wait-text:${dark ? t.bg : '#FFFFFF'}`);
+  if (!t.ink) out.push(`--ink:${t.text}`);
+  return out.join(';');
+}
+function fontVars(d){
+  return `--font:${d.fonts.latin},${d.fonts.cjk};--mono:${d.fonts.mono};--logo-light-bg:${d.logoLightBg};--logo-dark-bg:${d.logoDarkBg}`;
+}
+let css = '';
+for (const d of DIRS){
+  const L = vars(d.light,false), D = vars(d.dark,true);
+  css += `.d-${d.key},.d-${d.key} .lt{${L};${fontVars(d)}}.d-${d.key} .dk{${D}}`;
+  css += `@media (prefers-color-scheme:dark){.d-${d.key}{${D}}.d-${d.key} .lt{${L}}}`;
+}
+const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+
+// ---------- 畫面 ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function swatches(d, t, title, cls){
+  const group = (label, keys) => `<div class="sw-g">${label}</div>` + keys.map(([nm,k,desc]) =>
+    `<div class="sw"><i style="background:${t[k]}"></i><div>${nm}${desc?`<span style="opacity:.65">・${desc}</span>`:''}<br><span class="hx">${t[k]}</span></div></div>`).join('');
+  const status = Object.entries(STATUS_LABEL).map(([k,lb]) => [lb,'st-'+k,'']);
+  return `<div class="mode ${cls}" style="background:${t.bg};color:${t.text}">
+    <div class="mode-t">${title}</div>${group('品牌與中性色', d.palette)}${group('狀態色（agent session）', status)}</div>`;
+}
+
+function card(d, c){
+  const agentAv = c.agent ? `<span class="arrow">→</span><span class="av a" title="代做 agent">${icon(d,'agent')}</span><span class="nm">${esc(c.agent)}</span>` : `<span class="arrow">・</span><span>還沒交給 agent</span>`;
+  return `<div class="card">
+    <div class="top"><span class="id">${c.id}</span><span class="proj">${esc(c.p)}</span></div>
+    <p class="t">${esc(c.t)}</p>
+    <div class="who"><span class="av h" title="負責人">B</span><span class="nm">Bolas</span>${agentAv}</div>
+    ${c.s ? `<span class="badge b-${c.s}">${STATUS_LABEL[c.s]}</span>` : ''}
+  </div>`;
+}
+function board(d, mode){
+  const waiting = BOARD.flatMap(x => x.cards).filter(c => c.s === 'wait').length;
+  return `<div class="board-wrap ${mode}">
+    <div class="board-bar"><span style="display:inline-flex">${markSvg(d, mode === 'dk' ? d.dark : d.light, 22)}</span><span class="ttl">Nextline 第二版</span><span class="sp"></span>
+      <span class="wait">等你 <span>${waiting}</span></span><span class="btn" style="padding:5px 12px;font-size:.82rem">${esc(d.voice.btn)}</span></div>
+    <div class="board">${BOARD.map(col => `<div class="col${col.review?' review':''}" style="--c:var(--${col.c})">
+      <div class="col-h"><span class="sd"></span>${col.col}<span class="n">${col.cards.length}</span></div>
+      ${col.cards.map(c => card(d,c)).join('')}</div>`).join('')}</div>
+  </div>`;
+}
+
+function section(d){
+  const L = d.light, D = d.dark;
+  return `<section class="dir d-${d.key}" id="dir-${d.key}" aria-labelledby="h-${d.key}">
+  <div class="dir-head">
+    <div><div class="kicker">方向 ${d.letter} ・ ${d.en}</div><h2 id="h-${d.key}">${d.name}</h2><p class="persona">${esc(d.persona)}</p></div>
+    <div class="slogan">${esc(d.slogan)}</div>
+  </div>
+  <div class="grid">
+    <div class="box span-7"><h3>Logo</h3>
+      <div class="logo-row">
+        <div class="logo-tile on-light lt">${fullLogo(d, L, false)}</div>
+        <div class="logo-tile on-dark dk">${fullLogo(d, D, true)}</div>
+      </div>
+      <div class="sizes">
+        <figure><div class="chip l">${markSvg(d,L,16)}</div>16px</figure>
+        <figure><div class="chip l">${markSvg(d,L,32)}</div>32px</figure>
+        <figure><div class="chip d">${markSvg(d,D,16)}</div>16px 深色</figure>
+        <figure><div class="chip d">${markSvg(d,D,32)}</div>32px 深色</figure>
+        <figure><div class="chip l" style="width:72px;height:72px">${markSvg(d,L,64)}</div>64px</figure>
+        <figure><div class="tabmock">${markSvg(d,L,16)}<span>Nextline・看板</span></div><div class="tabmock dark">${markSvg(d,D,16)}<span>Nextline・看板</span></div>分頁列實際大小</figure>
+      </div>
+      <p class="logo-note">${esc(d.logoIdea)}</p>
+    </div>
+    <div class="box span-5 type-sample"><h3>字體</h3>
+      <p class="big">${d.key==='c'?'下一行，輪到誰？':'輪到誰，一眼就知道'}</p>
+      <p class="mid">Nextline 第二版・Claude Code 正在做 NX-146</p>
+      <p class="num">NX-146 ・ 待驗收 2 ・ 0123456789</p>
+      <div class="stack"><b>英文／數字</b><br>${esc(d.fonts.latin)}</div>
+      <div class="stack"><b>中文</b><br>${esc(d.fonts.cjk)}</div>
+      <div class="stack"><b>票號／張數</b><br>${esc(d.fonts.mono)}</div>
+      <p class="logo-note">${esc(d.fonts.note)}</p>
+    </div>
+    <div class="box span-12"><h3>色彩</h3>
+      <div class="pal">${swatches(d, L, '淺色模式', 'lt')}${swatches(d, D, '深色模式', 'dk')}</div>
+    </div>
+    <div class="box span-6"><h3>圖示風格</h3>
+      <div class="icons">${ICON_NAMES.map(([n,lb]) => `<figure><div class="ic">${icon(d,n)}</div>${lb}</figure>`).join('')}</div>
+      <p class="logo-note">${esc(d.icon.note)}</p>
+    </div>
+    <div class="box span-6"><h3>介面語氣</h3>
+      <div class="voice">
+        <div class="v"><span class="lbl">按鈕</span><span><span class="btn">${esc(d.voice.btn)}</span></span></div>
+        <div class="v"><span class="lbl">空狀態</span><div class="empty">${esc(d.voice.empty)}</div></div>
+        <div class="v"><span class="lbl">錯誤</span><div class="err">${esc(d.voice.err)}</div></div>
+        <div class="v"><span class="lbl">Toast</span><span><span class="toast">${esc(d.voice.toast)}</span></span></div>
+      </div>
+    </div>
+    <div class="box span-12"><h3>看板畫面</h3>
+      <div class="boards">
+        <div>${board(d,'lt')}<p class="board-cap">淺色模式</p></div>
+        <div>${board(d,'dk')}<p class="board-cap">深色模式</p></div>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
+document.getElementById('dirs').innerHTML = DIRS.map(section).join('');
+document.getElementById('glance').innerHTML = DIRS.map(d => `<a href="#dir-${d.key}" class="d-${d.key}">
+  ${fullLogo(d, matchMedia('(prefers-color-scheme: dark)').matches ? d.dark : d.light, false)}
+  <div class="nm">${d.letter}・${d.name}${d.key==='b'?' <span class="star">★ 推薦</span>':''}</div><div class="tg">${esc(d.persona)}</div></a>`).join('');
+
+// C 的游標方塊緊貼在字後面：實際字型不同時字寬會變，所以畫完再量。
+for (const svg of document.querySelectorAll('svg')){
+  const wm = svg.querySelector('.wm'), cur = svg.querySelector('.cur');
+  if (!wm || !cur) continue;
+  const bb = wm.getBBox(), end = bb.x + bb.width + 4;
+  cur.setAttribute('x', end.toFixed(1));
+  svg.setAttribute('viewBox', `0 0 ${Math.ceil(end + 16)} 44`);
+  svg.setAttribute('width', Math.ceil((end + 16) * 1.3));
+}
+</script>
+</body>
+</html>

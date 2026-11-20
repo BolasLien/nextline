@@ -1,0 +1,88 @@
+.nl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--color-line-strong);
+  color: var(--color-text-muted);
+}
+.nl-empty .ic {
+  width: var(--size-control-lg);
+  height: var(--size-control-lg);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+.nl-empty h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin: 0;
+}
+.nl-empty p {
+  margin: 0;
+  max-width: 340px;
+  font-size: var(--font-size-sm);
+}
+.nl-empty--error .ic {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+.nl-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 24px;
+}
+.nl-loading .row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nl-skel {
+  display: block;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg, var(--color-skeleton) 0%, var(--color-skeleton-shine) 50%, var(--color-skeleton) 100%);
+  background-size: 200% 100%;
+  animation: nl-shimmer 1.4s linear infinite;
+}
+.nl-skel--id {
+  width: 48px;
+}
+.nl-skel--title {
+  width: 90%;
+}
+.nl-skel--short {
+  width: 60%;
+}
+.nl-skel--full {
+  width: 100%;
+}
+.nl-skel--h-sm {
+  height: 10px;
+}
+.nl-skel--h-md {
+  height: 14px;
+}
+.nl-skel--h-lg {
+  height: var(--size-control-md);
+}
+@keyframes nl-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nl-skel {
+    animation: none;
+  }
+}

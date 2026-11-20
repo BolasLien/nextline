@@ -1,0 +1,1337 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nextline 設計系統</title>
+<!--
+  NX-148 設計系統總覽（NX-169 改成品牌方向 A「定線 Steady」）。單檔自包含：不連任何外部資源。
+  tokens 區塊由 build.mjs 從 tokens.ts 產生後內嵌，不要手改；元件 CSS（.nl-*）是給 React 實作對照的參考寫法。
+  強制狀態（.is-hover、.is-focus、.is-active、.is-loading）只是為了在這一頁並排展示；實作時用 :hover、:focus-visible、:active、aria-busy。
+  英文字型 Inter、JetBrains Mono 沒有內嵌，本頁以 fallback（SF Pro Text、SF Mono 等）顯示。
+-->
+<style id="tokens">
+/* tokens:start */
+/* Nextline design tokens（NX-148；NX-169 改成品牌方向 A「定線 Steady」）
+ * 由 build.mjs 從 tokens.ts 產生，不要手改；改 tokens.ts 再跑 node docs/design/system/build.mjs。
+ * 深淺色：預設跟系統（prefers-color-scheme）；<html data-theme="light|dark"> 手動指定，
+ * 也可以放在任何容器上，只影響那一塊。
+ */
+
+:root {
+  /* 原始色盤 */
+  --neutral-0: #FFFFFF;
+  --neutral-50: #F5F7FA;
+  --neutral-100: #EEF1F5;
+  --neutral-150: #E1E6ED;
+  --neutral-200: #C7CFDA;
+  --neutral-300: #93A1B2;
+  --neutral-400: #7A8696;
+  --neutral-500: #5B6675;
+  --neutral-600: #334458;
+  --neutral-700: #22303F;
+  --neutral-750: #1A2432;
+  --neutral-800: #0F1B2D;
+  --neutral-850: #121A26;
+  --neutral-900: #0B111A;
+  --graphite-200: #D5DBE3;
+  --graphite-300: #B8C0CB;
+  --graphite-400: #9CA4AF;
+  --graphite-600: #4A5363;
+  --graphite-700: #3A4250;
+  --graphite-750: #313844;
+  --graphite-800: #282E37;
+  --graphite-850: #232831;
+  --graphite-900: #1F242C;
+  --brand-50: #E8EEF5;
+  --brand-100: #BFD3EC;
+  --brand-200: #A9C4E8;
+  --brand-300: #8FB3E0;
+  --brand-400: #2C5282;
+  --brand-500: #1E3A5F;
+  --brand-600: #172E4C;
+  --brand-700: #11233A;
+  --brand-800: #16304F;
+  --brand-900: #1A2A3E;
+  --agent-50: #DDF3EF;
+  --agent-300: #2DD4BF;
+  --agent-500: #0E8F80;
+  --agent-600: #0B7568;
+  --agent-900: #123A37;
+
+  /* 尺度 */
+  --font-sans: Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;
+  --space-0: 0px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+  --size-control-sm: 28px;
+  --size-control-md: 36px;
+  --size-control-lg: 44px;
+  --size-icon-sm: 16px;
+  --size-icon-md: 20px;
+  --size-icon-lg: 24px;
+  --size-avatar-sm: 20px;
+  --size-avatar-md: 24px;
+  --size-avatar-lg: 32px;
+  --size-sidebar: 248px;
+  --size-peek: 480px;
+  --size-topbar: 52px;
+  --size-tabbar: 56px;
+  --size-board-col: 296px;
+  --size-modal-sm: 420px;
+  --size-modal-md: 600px;
+  --size-palette: 640px;
+  --size-toast: 420px;
+  --size-tooltip: 280px;
+  --icon-stroke: 1.5px;
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-dropdown: 100;
+  --z-peek: 200;
+  --z-modal: 300;
+  --z-palette: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --duration-instant: 80ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+  --duration-slower: 320ms;
+  --duration-toast: 4000ms;
+  --duration-toast-undo: 10000ms;
+  --duration-updated-flash: 5000ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.3, 1.3, 0.5, 1);
+  --breakpoint-sm: 560px;
+  --breakpoint-md: 760px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #F5F7FA; /* neutral-50 */
+  --color-surface: #FFFFFF; /* neutral-0 */
+  --color-surface-2: #EEF1F5; /* neutral-100 */
+  --color-surface-raised: #FFFFFF; /* neutral-0 */
+  --color-sidebar: #EEF1F5; /* neutral-100 */
+  --color-hover: #E6EAF0;
+  --color-selected: #E8EEF5; /* brand-50 */
+  --color-review-col: #F3F2EE;
+  --color-scrim: rgb(15 27 45 / 40%);
+  --color-skeleton: #E9EDF2;
+  --color-skeleton-shine: #F3F5F8;
+  --color-line: #E1E6ED; /* neutral-150 */
+  --color-line-strong: #C7CFDA; /* neutral-200 */
+  --color-border-input: #7A8696; /* neutral-400 */
+  --color-text: #0F1B2D; /* neutral-800 */
+  --color-text-muted: #5B6675; /* neutral-500 */
+  --color-text-disabled: #A3ADBA;
+  --color-primary: #1E3A5F; /* brand-500 */
+  --color-primary-hover: #172E4C; /* brand-600 */
+  --color-primary-active: #11233A; /* brand-700 */
+  --color-on-primary: #FFFFFF; /* neutral-0 */
+  --color-primary-soft: #E8EEF5; /* brand-50 */
+  --color-link: #2C5282; /* brand-400 */
+  --color-focus: #2C5282; /* brand-400 */
+  --color-agent: #0B7568; /* agent-600 */
+  --color-agent-soft: #DDF3EF; /* agent-50 */
+  --color-danger: #C62828;
+  --color-danger-hover: #A61F1F;
+  --color-on-danger: #FFFFFF; /* neutral-0 */
+  --color-danger-soft: #FBEAEA;
+  --color-inverse-bg: #0F1B2D; /* neutral-800 */
+  --color-inverse-text: #F5F7FA; /* neutral-50 */
+  --color-inverse-muted: #C7CFDA; /* neutral-200 */
+  --color-inverse-action: #8FB3E0; /* brand-300 */
+  --color-logo-bg: #1E3A5F; /* brand-500 */
+  --color-review-bg: #F9F0E6;
+  --color-review-icon: #B45309;
+  --shadow-review: none;
+  --status-backlog-fg: #5B6675; /* neutral-500 */
+  --status-backlog-solid: #7A8696; /* neutral-400 */
+  --status-backlog-soft: #EEF1F5; /* neutral-100 */
+  --status-todo-fg: #334458; /* neutral-600 */
+  --status-todo-solid: #334458; /* neutral-600 */
+  --status-todo-soft: #EEF1F5; /* neutral-100 */
+  --status-in-progress-fg: #1D4FC4;
+  --status-in-progress-solid: #2563EB;
+  --status-in-progress-soft: #EAF0FB;
+  --status-in-review-fg: #9A4508;
+  --status-in-review-solid: #B45309;
+  --status-in-review-soft: #F9F0E6;
+  --status-done-fg: #116B33;
+  --status-done-solid: #15803D;
+  --status-done-soft: #E8F3EC;
+  --status-canceled-fg: #5B6675; /* neutral-500 */
+  --status-canceled-solid: #7A8696; /* neutral-400 */
+  --status-canceled-soft: #EEF1F5; /* neutral-100 */
+  --session-pending-fg: #0B7568; /* agent-600 */
+  --session-pending-solid: #0E8F80; /* agent-500 */
+  --session-pending-soft: #DDF3EF; /* agent-50 */
+  --session-active-fg: #1D4FC4;
+  --session-active-solid: #2563EB;
+  --session-active-soft: #EAF0FB;
+  --session-awaiting-input-fg: #9A4508;
+  --session-awaiting-input-solid: #B45309;
+  --session-awaiting-input-soft: #F9F0E6;
+  --session-error-fg: #C62828;
+  --session-error-solid: #C62828;
+  --session-error-soft: #FBEAEA;
+  --session-stale-fg: #5B6675; /* neutral-500 */
+  --session-stale-solid: #6B7280;
+  --session-stale-soft: #EEF1F5; /* neutral-100 */
+  --session-stopping-fg: #C62828;
+  --session-stopping-solid: #C62828;
+  --session-stopping-soft: #FBEAEA;
+  --session-stopped-fg: #334458; /* neutral-600 */
+  --session-stopped-solid: #334458; /* neutral-600 */
+  --session-stopped-soft: #EEF1F5; /* neutral-100 */
+  --session-complete-fg: #116B33;
+  --session-complete-solid: #15803D;
+  --session-complete-soft: #E8F3EC;
+  --project-1: #A8563F;
+  --project-2: #94680F;
+  --project-3: #66722A;
+  --project-4: #2F7A55;
+  --project-5: #1D7470;
+  --project-6: #3A64A0;
+  --project-7: #5A55A0;
+  --project-8: #8E4A82;
+  --project-9: #B0485F;
+  --project-10: #64707E;
+  --shadow-sm: 0 0 0 1px rgb(15 27 45 / 6%), 0 1px 2px rgb(15 27 45 / 6%);
+  --shadow-md: 0 0 0 1px rgb(15 27 45 / 6%), 0 4px 12px rgb(15 27 45 / 8%);
+  --shadow-lg: 0 0 0 1px rgb(15 27 45 / 6%), 0 12px 32px rgb(15 27 45 / 12%);
+  --shadow-overlay: 0 0 0 1px rgb(15 27 45 / 8%), 0 24px 56px rgb(15 27 45 / 18%);
+  --shadow-button: 0 1px 0 rgb(15 27 45 / 10%);
+  --shadow-drag: 0 0 0 1px rgb(15 27 45 / 8%), 0 12px 28px rgb(15 27 45 / 16%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #1F242C; /* graphite-900 */
+    --color-surface: #282E37; /* graphite-800 */
+    --color-surface-2: #313844; /* graphite-750 */
+    --color-surface-raised: #313844; /* graphite-750 */
+    --color-sidebar: #232831; /* graphite-850 */
+    --color-hover: #313844; /* graphite-750 */
+    --color-selected: #2F3A4A;
+    --color-review-col: #353943;
+    --color-scrim: rgb(10 12 16 / 55%);
+    --color-skeleton: #313844; /* graphite-750 */
+    --color-skeleton-shine: #3A4250; /* graphite-700 */
+    --color-line: #3A4250; /* graphite-700 */
+    --color-line-strong: #4A5363; /* graphite-600 */
+    --color-border-input: #9CA4AF; /* graphite-400 */
+    --color-text: #D5DBE3; /* graphite-200 */
+    --color-text-muted: #B8C0CB; /* graphite-300 */
+    --color-text-disabled: #5E6776;
+    --color-primary: #8FB3E0; /* brand-300 */
+    --color-primary-hover: #A9C4E8; /* brand-200 */
+    --color-primary-active: #BFD3EC; /* brand-100 */
+    --color-on-primary: #14171C;
+    --color-primary-soft: #2F3A4A;
+    --color-link: #A9C4E8; /* brand-200 */
+    --color-focus: #8FB3E0; /* brand-300 */
+    --color-agent: #73D0C2;
+    --color-agent-soft: #2A403F;
+    --color-danger: #F3ACAC;
+    --color-danger-hover: #F7C2C2;
+    --color-on-danger: #14171C;
+    --color-danger-soft: #45333A;
+    --color-inverse-bg: #D5DBE3; /* graphite-200 */
+    --color-inverse-text: #1F242C; /* graphite-900 */
+    --color-inverse-muted: #4A5363; /* graphite-600 */
+    --color-inverse-action: #2C5282; /* brand-400 */
+    --color-logo-bg: #2A4568;
+    --color-review-bg: #313844; /* graphite-750 */
+    --color-review-icon: #E2B36E;
+    --shadow-review: inset 3px 0 0 #E2B36E;
+    --status-backlog-fg: #BAC1CC;
+    --status-backlog-solid: #9CA4AF; /* graphite-400 */
+    --status-backlog-soft: #363D49;
+    --status-todo-fg: #C3CAD4;
+    --status-todo-solid: #C3CAD4;
+    --status-todo-soft: #363D49;
+    --status-in-progress-fg: #A4C2EA;
+    --status-in-progress-solid: #86AEE3;
+    --status-in-progress-soft: #2F3B4E;
+    --status-in-review-fg: #E8C07E;
+    --status-in-review-solid: #D6A45E;
+    --status-in-review-soft: #463C24;
+    --status-done-fg: #95CDA9;
+    --status-done-solid: #74BE8E;
+    --status-done-soft: #2E4136;
+    --status-canceled-fg: #BAC1CC;
+    --status-canceled-solid: #9CA4AF; /* graphite-400 */
+    --status-canceled-soft: #363D49;
+    --session-pending-fg: #73D0C2;
+    --session-pending-solid: #73D0C2;
+    --session-pending-soft: #2A403F;
+    --session-active-fg: #A4C2EA;
+    --session-active-solid: #86AEE3;
+    --session-active-soft: #2F3B4E;
+    --session-awaiting-input-fg: #E8C07E;
+    --session-awaiting-input-solid: #D6A45E;
+    --session-awaiting-input-soft: #463C24;
+    --session-error-fg: #F3ACAC;
+    --session-error-solid: #EE8C8C;
+    --session-error-soft: #45333A;
+    --session-stale-fg: #BAC1CC;
+    --session-stale-solid: #9FA6B1;
+    --session-stale-soft: #363D49;
+    --session-stopping-fg: #F3ACAC;
+    --session-stopping-solid: #EE8C8C;
+    --session-stopping-soft: #45333A;
+    --session-stopped-fg: #C3CAD4;
+    --session-stopped-solid: #C3CAD4;
+    --session-stopped-soft: #363D49;
+    --session-complete-fg: #95CDA9;
+    --session-complete-solid: #74BE8E;
+    --session-complete-soft: #2E4136;
+    --project-1: #D09482;
+    --project-2: #CDA96C;
+    --project-3: #A9B37A;
+    --project-4: #84BC9C;
+    --project-5: #7BBDB5;
+    --project-6: #8FB3E0; /* brand-300 */
+    --project-7: #A8A4D8;
+    --project-8: #C99BBF;
+    --project-9: #D99DAC;
+    --project-10: #A3ADBA;
+    --shadow-sm: 0 0 0 1px rgb(255 255 255 / 4%), 0 1px 2px rgb(0 0 0 / 22%);
+    --shadow-md: 0 0 0 1px rgb(255 255 255 / 5%), 0 6px 16px rgb(0 0 0 / 22%);
+    --shadow-lg: 0 0 0 1px rgb(255 255 255 / 6%), 0 14px 36px rgb(0 0 0 / 30%);
+    --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 6%), 0 24px 64px rgb(0 0 0 / 42%);
+    --shadow-button: 0 1px 0 rgb(0 0 0 / 28%);
+    --shadow-drag: 0 0 0 1px rgb(255 255 255 / 6%), 0 14px 32px rgb(0 0 0 / 34%);
+  }
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #1F242C; /* graphite-900 */
+  --color-surface: #282E37; /* graphite-800 */
+  --color-surface-2: #313844; /* graphite-750 */
+  --color-surface-raised: #313844; /* graphite-750 */
+  --color-sidebar: #232831; /* graphite-850 */
+  --color-hover: #313844; /* graphite-750 */
+  --color-selected: #2F3A4A;
+  --color-review-col: #353943;
+  --color-scrim: rgb(10 12 16 / 55%);
+  --color-skeleton: #313844; /* graphite-750 */
+  --color-skeleton-shine: #3A4250; /* graphite-700 */
+  --color-line: #3A4250; /* graphite-700 */
+  --color-line-strong: #4A5363; /* graphite-600 */
+  --color-border-input: #9CA4AF; /* graphite-400 */
+  --color-text: #D5DBE3; /* graphite-200 */
+  --color-text-muted: #B8C0CB; /* graphite-300 */
+  --color-text-disabled: #5E6776;
+  --color-primary: #8FB3E0; /* brand-300 */
+  --color-primary-hover: #A9C4E8; /* brand-200 */
+  --color-primary-active: #BFD3EC; /* brand-100 */
+  --color-on-primary: #14171C;
+  --color-primary-soft: #2F3A4A;
+  --color-link: #A9C4E8; /* brand-200 */
+  --color-focus: #8FB3E0; /* brand-300 */
+  --color-agent: #73D0C2;
+  --color-agent-soft: #2A403F;
+  --color-danger: #F3ACAC;
+  --color-danger-hover: #F7C2C2;
+  --color-on-danger: #14171C;
+  --color-danger-soft: #45333A;
+  --color-inverse-bg: #D5DBE3; /* graphite-200 */
+  --color-inverse-text: #1F242C; /* graphite-900 */
+  --color-inverse-muted: #4A5363; /* graphite-600 */
+  --color-inverse-action: #2C5282; /* brand-400 */
+  --color-logo-bg: #2A4568;
+  --color-review-bg: #313844; /* graphite-750 */
+  --color-review-icon: #E2B36E;
+  --shadow-review: inset 3px 0 0 #E2B36E;
+  --status-backlog-fg: #BAC1CC;
+  --status-backlog-solid: #9CA4AF; /* graphite-400 */
+  --status-backlog-soft: #363D49;
+  --status-todo-fg: #C3CAD4;
+  --status-todo-solid: #C3CAD4;
+  --status-todo-soft: #363D49;
+  --status-in-progress-fg: #A4C2EA;
+  --status-in-progress-solid: #86AEE3;
+  --status-in-progress-soft: #2F3B4E;
+  --status-in-review-fg: #E8C07E;
+  --status-in-review-solid: #D6A45E;
+  --status-in-review-soft: #463C24;
+  --status-done-fg: #95CDA9;
+  --status-done-solid: #74BE8E;
+  --status-done-soft: #2E4136;
+  --status-canceled-fg: #BAC1CC;
+  --status-canceled-solid: #9CA4AF; /* graphite-400 */
+  --status-canceled-soft: #363D49;
+  --session-pending-fg: #73D0C2;
+  --session-pending-solid: #73D0C2;
+  --session-pending-soft: #2A403F;
+  --session-active-fg: #A4C2EA;
+  --session-active-solid: #86AEE3;
+  --session-active-soft: #2F3B4E;
+  --session-awaiting-input-fg: #E8C07E;
+  --session-awaiting-input-solid: #D6A45E;
+  --session-awaiting-input-soft: #463C24;
+  --session-error-fg: #F3ACAC;
+  --session-error-solid: #EE8C8C;
+  --session-error-soft: #45333A;
+  --session-stale-fg: #BAC1CC;
+  --session-stale-solid: #9FA6B1;
+  --session-stale-soft: #363D49;
+  --session-stopping-fg: #F3ACAC;
+  --session-stopping-solid: #EE8C8C;
+  --session-stopping-soft: #45333A;
+  --session-stopped-fg: #C3CAD4;
+  --session-stopped-solid: #C3CAD4;
+  --session-stopped-soft: #363D49;
+  --session-complete-fg: #95CDA9;
+  --session-complete-solid: #74BE8E;
+  --session-complete-soft: #2E4136;
+  --project-1: #D09482;
+  --project-2: #CDA96C;
+  --project-3: #A9B37A;
+  --project-4: #84BC9C;
+  --project-5: #7BBDB5;
+  --project-6: #8FB3E0; /* brand-300 */
+  --project-7: #A8A4D8;
+  --project-8: #C99BBF;
+  --project-9: #D99DAC;
+  --project-10: #A3ADBA;
+  --shadow-sm: 0 0 0 1px rgb(255 255 255 / 4%), 0 1px 2px rgb(0 0 0 / 22%);
+  --shadow-md: 0 0 0 1px rgb(255 255 255 / 5%), 0 6px 16px rgb(0 0 0 / 22%);
+  --shadow-lg: 0 0 0 1px rgb(255 255 255 / 6%), 0 14px 36px rgb(0 0 0 / 30%);
+  --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 6%), 0 24px 64px rgb(0 0 0 / 42%);
+  --shadow-button: 0 1px 0 rgb(0 0 0 / 28%);
+  --shadow-drag: 0 0 0 1px rgb(255 255 255 / 6%), 0 14px 32px rgb(0 0 0 / 34%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+  }
+}
+
+/* tokens:end */
+</style>
+<style>
+/* ---------- 頁面骨架 ---------- */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-bg);color:var(--color-text);font:var(--font-weight-regular) var(--font-size-md)/var(--line-height-normal) var(--font-sans);overflow-wrap:anywhere}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--color-text-muted)}
+h1,h2,h3,h4{line-height:var(--line-height-tight);margin:0}
+.pg-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:32px 0 12px}
+.pg-head h1{font-size:var(--font-size-3xl);font-weight:var(--font-weight-bold);display:flex;align-items:center;gap:12px}
+.pg-head .sp{flex:1}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 24px}
+.toc a{font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border-radius:var(--radius-sm);background:var(--color-surface-2)}
+.toc a:hover{color:var(--color-text)}
+.sec{margin:0 0 48px;scroll-margin-top:16px}
+.sec>h2{font-size:var(--font-size-2xl);font-weight:var(--font-weight-bold);margin-bottom:6px}
+.sec>p.lead{margin:0 0 16px;color:var(--color-text-muted)}
+.demo{background:var(--color-surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:20px;margin:0 0 16px;min-width:0}
+.demo>h3{font-size:var(--font-size-lg);font-weight:var(--font-weight-bold);margin:0 0 12px}
+.demo>h3 small{font-size:var(--font-size-sm);font-weight:var(--font-weight-regular);color:var(--color-text-muted);margin-left:6px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.states{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 12px;align-items:start}
+.state{display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:0}
+.state>.lbl,.cap{font:var(--font-weight-semibold) var(--font-size-xs)/1.3 var(--font-mono);color:var(--color-text-muted)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pair>.pane{background:var(--color-bg);color:var(--color-text);border-radius:var(--radius-md);padding:14px;border:1px solid var(--color-line);min-width:0}
+.pane-t{font-size:var(--font-size-xs);font-weight:var(--font-weight-bold);color:var(--color-text-muted);margin-bottom:10px;letter-spacing:.04em}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+footer{padding:12px 0 48px;color:var(--color-text-muted);font-size:var(--font-size-sm)}
+
+/* 色票 */
+.sw-list{display:grid;gap:6px}
+.sw{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:center;font-size:var(--font-size-sm);line-height:1.3}
+.sw i{width:28px;height:28px;border-radius:var(--radius-xs);display:block;box-shadow:inset 0 0 0 1px rgb(127 127 127 / 28%)}
+.sw .nm{font-family:var(--font-mono);font-size:var(--font-size-xs)}
+.sw .hx{font-family:var(--font-mono);font-size:var(--font-size-xs);color:var(--color-text-muted)}
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px 16px}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.chips figure{margin:0;font:var(--font-size-xs)/1.3 var(--font-mono);color:var(--color-text-muted)}
+.chips figure i{display:block;height:44px;border-radius:var(--radius-sm);margin-bottom:4px;box-shadow:inset 0 0 0 1px rgb(127 127 127 / 20%)}
+.badge-grid{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 尺度展示 */
+.type-row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:baseline;padding:8px 0;border-top:1px solid var(--color-line)}
+.type-row:first-child{border-top:0}
+.space-row{display:grid;grid-template-columns:90px 60px minmax(0,1fr);gap:10px;align-items:center;font-size:var(--font-size-sm)}
+.space-row b{display:block;height:12px;background:var(--color-primary);border-radius:3px}
+.radius-box{width:72px;height:56px;background:var(--color-surface-2);border:2px solid var(--color-line-strong)}
+.shadow-box{height:72px;border-radius:var(--radius-md);background:var(--color-surface);display:flex;align-items:flex-end;padding:8px;font:var(--font-size-xs)/1.3 var(--font-mono);color:var(--color-text-muted)}
+.tbl{width:100%;border-collapse:collapse;font-size:var(--font-size-sm)}
+.tbl th,.tbl td{text-align:left;padding:6px 8px;border-top:1px solid var(--color-line);vertical-align:top}
+.tbl th{color:var(--color-text-muted);font-weight:var(--font-weight-semibold);border-top:0}
+.motion-demo{display:flex;align-items:center;gap:10px}
+.motion-track{position:relative;flex:1;height:28px;background:var(--color-surface-2);border-radius:var(--radius-pill);min-width:80px}
+.motion-dot{position:absolute;left:4px;top:4px;width:20px;height:20px;border-radius:50%;background:var(--color-primary)}
+.motion-track.go .motion-dot{left:calc(100% - 24px)}
+
+/* ================================================================
+   元件（參考實作）
+   ================================================================ */
+.nl-icon{width:var(--size-icon-md);height:var(--size-icon-md);flex:none;fill:none;stroke:currentColor;stroke-width:var(--icon-stroke);stroke-linecap:round;stroke-linejoin:round}
+.nl-icon--sm{width:var(--size-icon-sm);height:var(--size-icon-sm)}
+.nl-kbd{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:var(--radius-xs);font:var(--font-weight-semibold) var(--font-size-xs)/1 var(--font-mono);background:var(--color-surface-2);color:var(--color-text-muted);box-shadow:inset 0 -1px 0 var(--color-line-strong)}
+.nl-btn--primary .nl-kbd,.nl-btn--danger .nl-kbd{background:rgb(255 255 255 / 18%);color:inherit;box-shadow:none}
+.focus-ring,.nl-btn:focus-visible,.nl-btn.is-focus,.nl-input:focus-visible,.nl-input.is-focus,.nl-card:focus-visible,.nl-card.is-focus,.nl-row:focus-visible,.nl-row.is-focus,.nl-nav-item:focus-visible,.nl-nav-item.is-focus,.nl-tab:focus-visible,.nl-tab.is-focus,.nl-menu-item.is-focus{outline:2px solid var(--color-focus);outline-offset:2px}
+
+/* 按鈕 */
+.nl-btn{--h:var(--size-control-md);display:inline-flex;align-items:center;justify-content:center;gap:6px;height:var(--h);padding:0 16px;border:0;border-radius:var(--radius-sm);font:var(--font-weight-semibold) var(--font-size-md)/1 var(--font-sans);cursor:pointer;white-space:nowrap;text-decoration:none;transition:background-color var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-standard),box-shadow var(--duration-fast) var(--ease-standard)}
+.nl-btn--sm{--h:var(--size-control-sm);padding:0 12px;font-size:var(--font-size-sm)}
+.nl-btn--lg{--h:var(--size-control-lg);padding:0 20px}
+.nl-btn--primary{background:var(--color-primary);color:var(--color-on-primary);box-shadow:var(--shadow-button)}
+.nl-btn--primary:hover,.nl-btn--primary.is-hover{background:var(--color-primary-hover)}
+.nl-btn--primary:active,.nl-btn--primary.is-active{background:var(--color-primary-active);transform:translateY(1px);box-shadow:none}
+.nl-btn--secondary{background:var(--color-surface);color:var(--color-text);box-shadow:inset 0 0 0 1.5px var(--color-line-strong)}
+.nl-btn--secondary:hover,.nl-btn--secondary.is-hover{background:var(--color-hover);box-shadow:inset 0 0 0 1.5px var(--color-border-input)}
+.nl-btn--secondary:active,.nl-btn--secondary.is-active{background:var(--color-surface-2);transform:translateY(1px)}
+.nl-btn--ghost{background:transparent;color:var(--color-link);padding:0 10px}
+.nl-btn--ghost:hover,.nl-btn--ghost.is-hover{background:var(--color-primary-soft)}
+.nl-btn--ghost:active,.nl-btn--ghost.is-active{background:var(--color-primary-soft);transform:translateY(1px)}
+.nl-btn--danger{background:var(--color-danger);color:var(--color-on-danger);box-shadow:var(--shadow-button)}
+.nl-btn--danger:hover,.nl-btn--danger.is-hover{background:var(--color-danger-hover)}
+.nl-btn--danger:active,.nl-btn--danger.is-active{transform:translateY(1px);box-shadow:none}
+.nl-btn--icon{width:var(--h);padding:0;background:transparent;color:var(--color-text-muted)}
+.nl-btn--icon:hover,.nl-btn--icon.is-hover{background:var(--color-hover);color:var(--color-text)}
+.nl-btn--icon:active,.nl-btn--icon.is-active{background:var(--color-surface-2);transform:translateY(1px)}
+.nl-btn:disabled,.nl-btn[aria-disabled="true"]{background:var(--color-surface-2);color:var(--color-text-disabled);box-shadow:none;cursor:not-allowed;transform:none}
+.nl-btn--ghost:disabled,.nl-btn--icon:disabled{background:transparent}
+.nl-btn.is-loading{cursor:progress;color:transparent;position:relative}
+.nl-btn.is-loading>*{visibility:hidden}
+.nl-btn.is-loading::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;border:2px solid var(--spin,var(--color-on-primary));border-right-color:transparent;animation:nl-spin .8s linear infinite}
+.nl-btn--secondary.is-loading{--spin:var(--color-text)}
+.nl-btn--ghost.is-loading{--spin:var(--color-link)}
+.nl-btn--icon.is-loading{--spin:var(--color-text-muted)}
+@keyframes nl-spin{to{transform:rotate(360deg)}}
+
+/* 輸入 */
+.nl-field{display:flex;flex-direction:column;gap:6px;min-width:0;width:100%}
+.nl-label{font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold)}
+.nl-help{font-size:var(--font-size-sm);color:var(--color-text-muted)}
+.nl-error{font-size:var(--font-size-sm);color:var(--color-danger);display:flex;gap:4px;align-items:center}
+.nl-input{width:100%;min-height:var(--size-control-md);padding:0 12px;border-radius:var(--radius-sm);border:1.5px solid var(--color-border-input);background:var(--color-surface);color:var(--color-text);font:var(--font-weight-regular) var(--font-size-md)/1.4 var(--font-sans);transition:border-color var(--duration-fast) var(--ease-standard)}
+.nl-input::placeholder{color:var(--color-text-muted)}
+.nl-input:hover,.nl-input.is-hover{border-color:var(--color-text-muted)}
+.nl-input:focus-visible,.nl-input.is-focus{border-color:var(--color-focus);outline-offset:0;outline-width:1px}
+.nl-input:disabled{background:var(--color-surface-2);border-color:var(--color-line-strong);color:var(--color-text-disabled);cursor:not-allowed}
+.nl-input[aria-invalid="true"]{border-color:var(--color-danger)}
+.nl-input[aria-invalid="true"].is-focus,.nl-input[aria-invalid="true"]:focus-visible{outline-color:var(--color-danger)}
+textarea.nl-input{padding:8px 12px;min-height:96px;resize:vertical;line-height:var(--line-height-normal)}
+.nl-select{display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer}
+.nl-select .v{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-select .ph{color:var(--color-text-muted)}
+.nl-spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--color-text-muted);border-right-color:transparent;animation:nl-spin .8s linear infinite;flex:none}
+
+/* 下拉、選單、combobox 列表 */
+.nl-popover{background:var(--color-surface-raised);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);padding:6px;min-width:220px;max-width:100%;z-index:var(--z-dropdown)}
+.nl-popover .search{display:flex;align-items:center;gap:8px;padding:6px 8px 8px;border-bottom:1px solid var(--color-line);margin:0 -6px 6px;padding-left:14px;color:var(--color-text-muted)}
+.nl-popover .search input{border:0;background:transparent;color:var(--color-text);font:inherit;flex:1;min-width:0;outline:0}
+.nl-menu-item{display:flex;align-items:center;gap:10px;min-height:var(--size-control-md);padding:0 10px;border-radius:var(--radius-sm);font-size:var(--font-size-md);color:var(--color-text);cursor:pointer}
+.nl-menu-item .sp{flex:1}
+.nl-menu-item:hover,.nl-menu-item.is-hover,.nl-menu-item[aria-selected="true"]{background:var(--color-hover)}
+.nl-menu-item.is-focus{outline-offset:-2px}
+.nl-menu-item[aria-disabled="true"]{color:var(--color-text-disabled);cursor:not-allowed;background:transparent}
+.nl-menu-item.danger{color:var(--color-danger)}
+.nl-menu-item .check{color:var(--color-primary)}
+.nl-menu-sep{height:1px;background:var(--color-line);margin:6px 4px}
+.nl-menu-group{font-size:var(--font-size-xs);font-weight:var(--font-weight-bold);color:var(--color-text-muted);padding:8px 10px 4px}
+.nl-empty-inline{padding:14px 10px;color:var(--color-text-muted);font-size:var(--font-size-sm)}
+
+/* 徽章 */
+.nl-badge{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:var(--radius-sm);font:var(--font-weight-semibold) var(--font-size-xs)/1 var(--font-sans);white-space:nowrap;background:var(--b-soft);color:var(--b-fg)}
+.nl-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--b-solid);flex:none}
+.nl-badge .nl-icon{width:14px;height:14px;color:var(--b-solid)}
+.nl-badge--bare{background:transparent;padding:0}
+.nl-badge[data-session="pending"] .dot{background:transparent;box-shadow:inset 0 0 0 1.5px var(--b-solid)}
+.nl-badge[data-session="active"] .dot{animation:nl-pulse 1.6s var(--ease-standard) infinite}
+.nl-badge[data-session="stopping"] .dot{animation:nl-pulse 1s var(--ease-standard) infinite}
+.nl-badge[data-session="stopped"] .dot{border-radius:2px}
+.nl-badge[data-session="error"] .dot{border-radius:1px;transform:rotate(45deg)}
+.nl-badge .meta{font-weight:var(--font-weight-regular);opacity:.95}
+@keyframes nl-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.nl-badge .dot,.nl-btn.is-loading::after,.nl-spinner{animation:none!important}.nl-skel{animation:none!important}}
+
+/* 頭像 */
+.nl-avatar{--s:var(--size-avatar-md);width:var(--s);height:var(--s);display:inline-flex;align-items:center;justify-content:center;flex:none;font:var(--font-weight-bold) calc(var(--s) * .46)/1 var(--font-sans)}
+.nl-avatar--sm{--s:var(--size-avatar-sm)}
+.nl-avatar--lg{--s:var(--size-avatar-lg)}
+.nl-avatar--human{border-radius:var(--radius-round);background:var(--color-primary);color:var(--color-on-primary)}
+.nl-avatar--agent{border-radius:30%;background:var(--color-agent-soft);color:var(--color-agent);box-shadow:inset 0 0 0 1.5px var(--color-agent)}
+.nl-avatar--agent .nl-icon{width:calc(var(--s) * .62);height:calc(var(--s) * .62)}
+.nl-avatar--empty{border-radius:30%;background:transparent;color:var(--color-text-muted);box-shadow:inset 0 0 0 1.5px var(--color-border-input);border:0}
+.nl-who{display:inline-flex;align-items:center;gap:6px;font-size:var(--font-size-xs);color:var(--color-text-muted);min-width:0}
+.nl-who .nm{color:var(--color-text);font-weight:var(--font-weight-semibold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-who .nl-icon{width:12px;height:12px}
+
+/* 票卡片 */
+.nl-card{position:relative;display:block;background:var(--color-surface);border-radius:var(--radius-md);padding:10px 12px 12px;box-shadow:var(--shadow-sm);color:var(--color-text);cursor:grab;min-width:0;transition:box-shadow var(--duration-fast) var(--ease-standard),transform var(--duration-fast) var(--ease-standard)}
+.nl-card:hover,.nl-card.is-hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.nl-card .top{display:flex;align-items:center;gap:8px;margin-bottom:4px;min-width:0}
+.nl-card .id{font:var(--font-weight-semibold) var(--font-size-xs)/1.4 var(--font-mono);color:var(--color-text-muted);flex:none}
+.nl-card .proj{display:inline-flex;align-items:center;gap:5px;font-size:var(--font-size-xs);color:var(--color-text-muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-pdot{width:8px;height:8px;border-radius:2px;flex:none;background:var(--p)}
+.nl-card .t{font-size:var(--font-size-md);line-height:var(--line-height-snug);font-weight:var(--font-weight-semibold);margin:0 0 10px}
+.nl-card .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.nl-card .hover-act{position:absolute;top:6px;right:6px;display:none}
+.nl-card:hover .hover-act,.nl-card.is-hover .hover-act{display:flex}
+.nl-card .cb{position:absolute;top:8px;left:-8px;width:18px;height:18px;border-radius:5px;background:var(--color-surface);box-shadow:inset 0 0 0 1.5px var(--color-border-input);display:none;align-items:center;justify-content:center;color:var(--color-on-primary)}
+.nl-card[aria-selected="true"]{background:var(--color-selected);box-shadow:inset 0 0 0 2px var(--color-primary),var(--shadow-sm)}
+.nl-card[aria-selected="true"] .cb{display:flex;background:var(--color-primary);box-shadow:none}
+.nl-card.is-dragging{transform:rotate(1.5deg) scale(1.02);box-shadow:var(--shadow-drag);cursor:grabbing}
+.nl-card.is-placeholder{background:transparent;box-shadow:inset 0 0 0 2px var(--color-line-strong);min-height:88px;border-radius:var(--radius-md)}
+.nl-card.is-updated{box-shadow:inset 0 0 0 2px var(--color-agent),var(--shadow-sm)}
+.nl-card .flag{display:flex;align-items:center;gap:6px;margin:-2px 0 8px;font-size:var(--font-size-xs);color:var(--color-agent);font-weight:var(--font-weight-semibold)}
+.nl-card.is-error{box-shadow:inset 0 0 0 2px var(--color-danger),var(--shadow-sm)}
+.nl-card .err{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--color-line);font-size:var(--font-size-xs);color:var(--color-danger);font-weight:var(--font-weight-semibold)}
+.nl-card .err .nl-btn{margin-left:auto}
+.nl-card .quote{font-size:var(--font-size-sm);color:var(--color-text-muted);margin:-4px 0 10px;padding-left:8px;border-left:3px solid var(--b-solid,var(--color-line-strong))}
+.nl-card--done .t{color:var(--color-text-muted)}
+
+/* 看板欄 */
+.nl-board{display:flex;gap:12px;align-items:flex-start;min-width:min-content}
+.nl-col{width:var(--size-board-col);flex:none;background:var(--color-surface-2);border-radius:var(--radius-lg);padding:10px;display:flex;flex-direction:column;gap:8px}
+.nl-col-h{display:flex;align-items:center;gap:8px;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm);padding:2px 2px 4px;color:var(--color-text)}
+.nl-col-h .nl-icon{width:16px;height:16px;color:var(--s-solid)}
+.nl-col-h .n{font:var(--font-weight-semibold) var(--font-size-xs)/1.6 var(--font-mono);background:var(--color-surface);color:var(--color-text-muted);border-radius:var(--radius-pill);padding:0 7px}
+.nl-col-h .sp{flex:1}
+.nl-col--review{background:var(--color-review-col);outline:2px dashed var(--status-in-review-solid);outline-offset:-2px}
+.nl-col.is-drop{background:var(--color-primary-soft);outline:2px dashed var(--color-primary);outline-offset:-2px}
+.nl-col--collapsed{border:0;font-family:inherit;color:var(--color-text);width:auto;flex-direction:row;align-items:center;padding:10px 12px;cursor:pointer;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm);gap:8px}
+.nl-col--collapsed .nl-icon{width:16px;height:16px}
+.nl-col-empty{border:1.5px dashed var(--color-line-strong);border-radius:var(--radius-md);padding:14px 12px;color:var(--color-text-muted);font-size:var(--font-size-sm);text-align:center}
+
+/* 列表列 */
+.nl-list{border-radius:var(--radius-md);overflow:hidden;background:var(--color-surface);box-shadow:inset 0 0 0 1px var(--color-line)}
+.nl-row{display:grid;grid-template-columns:24px 64px minmax(160px,1fr) 120px 52px 56px 112px 64px;gap:10px;align-items:center;min-height:44px;padding:0 12px;border-top:1px solid var(--color-line);font-size:var(--font-size-sm);color:var(--color-text);cursor:pointer}
+.nl-row:first-child{border-top:0}
+.nl-row--group{min-height:34px;background:var(--color-surface-2);font-weight:var(--font-weight-bold);cursor:default;grid-template-columns:auto 1fr;gap:8px}
+.nl-row--group .nl-icon{width:16px;height:16px;color:var(--s-solid)}
+.nl-row:not(.nl-row--group):hover,.nl-row.is-hover{background:var(--color-hover)}
+.nl-row[aria-selected="true"]{background:var(--color-selected);box-shadow:inset 3px 0 0 var(--color-primary)}
+.nl-row.is-focus{outline-offset:-2px}
+.nl-row .id{font:var(--font-weight-semibold) var(--font-size-xs)/1 var(--font-mono);color:var(--color-text-muted)}
+.nl-row .ttl{font-weight:var(--font-weight-semibold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--font-size-md)}
+.nl-row .c-muted{color:var(--color-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-cb{width:18px;height:18px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--color-border-input);display:inline-flex;align-items:center;justify-content:center;color:var(--color-on-primary);background:var(--color-surface)}
+.nl-cb.on{background:var(--color-primary);box-shadow:none}
+.nl-cb .nl-icon{width:13px;height:13px;stroke-width:3}
+
+/* 側欄 */
+.nl-sidebar{width:var(--size-sidebar);background:var(--color-sidebar);border-radius:var(--radius-lg);padding:12px;display:flex;flex-direction:column;gap:2px;flex:none}
+.nl-sidebar .brand{display:flex;align-items:center;gap:8px;font-weight:var(--font-weight-bold);font-size:var(--font-size-lg);padding:4px 8px 10px}
+.nl-sidebar .acts{display:flex;gap:6px;margin-bottom:8px}
+.nl-sidebar .acts .nl-btn{flex:1}
+.nl-nav-item{position:relative;display:flex;align-items:center;gap:10px;min-height:34px;padding:0 10px;border-radius:var(--radius-sm);color:var(--color-text);text-decoration:none;font-size:var(--font-size-md);font-weight:var(--font-weight-regular)}
+.nl-nav-item .nl-icon{width:18px;height:18px;color:var(--color-text-muted)}
+.nl-nav-item .sp{flex:1}
+.nl-nav-item .count{font:var(--font-weight-bold) var(--font-size-xs)/1 var(--font-mono);background:var(--color-primary);color:var(--color-on-primary);border-radius:var(--radius-pill);padding:3px 7px}
+.nl-nav-item .count.quiet{background:transparent;color:var(--color-text-muted);padding:0}
+.nl-nav-item:hover,.nl-nav-item.is-hover{background:var(--color-hover)}
+.nl-nav-item[aria-current="page"]{background:var(--color-surface);font-weight:var(--font-weight-semibold);box-shadow:var(--shadow-sm)}
+.nl-nav-item[aria-current="page"] .nl-icon{color:var(--color-primary)}
+.nl-nav-item[aria-current="page"]::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--color-primary)}
+.nl-nav-item.is-focus{outline-offset:-2px}
+.nl-nav-group{font-size:var(--font-size-xs);font-weight:var(--font-weight-bold);color:var(--color-text-muted);padding:12px 10px 4px;display:flex;align-items:center;gap:6px}
+.nl-sidebar .nl-pdot{width:10px;height:10px;border-radius:3px}
+
+/* 底部分頁列 */
+.nl-tabbar{display:flex;align-items:stretch;height:var(--size-tabbar);background:var(--color-surface);box-shadow:0 -1px 0 var(--color-line);padding:0 4px;position:relative}
+.nl-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);color:var(--color-text-muted);text-decoration:none;position:relative;min-width:0;border-radius:var(--radius-sm)}
+.nl-tab .nl-icon{width:22px;height:22px}
+.nl-tab[aria-current="page"]{color:var(--color-primary)}
+.nl-tab .count{position:absolute;top:5px;left:calc(50% + 6px);font:var(--font-weight-bold) 10px/1 var(--font-mono);background:var(--color-primary);color:var(--color-on-primary);border-radius:var(--radius-pill);padding:3px 5px;box-shadow:0 0 0 2px var(--color-surface)}
+.nl-tab.is-focus{outline-offset:-4px}
+.nl-fab{position:absolute;right:16px;top:-64px;width:52px;height:52px;border-radius:50%;background:var(--color-primary);color:var(--color-on-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);border:0}
+.nl-fab .nl-icon{width:24px;height:24px;stroke-width:2.5}
+.phone{width:100%;max-width:360px;border-radius:24px;overflow:hidden;background:var(--color-bg);box-shadow:inset 0 0 0 1px var(--color-line);display:flex;flex-direction:column}
+.phone .scr{height:200px;padding:12px;display:flex;flex-direction:column;gap:8px}
+
+/* 指令面板 */
+.nl-palette{width:100%;max-width:var(--size-palette);background:var(--color-surface-raised);border-radius:var(--radius-lg);box-shadow:var(--shadow-overlay);overflow:hidden}
+.nl-palette .in{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--color-line);color:var(--color-text-muted)}
+.nl-palette .in input{flex:1;min-width:0;border:0;background:transparent;font:var(--font-weight-regular) var(--font-size-lg)/1.3 var(--font-sans);color:var(--color-text);outline:0}
+.nl-palette .ctx{font-size:var(--font-size-xs);font-weight:var(--font-weight-semibold);background:var(--color-surface-2);color:var(--color-text-muted);border-radius:var(--radius-sm);padding:3px 8px;white-space:nowrap}
+.nl-palette .res{padding:6px;max-height:340px;overflow:auto}
+.nl-palette .foot{display:flex;gap:14px;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--color-line);font-size:var(--font-size-xs);color:var(--color-text-muted)}
+.nl-palette .foot span{display:inline-flex;gap:4px;align-items:center}
+
+/* modal */
+.scrim-demo{position:relative;border-radius:var(--radius-lg);background:var(--color-scrim);padding:28px 16px;display:flex;justify-content:center;overflow:hidden}
+.nl-modal{width:100%;max-width:var(--size-modal-md);background:var(--color-surface-raised);border-radius:var(--radius-lg);box-shadow:var(--shadow-overlay);display:flex;flex-direction:column}
+.nl-modal--sm{max-width:var(--size-modal-sm)}
+.nl-modal .hd{display:flex;align-items:center;gap:8px;padding:16px 16px 0 20px}
+.nl-modal .hd h4{font-size:var(--font-size-lg);font-weight:var(--font-weight-bold);flex:1}
+.nl-modal .bd{padding:12px 20px;display:flex;flex-direction:column;gap:12px}
+.nl-modal .ft{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px 16px 20px;border-top:1px solid var(--color-line)}
+.nl-modal .ft .sp{flex:1}
+.nl-title-input{border:0;background:transparent;color:var(--color-text);font:var(--font-weight-bold) var(--font-size-xl)/1.3 var(--font-sans);padding:0;outline:0;width:100%}
+.nl-title-input::placeholder{color:var(--color-text-muted)}
+.nl-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--radius-sm);background:var(--color-surface-2);color:var(--color-text);font-size:var(--font-size-sm);font-weight:var(--font-weight-semibold);border:0;cursor:pointer}
+.nl-chip:hover{background:var(--color-hover);box-shadow:inset 0 0 0 1.5px var(--color-line-strong)}
+.nl-chip .nl-icon{width:14px;height:14px;color:var(--color-text-muted)}
+.nl-check{display:inline-flex;align-items:center;gap:8px;font-size:var(--font-size-sm);color:var(--color-text)}
+
+/* 右側預覽 */
+.peek-stage{display:flex;justify-content:flex-end;background:var(--color-bg);border-radius:var(--radius-lg);box-shadow:inset 0 0 0 1px var(--color-line);overflow:hidden}
+.nl-peek{width:100%;max-width:var(--size-peek);background:var(--color-surface);box-shadow:var(--shadow-overlay);display:flex;flex-direction:column;min-width:0}
+.nl-peek .hd{display:flex;align-items:center;gap:6px;padding:10px 10px 10px 16px;border-bottom:1px solid var(--color-line);font:var(--font-weight-semibold) var(--font-size-sm)/1 var(--font-mono);color:var(--color-text-muted)}
+.nl-peek .hd .sp{flex:1}
+.nl-peek .bd{padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.nl-peek h4{font-size:var(--font-size-xl);font-weight:var(--font-weight-bold);line-height:1.3}
+.nl-review{background:var(--status-in-review-soft);border-radius:var(--radius-md);padding:12px;display:flex;flex-direction:column;gap:10px}
+.nl-review .who{display:flex;gap:10px;align-items:flex-start}
+.nl-review .who p{margin:2px 0 0;font-size:var(--font-size-sm);color:var(--color-text)}
+.nl-review .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.nl-fields{display:grid;grid-template-columns:88px minmax(0,1fr);gap:8px 12px;align-items:center;font-size:var(--font-size-sm)}
+.nl-fields .k{color:var(--color-text-muted)}
+.nl-session{border-radius:var(--radius-md);box-shadow:inset 0 0 0 1px var(--color-line);padding:12px;display:flex;flex-direction:column;gap:8px}
+.nl-session .h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-weight:var(--font-weight-bold);font-size:var(--font-size-sm)}
+.nl-session .h .sp{flex:1}
+.nl-session .act{font-size:var(--font-size-sm);color:var(--color-text-muted);padding-left:12px;border-left:2px solid var(--color-line)}
+.nl-history{display:flex;flex-direction:column}
+.nl-history h5{font-size:var(--font-size-sm);font-weight:var(--font-weight-bold);margin:0 0 6px;display:flex;align-items:center;gap:6px}
+.nl-hist{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--color-line);font-size:var(--font-size-sm)}
+.nl-hist .what b{font-weight:var(--font-weight-semibold)}
+.nl-hist .when{color:var(--color-text-muted);font-size:var(--font-size-xs);display:block}
+.nl-hist.is-reverted .what{color:var(--color-text-muted);text-decoration:line-through}
+.nl-hist .done-tag{font-size:var(--font-size-xs);color:var(--color-text-muted);white-space:nowrap}
+
+/* toast */
+.nl-toast-stack{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.nl-toast{position:relative;display:flex;align-items:center;gap:10px;max-width:var(--size-toast);width:100%;background:var(--color-inverse-bg);color:var(--color-inverse-text);border-radius:var(--radius-md);padding:10px 8px 10px 14px;box-shadow:var(--shadow-lg);font-size:var(--font-size-md);overflow:hidden}
+.nl-toast .msg{flex:1;min-width:0}
+.nl-toast{--check-stroke:var(--color-inverse-bg)}
+.nl-toast .nl-icon{color:var(--color-inverse-muted);width:18px;height:18px}
+.nl-toast .act{background:transparent;border:0;color:var(--color-inverse-action);font:var(--font-weight-bold) var(--font-size-md)/1 var(--font-sans);padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.nl-toast .act:hover{background:rgb(127 127 127 / 18%)}
+.nl-toast .act .nl-icon{color:inherit;width:16px;height:16px}
+.nl-toast .x{color:var(--color-inverse-muted);background:transparent;border:0;width:28px;height:28px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.nl-toast .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--color-inverse-action);opacity:.7;width:var(--left,100%)}
+.nl-toast--error{box-shadow:inset 4px 0 0 var(--color-danger),var(--shadow-lg)}
+.nl-toast--error .lead{color:var(--color-inverse-text)}
+
+/* 空狀態 */
+.nl-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:28px 16px;border-radius:var(--radius-lg);border:1.5px dashed var(--color-line-strong);color:var(--color-text-muted)}
+.nl-empty .ic{width:44px;height:44px;border-radius:var(--radius-md);background:var(--color-surface-2);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted)}
+.nl-empty h5{font-size:var(--font-size-lg);font-weight:var(--font-weight-bold);color:var(--color-text);margin:0}
+.nl-empty p{margin:0;max-width:340px;font-size:var(--font-size-sm)}
+
+/* skeleton */
+.nl-skel{display:block;border-radius:6px;background:linear-gradient(90deg,var(--color-skeleton) 0%,var(--color-skeleton-shine) 50%,var(--color-skeleton) 100%);background-size:200% 100%;animation:nl-shimmer 1.4s linear infinite}
+@keyframes nl-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+
+/* tooltip */
+.nl-tooltip{position:relative;display:inline-block;max-width:var(--size-tooltip);background:var(--color-inverse-bg);color:var(--color-inverse-text);font-size:var(--font-size-sm);line-height:1.4;padding:6px 10px;border-radius:var(--radius-sm);box-shadow:var(--shadow-md)}
+.nl-tooltip .k{color:var(--color-inverse-muted);font-family:var(--font-mono);margin-left:6px}
+.nl-tooltip::after{content:"";position:absolute;left:50%;top:100%;margin-left:-5px;border:5px solid transparent;border-top-color:var(--color-inverse-bg)}
+.tip-demo{display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* 主題切換（本頁用；也是設定頁「偏好」的分段控制） */
+.nl-seg{display:inline-flex;background:var(--color-surface-2);border-radius:var(--radius-sm);padding:3px;gap:2px}
+.nl-seg button{border:0;background:transparent;color:var(--color-text-muted);font:var(--font-weight-semibold) var(--font-size-sm)/1 var(--font-sans);padding:7px 12px;border-radius:var(--radius-xs);cursor:pointer}
+.nl-seg button[aria-pressed="true"]{background:var(--color-surface);color:var(--color-text);box-shadow:var(--shadow-sm)}
+.nl-seg button:focus-visible{outline:2px solid var(--color-focus);outline-offset:1px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4V20M15 4V20"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8H16M8 12H16M8 16H12"/></symbol>
+    <symbol id="i-agent" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 4V8M9 13V14.5M15 13V14.5"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20c.6-3.6 3.6-5.8 7.5-5.8s6.9 2.2 7.5 5.8"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13l2.5-7.5h11L20 13v5a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M4 13h4.5l1.2 2.2h4.6L15.5 13H20"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6H20M9 12H20M9 18H20"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="3"/></symbol>
+    <symbol id="i-zones" viewBox="0 0 24 24"><rect x="3" y="3.5" width="18" height="5" rx="2.5"/><rect x="3" y="10" width="18" height="5" rx="2.5"/><rect x="3" y="16.5" width="11" height="4" rx="2"/></symbol>
+    <symbol id="i-sprint" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M5 3.5V7.5H9"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 012-2h4l2 2.5h7a2 2 0 012 2v7.5a2 2 0 01-2 2h-13a2 2 0 01-2-2z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16L20 20"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5V19M5 12H19"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 6.5"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 5L4 10l5 5"/><path d="M4 10h10a5.5 5.5 0 010 11h-3"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><path d="M6 12h.01M12 12h.01M18 12h.01" stroke-width="3.2"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <!-- 票狀態圖示：顏色以外再用形狀區分 -->
+    <symbol id="s-backlog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3.2 3"/></symbol>
+    <symbol id="s-todo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+    <symbol id="s-in-progress" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5a4.5 4.5 0 010 9z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="s-in-review" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5a4.5 4.5 0 11-4.5 4.5H12z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="s-done" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor" stroke="none"/><path d="M8.2 12.3l2.6 2.6 5-5.4" style="stroke:var(--check-stroke,var(--color-surface))"/></symbol>
+    <symbol id="s-canceled" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></symbol>
+    <symbol id="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" style="fill:var(--color-logo-bg)"/><rect x="6" y="9" width="13" height="5" rx="1.5" style="fill:var(--neutral-0)"/><rect x="12" y="18" width="14" height="5" rx="1.5" style="fill:var(--agent-300)"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="pg-head">
+    <h1><svg width="36" height="36" aria-hidden="true"><use href="#logo"/></svg>Nextline 設計系統</h1>
+    <span class="sp"></span>
+    <div class="nl-seg" role="group" aria-label="深淺色">
+      <button type="button" data-set-theme="" aria-pressed="true">跟系統</button>
+      <button type="button" data-set-theme="light" aria-pressed="false">淺色</button>
+      <button type="button" data-set-theme="dark" aria-pressed="false">深色</button>
+    </div>
+  </header>
+  <nav class="toc" aria-label="目錄">
+    <a href="#color">色彩</a><a href="#status">狀態色</a><a href="#project">Project 色</a><a href="#type">字體</a><a href="#space">間距・圓角・陰影</a><a href="#motion">動效・疊層</a><a href="#icon">圖示</a>
+    <a href="#c-button">按鈕</a><a href="#c-input">輸入</a><a href="#c-badge">徽章・頭像</a><a href="#c-card">票卡片</a><a href="#c-column">看板欄</a><a href="#c-row">列表列</a><a href="#c-nav">側欄・分頁列</a><a href="#c-palette">指令面板</a><a href="#c-modal">Modal</a><a href="#c-peek">預覽面板</a><a href="#c-toast">Toast</a><a href="#c-feedback">空狀態・skeleton・tooltip</a><a href="#c-menu">選單</a>
+  </nav>
+
+  <!-- ============ tokens ============ -->
+  <section class="sec" id="color">
+    <h2>色彩</h2>
+    <p class="lead">墨藍是人與主要動作，青綠是 agent，冷灰是中性色；大面積底色都是低彩度。左右兩欄是同一個 token 在淺色、深色的值。</p>
+    <div class="demo"><h3>原始色盤</h3><div class="chips" id="raw-palette"></div></div>
+    <div class="demo"><h3>語意色</h3><div class="pair" id="semantic"></div></div>
+  </section>
+
+  <section class="sec" id="status">
+    <h2>狀態色</h2>
+    <p class="lead">每個狀態三個值：fg（文字、圖示）、solid（色點、欄頂圖示）、soft（徽章底）。票狀態另用圖示形狀區分，不只靠顏色。</p>
+    <div class="demo"><h3>票狀態 <small>6 種</small></h3><div class="pair" id="ticket-status"></div></div>
+    <div class="demo"><h3>agent session 狀態 <small>8 種；「等 agent 接手」超過 30 分鐘顯示「還沒開工」</small></h3><div class="pair" id="session-status"></div></div>
+  </section>
+
+  <section class="sec" id="project">
+    <h2>Project 色盤</h2>
+    <p class="lead">10 色，依 Project id 輪流分配。只當色點與小方塊用，旁邊一定有 Project 名稱。</p>
+    <div class="demo"><div class="pair" id="project-colors"></div></div>
+  </section>
+
+  <section class="sec" id="type">
+    <h2>字體</h2>
+    <div class="demo">
+      <div id="type-scale"></div>
+      <table class="tbl" style="margin-top:12px"><tbody>
+        <tr><th>英文、數字</th><td class="mono" id="font-sans"></td></tr>
+        <tr><th>票號、張數</th><td class="mono" id="font-mono"></td></tr>
+        <tr><th>字重</th><td>內文 500・強調 700・標題 800</td></tr>
+        <tr><th>行高</th><td>標題 1.25・卡片標題 1.4・內文 1.6</td></tr>
+      </tbody></table>
+    </div>
+  </section>
+
+  <section class="sec" id="space">
+    <h2>間距・圓角・陰影</h2>
+    <div class="grid2">
+      <div class="demo"><h3>間距 <small>4px 基準</small></h3><div id="space-scale" style="display:grid;gap:6px"></div></div>
+      <div class="demo"><h3>圓角</h3><div class="row" id="radius-scale"></div>
+        <h3 style="margin-top:20px">元件尺寸</h3><table class="tbl" id="size-scale"></table></div>
+    </div>
+    <div class="demo"><h3>陰影 <small>冷色調、貼近表面、帶 1px 淡邊</small></h3><div class="grid3" id="shadow-scale" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div></div>
+  </section>
+
+  <section class="sec" id="motion">
+    <h2>動效・疊層</h2>
+    <div class="grid2">
+      <div class="demo"><h3>動效 <small>點一下播放；系統開「減少動態效果」時，時間全部變 0</small></h3><div id="motion-scale" style="display:grid;gap:10px"></div></div>
+      <div class="demo"><h3>疊層 z-index</h3><table class="tbl" id="z-scale"></table></div>
+    </div>
+  </section>
+
+  <section class="sec" id="icon">
+    <h2>圖示</h2>
+    <div class="demo">
+      <p class="muted" style="margin:0 0 12px">24px 格、線寬 1.5px、圓頭端點、轉角半徑 2px。顏色一律 currentColor。只用圖示的按鈕一定要有 aria-label。</p>
+      <div class="chips" id="icons"></div>
+    </div>
+  </section>
+
+  <!-- ============ 元件 ============ -->
+  <section class="sec" id="c-button">
+    <h2>按鈕</h2>
+    <div class="demo"><h3>主要 <small>一個畫面最多一顆</small></h3><div class="states" data-btn="primary" data-text="建立票"></div></div>
+    <div class="demo"><h3>次要</h3><div class="states" data-btn="secondary" data-text="退回"></div></div>
+    <div class="demo"><h3>文字</h3><div class="states" data-btn="ghost" data-text="複製開工指令"></div></div>
+    <div class="demo"><h3>危險 <small>只放在確認對話框裡</small></h3><div class="states" data-btn="danger" data-text="取消這張票"></div></div>
+    <div class="demo"><h3>icon</h3><div class="states" data-btn="icon"></div></div>
+    <div class="demo"><h3>尺寸</h3><div class="row">
+      <button class="nl-btn nl-btn--primary nl-btn--sm" type="button">sm 28</button>
+      <button class="nl-btn nl-btn--primary" type="button">md 36</button>
+      <button class="nl-btn nl-btn--primary nl-btn--lg" type="button">lg 44（手機）</button>
+      <button class="nl-btn nl-btn--primary" type="button"><svg class="nl-icon nl-icon--sm"><use href="#i-plus"/></svg><span>建立票</span><span class="nl-kbd">C</span></button>
+      <button class="nl-btn nl-btn--secondary" type="button"><svg class="nl-icon nl-icon--sm"><use href="#i-undo"/></svg><span>移回待驗收</span></button>
+    </div></div>
+  </section>
+
+  <section class="sec" id="c-input">
+    <h2>輸入框・textarea・select／combobox</h2>
+    <div class="demo"><h3>輸入框</h3>
+      <div class="states" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+        <div class="state"><span class="lbl">default</span><input class="nl-input" placeholder="票的標題" aria-label="default"></div>
+        <div class="state"><span class="lbl">hover</span><input class="nl-input is-hover" placeholder="票的標題" aria-label="hover"></div>
+        <div class="state"><span class="lbl">focus</span><input class="nl-input is-focus" value="設計系統 tokens" aria-label="focus"></div>
+        <div class="state"><span class="lbl">disabled</span><input class="nl-input" disabled value="NX-148" aria-label="disabled"></div>
+        <div class="state"><span class="lbl">error</span><div class="nl-field"><input class="nl-input" aria-invalid="true" aria-describedby="e1" value="" placeholder="票的標題" aria-label="error"><span class="nl-error" id="e1"><svg class="nl-icon nl-icon--sm"><use href="#i-alert"/></svg>標題還沒填</span></div></div>
+        <div class="state"><span class="lbl">loading</span><div class="nl-input nl-select" aria-busy="true"><span class="v ph">搜尋中…</span><span class="nl-spinner" aria-hidden="true"></span></div></div>
+      </div>
+    </div>
+    <div class="demo"><h3>textarea・欄位組合</h3>
+      <div class="grid2">
+        <div class="nl-field"><label class="nl-label" for="ta1">描述</label><textarea class="nl-input" id="ta1" placeholder="要做什麼、做完怎麼算完成"></textarea><span class="nl-help">支援 Markdown。</span></div>
+        <div class="nl-field"><label class="nl-label" for="ta2">退回原因（必填）</label><textarea class="nl-input" id="ta2" aria-invalid="true" aria-describedby="e2"></textarea><span class="nl-error" id="e2"><svg class="nl-icon nl-icon--sm"><use href="#i-alert"/></svg>寫一句要改什麼，agent 才知道從哪裡接著做</span></div>
+      </div>
+    </div>
+    <div class="demo"><h3>select／combobox <small>選代做 agent：可打字篩選</small></h3>
+      <div class="grid3">
+        <div class="state"><span class="lbl">閉合・未選</span><button class="nl-input nl-select" type="button" aria-haspopup="listbox"><span class="v ph">還沒交給 agent</span><svg class="nl-icon nl-icon--sm"><use href="#i-chev-down"/></svg></button></div>
+        <div class="state"><span class="lbl">閉合・已選</span><button class="nl-input nl-select" type="button" aria-haspopup="listbox"><span class="nl-avatar nl-avatar--agent nl-avatar--sm"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="v">claude-nextline</span><svg class="nl-icon nl-icon--sm"><use href="#i-chev-down"/></svg></button></div>
+        <div class="state"><span class="lbl">disabled</span><button class="nl-input nl-select" type="button" disabled><span class="v">阿澈</span><svg class="nl-icon nl-icon--sm"><use href="#i-chev-down"/></svg></button></div>
+      </div>
+      <div class="grid3" style="margin-top:16px">
+        <div class="state"><span class="lbl">展開・鍵盤移到第 2 項</span>
+          <div class="nl-popover" role="listbox" aria-label="代做 agent" style="width:100%">
+            <div class="search"><svg class="nl-icon nl-icon--sm"><use href="#i-search"/></svg><input value="cla" aria-label="篩選 agent"></div>
+            <div class="nl-menu-item" role="option" aria-selected="false"><span class="nl-avatar nl-avatar--agent nl-avatar--sm"><svg class="nl-icon"><use href="#i-agent"/></svg></span>claude-brand</div>
+            <div class="nl-menu-item is-focus" role="option" aria-selected="true"><span class="nl-avatar nl-avatar--agent nl-avatar--sm"><svg class="nl-icon"><use href="#i-agent"/></svg></span>claude-nextline<span class="sp"></span><svg class="nl-icon nl-icon--sm check"><use href="#i-check"/></svg></div>
+            <div class="nl-menu-sep"></div>
+            <div class="nl-menu-item" role="option"><span class="nl-avatar nl-avatar--empty nl-avatar--sm"><svg class="nl-icon nl-icon--sm"><use href="#i-x"/></svg></span>移除代做 agent</div>
+          </div></div>
+        <div class="state"><span class="lbl">展開・沒有結果</span>
+          <div class="nl-popover" style="width:100%"><div class="search"><svg class="nl-icon nl-icon--sm"><use href="#i-search"/></svg><input value="gemini" aria-label="篩選 agent"></div><div class="nl-empty-inline">沒有叫「gemini」的 agent。到 設定 → 成員與 agent 加一個。</div></div></div>
+        <div class="state"><span class="lbl">展開・loading</span>
+          <div class="nl-popover" style="width:100%" aria-busy="true"><div class="search"><svg class="nl-icon nl-icon--sm"><use href="#i-search"/></svg><input aria-label="篩選 agent" placeholder="找 agent"></div>
+            <div class="nl-menu-item"><span class="nl-skel" style="width:20px;height:20px;border-radius:30%"></span><span class="nl-skel" style="width:60%;height:10px"></span></div>
+            <div class="nl-menu-item"><span class="nl-skel" style="width:20px;height:20px;border-radius:30%"></span><span class="nl-skel" style="width:45%;height:10px"></span></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-badge">
+    <h2>徽章・頭像</h2>
+    <div class="demo"><h3>票狀態徽章</h3><div class="badge-grid" id="ticket-badges"></div></div>
+    <div class="demo"><h3>agent session 徽章 <small>可附時間或輪數</small></h3><div class="badge-grid" id="session-badges"></div></div>
+    <div class="demo"><h3>頭像 <small>人＝實心圓＋名字縮寫；agent＝空心方角＋機器人圖示</small></h3>
+      <div class="row" style="gap:20px">
+        <div class="state"><span class="lbl">人 20／24／32</span><div class="row"><span class="nl-avatar nl-avatar--human nl-avatar--sm" role="img" aria-label="Bolas（人）">B</span><span class="nl-avatar nl-avatar--human" role="img" aria-label="Bolas（人）">B</span><span class="nl-avatar nl-avatar--human nl-avatar--lg" role="img" aria-label="Bolas（人）">B</span></div></div>
+        <div class="state"><span class="lbl">agent 20／24／32</span><div class="row"><span class="nl-avatar nl-avatar--agent nl-avatar--sm" role="img" aria-label="claude-nextline（agent）"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="nl-avatar nl-avatar--agent" role="img" aria-label="claude-nextline（agent）"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="nl-avatar nl-avatar--agent nl-avatar--lg" role="img" aria-label="claude-nextline（agent）"><svg class="nl-icon"><use href="#i-agent"/></svg></span></div></div>
+        <div class="state"><span class="lbl">還沒交給 agent</span><span class="nl-avatar nl-avatar--empty" role="img" aria-label="還沒交給 agent"><svg class="nl-icon nl-icon--sm"><use href="#i-plus"/></svg></span></div>
+        <div class="state"><span class="lbl">負責人 → 代做 agent</span><span class="nl-who"><span class="nl-avatar nl-avatar--human nl-avatar--sm" aria-hidden="true">B</span><span class="nm">Bolas</span><svg class="nl-icon" aria-hidden="true"><use href="#i-arrow-right"/></svg><span class="nl-avatar nl-avatar--agent nl-avatar--sm" aria-hidden="true"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="nm">claude-nextline</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-card">
+    <h2>票卡片</h2>
+    <div class="demo"><div class="states" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px 16px" id="cards"></div></div>
+  </section>
+
+  <section class="sec" id="c-column">
+    <h2>看板欄</h2>
+    <div class="demo"><div class="scroll-x"><div class="nl-board" id="board"></div></div></div>
+  </section>
+
+  <section class="sec" id="c-row">
+    <h2>列表列</h2>
+    <div class="demo"><div class="scroll-x"><div class="nl-list" role="grid" aria-label="全部的票" style="min-width:820px" id="list"></div></div>
+      <p class="cap" style="margin:10px 0 0">由上到下：分組列、default、hover、selected（Shift＋點）、focus（鍵盤 J／K 移動）、loading。手機寬度下改成兩行卡片式（見側欄區的手機示意）。</p></div>
+  </section>
+
+  <section class="sec" id="c-nav">
+    <h2>側欄・底部分頁列</h2>
+    <div class="grid2">
+      <div class="demo"><h3>側欄 <small>桌面固定在左</small></h3>
+        <nav class="nl-sidebar" aria-label="主要" style="width:100%;max-width:var(--size-sidebar)">
+          <div class="brand"><svg width="24" height="24" aria-hidden="true"><use href="#logo"/></svg>Nextline</div>
+          <div class="acts"><button class="nl-btn nl-btn--secondary nl-btn--sm" type="button"><svg class="nl-icon nl-icon--sm"><use href="#i-search"/></svg><span>搜尋</span><span class="nl-kbd">⌘K</span></button><button class="nl-btn nl-btn--primary nl-btn--sm nl-btn--icon" style="width:28px;color:var(--color-on-primary);background:var(--color-primary)" type="button" aria-label="建立票（C）"><svg class="nl-icon nl-icon--sm"><use href="#i-plus"/></svg></button></div>
+          <a class="nl-nav-item" href="#c-nav"><svg class="nl-icon"><use href="#i-inbox"/></svg>等你<span class="sp"></span><span class="count" aria-label="3 張">3</span></a>
+          <a class="nl-nav-item" href="#c-nav" aria-current="page"><svg class="nl-icon"><use href="#i-board"/></svg>看板</a>
+          <a class="nl-nav-item is-hover" href="#c-nav"><svg class="nl-icon"><use href="#i-list"/></svg>全部的票</a>
+          <a class="nl-nav-item is-focus" href="#c-nav"><svg class="nl-icon"><use href="#i-zones"/></svg>三區</a>
+          <div class="nl-nav-group"><svg class="nl-icon nl-icon--sm"><use href="#i-sprint"/></svg>Sprint</div>
+          <a class="nl-nav-item" href="#c-nav">目前（Sprint 12）<span class="sp"></span><span class="count quiet">18</span></a>
+          <div class="nl-nav-group"><svg class="nl-icon nl-icon--sm"><use href="#i-folder"/></svg>Project</div>
+          <a class="nl-nav-item" href="#c-nav"><span class="nl-pdot" style="--p:var(--project-1)"></span>Nextline 第二版</a>
+          <a class="nl-nav-item" href="#c-nav"><span class="nl-pdot" style="--p:var(--project-6)"></span>記帳 App</a>
+          <a class="nl-nav-item" href="#c-nav"><span class="nl-pdot" style="--p:var(--project-4)"></span>旅遊剪片 Agent</a>
+          <div class="nl-nav-group">我的 view</div>
+          <a class="nl-nav-item" href="#c-nav"><svg class="nl-icon"><use href="#i-agent"/></svg>Agent 工作中</a>
+          <a class="nl-nav-item" href="#c-nav"><svg class="nl-icon"><use href="#i-settings"/></svg>設定</a>
+        </nav>
+        <p class="cap" style="margin:10px 0 0">狀態：看板＝目前頁（aria-current）、全部的票＝hover、三區＝focus。</p>
+      </div>
+      <div class="demo"><h3>底部分頁列 <small>手機；右下角浮動「開票」</small></h3>
+        <div class="phone">
+          <div class="scr">
+            <div class="nl-row" style="grid-template-columns:minmax(0,1fr) auto;border-radius:var(--radius-md);box-shadow:inset 0 0 0 1px var(--color-line);min-height:56px;padding:8px 12px;background:var(--color-surface)"><div style="min-width:0"><div class="id">NX-145</div><div class="ttl">02 產品定位</div></div><span class="nl-badge" data-session="awaiting-input" style="--b-fg:var(--session-awaiting-input-fg);--b-solid:var(--session-awaiting-input-solid);--b-soft:var(--session-awaiting-input-soft)"><span class="dot"></span>等你回覆</span></div>
+            <div class="nl-row" style="grid-template-columns:minmax(0,1fr) auto;border-radius:var(--radius-md);box-shadow:inset 0 0 0 1px var(--color-line);min-height:56px;padding:8px 12px;background:var(--color-surface)"><div style="min-width:0"><div class="id">NX-141</div><div class="ttl">08 網頁視覺改版</div></div><span class="nl-badge" style="--b-fg:var(--status-in-review-fg);--b-solid:var(--status-in-review-solid);--b-soft:var(--status-in-review-soft)"><svg class="nl-icon"><use href="#s-in-review"/></svg>待驗收</span></div>
+          </div>
+          <nav class="nl-tabbar" aria-label="主要">
+            <button class="nl-fab" type="button" aria-label="建立票"><svg class="nl-icon"><use href="#i-plus"/></svg></button>
+            <a class="nl-tab" href="#c-nav" aria-current="page"><svg class="nl-icon"><use href="#i-board"/></svg>看板</a>
+            <a class="nl-tab" href="#c-nav"><svg class="nl-icon"><use href="#i-inbox"/></svg>等你<span class="count" aria-label="3 張">3</span></a>
+            <a class="nl-tab is-focus" href="#c-nav"><svg class="nl-icon"><use href="#i-list"/></svg>全部</a>
+            <a class="nl-tab" href="#c-nav"><svg class="nl-icon"><use href="#i-search"/></svg>搜尋</a>
+            <a class="nl-tab" href="#c-nav"><svg class="nl-icon"><use href="#i-more"/></svg>更多</a>
+          </nav>
+        </div>
+        <p class="cap" style="margin:10px 0 0">狀態：看板＝目前頁、全部＝focus。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-palette">
+    <h2>Cmd+K 指令面板</h2>
+    <div class="grid2">
+      <div class="demo"><h3>有選取的票・輸入中</h3>
+        <div class="nl-palette" role="dialog" aria-label="指令面板">
+          <div class="in"><svg class="nl-icon"><use href="#i-search"/></svg><input role="combobox" aria-expanded="true" aria-controls="pl1" aria-activedescendant="pl1-2" value="交給" aria-label="輸入指令或票號"><span class="ctx">NX-148</span></div>
+          <div class="res" role="listbox" id="pl1">
+            <div class="nl-menu-group">對這張票</div>
+            <div class="nl-menu-item" role="option" id="pl1-1"><svg class="nl-icon nl-icon--sm"><use href="#s-in-progress"/></svg>改狀態<span class="sp"></span><span class="nl-kbd">S</span></div>
+            <div class="nl-menu-item" role="option" id="pl1-2" aria-selected="true"><svg class="nl-icon nl-icon--sm"><use href="#i-agent"/></svg>交給 agent<span class="sp"></span><span class="nl-kbd">D</span></div>
+            <div class="nl-menu-item" role="option"><svg class="nl-icon nl-icon--sm"><use href="#i-check"/></svg>移到 Done<span class="sp"></span></div>
+            <div class="nl-menu-group">跳到</div>
+            <div class="nl-menu-item" role="option"><svg class="nl-icon nl-icon--sm"><use href="#i-inbox"/></svg>等你<span class="sp"></span><span class="nl-kbd">G</span><span class="nl-kbd">M</span></div>
+            <div class="nl-menu-group">票</div>
+            <div class="nl-menu-item" role="option"><span class="mono muted" style="font-size:var(--font-size-xs)">NX-175</span>MCP 支援交給 agent 的指令<span class="sp"></span></div>
+          </div>
+          <div class="foot"><span><span class="nl-kbd">↑</span><span class="nl-kbd">↓</span>移動</span><span><span class="nl-kbd">↵</span>執行</span><span><span class="nl-kbd">esc</span>關閉</span></div>
+        </div>
+      </div>
+      <div class="demo"><h3>沒有結果・載入中</h3>
+        <div class="nl-palette" role="dialog" aria-label="指令面板" style="margin-bottom:16px">
+          <div class="in"><svg class="nl-icon"><use href="#i-search"/></svg><input value="甘特圖" aria-label="輸入指令或票號"></div>
+          <div class="res"><div class="nl-empty-inline">找不到「甘特圖」。試試票號（例如 148）或頁面名稱。</div></div>
+        </div>
+        <div class="nl-palette" role="dialog" aria-label="指令面板" aria-busy="true">
+          <div class="in"><svg class="nl-icon"><use href="#i-search"/></svg><input value="148" aria-label="輸入指令或票號"><span class="nl-spinner" aria-hidden="true"></span></div>
+          <div class="res"><div class="nl-menu-item"><span class="nl-skel" style="width:40px;height:10px"></span><span class="nl-skel" style="width:55%;height:10px"></span></div><div class="nl-menu-item"><span class="nl-skel" style="width:40px;height:10px"></span><span class="nl-skel" style="width:40%;height:10px"></span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-modal">
+    <h2>Modal</h2>
+    <div class="grid2">
+      <div class="demo"><h3>開票對話框</h3>
+        <div class="scrim-demo">
+          <div class="nl-modal" role="dialog" aria-modal="true" aria-labelledby="m1">
+            <div class="hd"><h4 id="m1">建立票</h4><button class="nl-btn nl-btn--icon nl-btn--sm" type="button" aria-label="關閉"><svg class="nl-icon nl-icon--sm"><use href="#i-x"/></svg></button></div>
+            <div class="bd">
+              <input class="nl-title-input" placeholder="要做什麼？" aria-label="標題" value="06 關鍵畫面高保真原型">
+              <div class="row" style="gap:6px">
+                <button class="nl-chip" type="button"><span class="nl-pdot" style="--p:var(--project-1)"></span>Nextline 第二版</button>
+                <button class="nl-chip" type="button"><svg class="nl-icon"><use href="#i-sprint"/></svg>Sprint 12</button>
+                <button class="nl-chip" type="button" style="color:var(--status-todo-fg)"><svg class="nl-icon" style="color:var(--status-todo-solid)"><use href="#s-todo"/></svg>Todo</button>
+                <button class="nl-chip" type="button"><svg class="nl-icon"><use href="#i-agent"/></svg>代做 agent</button>
+              </div>
+              <textarea class="nl-input" placeholder="描述（選填）" aria-label="描述" style="min-height:72px"></textarea>
+            </div>
+            <div class="ft"><label class="nl-check"><span class="nl-cb"></span>建立後繼續建立下一張</label><span class="sp"></span><button class="nl-btn nl-btn--secondary" type="button">取消</button><button class="nl-btn nl-btn--primary" type="button">建立<span class="nl-kbd">⌘↵</span></button></div>
+          </div>
+        </div>
+      </div>
+      <div class="demo"><h3>確認對話框 <small>不可逆或影響多張票才用</small></h3>
+        <div class="scrim-demo">
+          <div class="nl-modal nl-modal--sm" role="alertdialog" aria-modal="true" aria-labelledby="m2" aria-describedby="m2d">
+            <div class="hd"><h4 id="m2">清掉 4 張範例票？</h4></div>
+            <div class="bd"><p id="m2d" style="margin:0">範例 Project 和票會移到 Canceled。10 秒內可以按「復原」，之後也能在 Canceled 欄找回來。</p></div>
+            <div class="ft"><span class="sp"></span><button class="nl-btn nl-btn--secondary" type="button">先留著</button><button class="nl-btn nl-btn--danger" type="button">清掉範例</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-peek">
+    <h2>右側預覽面板</h2>
+    <div class="demo"><h3>待驗收的票 <small>驗收列在最上面；變更紀錄每筆可一鍵還原</small></h3>
+      <div class="peek-stage">
+        <aside class="nl-peek" role="dialog" aria-labelledby="pk1">
+          <div class="hd">nextline ／ NX-146<span class="sp"></span>
+            <button class="nl-btn nl-btn--icon nl-btn--sm" type="button" aria-label="展開成完整頁（Enter）"><svg class="nl-icon nl-icon--sm"><use href="#i-expand"/></svg></button>
+            <button class="nl-btn nl-btn--icon nl-btn--sm" type="button" aria-label="關閉預覽（Esc）"><svg class="nl-icon nl-icon--sm"><use href="#i-x"/></svg></button></div>
+          <div class="bd">
+            <div class="nl-review" role="region" aria-label="驗收">
+              <div class="who"><span class="nl-avatar nl-avatar--agent" aria-hidden="true"><svg class="nl-icon"><use href="#i-agent"/></svg></span><div><b>claude-brand 做完了，等你看一下</b><p>三個方向放在 directions.html，推薦 B「接力」。</p></div></div>
+              <div class="acts"><button class="nl-btn nl-btn--secondary nl-btn--sm" type="button">退回</button><button class="nl-btn nl-btn--primary nl-btn--sm" type="button"><svg class="nl-icon nl-icon--sm"><use href="#i-check"/></svg><span>通過</span></button></div>
+            </div>
+            <h4 id="pk1">03 品牌識別：logo、配色、字體、圖示與介面語氣</h4>
+            <div class="nl-fields">
+              <span class="k">狀態</span><span><button class="nl-chip" type="button" style="color:var(--status-in-review-fg)"><svg class="nl-icon" style="color:var(--status-in-review-solid)"><use href="#s-in-review"/></svg>待驗收</button></span>
+              <span class="k">負責人</span><span class="nl-who"><span class="nl-avatar nl-avatar--human nl-avatar--sm" aria-hidden="true">B</span><span class="nm">Bolas</span></span>
+              <span class="k">代做 agent</span><span class="nl-who"><span class="nl-avatar nl-avatar--agent nl-avatar--sm" aria-hidden="true"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="nm">claude-brand</span></span>
+              <span class="k">Project</span><span class="nl-who"><span class="nl-pdot" style="--p:var(--project-1)"></span><span class="nm">Nextline 第二版</span></span>
+            </div>
+            <div class="nl-session">
+              <div class="h">Session 第 1 輪<span class="nl-badge" data-session="complete" style="--b-fg:var(--session-complete-fg);--b-solid:var(--session-complete-solid);--b-soft:var(--session-complete-soft)"><span class="dot"></span>做完了</span><span class="sp"></span><button class="nl-btn nl-btn--secondary nl-btn--sm" type="button" disabled><svg class="nl-icon nl-icon--sm"><use href="#i-stop"/></svg><span>停止</span></button></div>
+              <div class="act">動作：讀 2026-11-03_產品定位.md・12 分鐘前</div>
+              <div class="act">回覆：三個方向放在 directions.html……・2 分鐘前</div>
+            </div>
+            <div class="nl-history" role="list" aria-label="變更紀錄">
+              <h5><svg class="nl-icon nl-icon--sm"><use href="#i-history"/></svg>變更紀錄</h5>
+              <div class="nl-hist" role="listitem"><span class="nl-avatar nl-avatar--agent nl-avatar--sm" aria-hidden="true"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="what"><b>claude-brand</b> 把狀態從 In Progress 改成 待驗收<span class="when">2 分鐘前</span></span><button class="nl-btn nl-btn--ghost nl-btn--sm" type="button" aria-label="還原：狀態改回 In Progress"><svg class="nl-icon nl-icon--sm"><use href="#i-undo"/></svg><span>還原</span></button></div>
+              <div class="nl-hist" role="listitem"><span class="nl-avatar nl-avatar--agent nl-avatar--sm" aria-hidden="true"><svg class="nl-icon"><use href="#i-agent"/></svg></span><span class="what"><b>claude-brand</b> 改了標題<span class="when">40 分鐘前</span></span><button class="nl-btn nl-btn--ghost nl-btn--sm is-loading" type="button" aria-busy="true" aria-label="還原中"><span>還原</span></button></div>
+              <div class="nl-hist is-reverted" role="listitem"><span class="nl-avatar nl-avatar--human nl-avatar--sm" aria-hidden="true">B</span><span class="what"><b>Bolas</b> 把 Sprint 從 12 改成 13<span class="when">1 小時前</span></span><span class="done-tag">已還原</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-toast">
+    <h2>Toast</h2>
+    <div class="demo"><div class="nl-toast-stack">
+      <div class="nl-toast" role="status"><svg class="nl-icon"><use href="#s-done"/></svg><span class="msg">NX-148 已完成</span><button class="act" type="button"><svg class="nl-icon"><use href="#i-undo"/></svg>復原</button><button class="x" type="button" aria-label="關閉"><svg class="nl-icon nl-icon--sm"><use href="#i-x"/></svg></button><span class="bar" style="--left:62%" aria-hidden="true"></span></div>
+      <div class="nl-toast" role="status"><span class="msg">已把 4 張移到 Sprint 13</span><button class="act" type="button"><svg class="nl-icon"><use href="#i-undo"/></svg>復原</button><button class="x" type="button" aria-label="關閉"><svg class="nl-icon nl-icon--sm"><use href="#i-x"/></svg></button><span class="bar" style="--left:88%" aria-hidden="true"></span></div>
+      <div class="nl-toast" role="status"><svg class="nl-icon"><use href="#i-agent"/></svg><span class="msg">交給 claude-nextline 了，它開始動手時卡片會亮起來。</span><button class="act" type="button"><svg class="nl-icon"><use href="#i-copy"/></svg>複製開工指令</button></div>
+      <div class="nl-toast" role="status"><span class="msg">已開 NX-176</span><button class="act" type="button">打開</button></div>
+      <div class="nl-toast nl-toast--error" role="alert"><svg class="nl-icon"><use href="#i-alert"/></svg><span class="msg">儲存失敗：連線中斷。修改已保留，恢復連線後會自動送出。</span><button class="act" type="button">重試</button></div>
+    </div></div>
+  </section>
+
+  <section class="sec" id="c-feedback">
+    <h2>空狀態・loading skeleton・tooltip</h2>
+    <div class="grid3">
+      <div class="demo"><h3>空狀態：看板</h3>
+        <div class="nl-empty"><div class="ic"><svg class="nl-icon"><use href="#i-board"/></svg></div><h5>沒有票</h5><p>按 C 建立票。</p><button class="nl-btn nl-btn--primary nl-btn--sm" type="button"><span>建立票</span><span class="nl-kbd">C</span></button></div></div>
+      <div class="demo"><h3>空狀態：篩選沒結果</h3>
+        <div class="nl-empty"><div class="ic"><svg class="nl-icon"><use href="#i-filter"/></svg></div><h5>沒有符合的票</h5><p>代做 agent＝claude-nextline、session＝出錯，目前沒有票。</p><button class="nl-btn nl-btn--secondary nl-btn--sm" type="button">清除篩選</button></div></div>
+      <div class="demo"><h3>空狀態：等你</h3>
+        <div class="nl-empty"><div class="ic"><svg class="nl-icon"><use href="#i-check"/></svg></div><h5>沒有輪到你的票</h5><p>agent 有問題或做完了，會出現在這裡。</p></div></div>
+    </div>
+    <div class="grid2">
+      <div class="demo"><h3>loading skeleton <small>卡片、列表列；超過 300ms 才出現</small></h3>
+        <div class="grid2" aria-busy="true" aria-label="載入中">
+          <div class="nl-card" style="cursor:default"><div class="top"><span class="nl-skel" style="width:48px;height:10px"></span><span class="nl-skel" style="width:80px;height:10px"></span></div><span class="nl-skel" style="width:92%;height:14px;margin:8px 0 6px"></span><span class="nl-skel" style="width:64%;height:14px;margin-bottom:12px"></span><div class="row" style="gap:6px"><span class="nl-skel" style="width:20px;height:20px;border-radius:50%"></span><span class="nl-skel" style="width:20px;height:20px;border-radius:30%"></span><span class="nl-skel" style="width:64px;height:20px;border-radius:999px;margin-left:auto"></span></div></div>
+          <div style="display:grid;gap:8px"><span class="nl-skel" style="height:44px;border-radius:var(--radius-sm)"></span><span class="nl-skel" style="height:44px;border-radius:var(--radius-sm)"></span><span class="nl-skel" style="height:44px;border-radius:var(--radius-sm)"></span></div>
+        </div></div>
+      <div class="demo"><h3>tooltip <small>滑過 500ms 或鍵盤 focus 時出現</small></h3>
+        <div class="row" style="gap:28px;align-items:flex-end;padding-top:4px">
+          <div class="tip-demo"><span class="nl-tooltip" role="tooltip" id="tt1">claude-nextline・代做 agent</span><span class="nl-avatar nl-avatar--agent" aria-describedby="tt1"><svg class="nl-icon"><use href="#i-agent"/></svg></span></div>
+          <div class="tip-demo"><span class="nl-tooltip" role="tooltip" id="tt2">建立票<span class="k">C</span></span><button class="nl-btn nl-btn--icon is-hover" type="button" aria-label="建立票" aria-describedby="tt2"><svg class="nl-icon"><use href="#i-plus"/></svg></button></div>
+          <div class="tip-demo"><span class="nl-tooltip" role="tooltip" id="tt3">出錯：wrangler 找不到 D1 binding</span><span class="nl-badge" data-session="error" aria-describedby="tt3" style="--b-fg:var(--session-error-fg);--b-solid:var(--session-error-solid);--b-soft:var(--session-error-soft)"><span class="dot"></span>出錯</span></div>
+        </div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="c-menu">
+    <h2>選單</h2>
+    <div class="grid2">
+      <div class="demo"><h3>狀態選單 <small>S 打開；數字鍵直接選</small></h3>
+        <div class="nl-popover" role="menu" aria-label="改狀態" id="status-menu" style="max-width:300px"></div></div>
+      <div class="demo"><h3>卡片的「更多」選單 <small>右鍵或 ⋯</small></h3>
+        <div class="nl-popover" role="menu" aria-label="NX-148 的動作" style="max-width:300px">
+          <div class="nl-menu-item" role="menuitem"><svg class="nl-icon nl-icon--sm"><use href="#i-expand"/></svg>打開<span class="sp"></span><span class="nl-kbd">↵</span></div>
+          <div class="nl-menu-item is-hover" role="menuitem"><svg class="nl-icon nl-icon--sm"><use href="#i-agent"/></svg>交給 agent<span class="sp"></span><span class="nl-kbd">D</span></div>
+          <div class="nl-menu-item" role="menuitem"><svg class="nl-icon nl-icon--sm"><use href="#i-copy"/></svg>複製開工指令</div>
+          <div class="nl-menu-item" role="menuitem" aria-disabled="true"><svg class="nl-icon nl-icon--sm"><use href="#i-stop"/></svg>停止 agent<span class="sp"></span><span class="muted" style="font-size:var(--font-size-xs)">沒有進行中的 session</span></div>
+          <div class="nl-menu-sep"></div>
+          <div class="nl-menu-item danger" role="menuitem"><svg class="nl-icon nl-icon--sm"><use href="#s-canceled"/></svg>取消這張票…</div>
+        </div></div>
+    </div>
+  </section>
+
+  <footer>NX-148。tokens 由 tokens.ts 產生（build.mjs）；對比結果見 components.md 最後一段。英文字型 Inter、JetBrains Mono 沒有內嵌，本頁顯示的是 fallback 字型。</footer>
+</div>
+
+<script>
+/* tokens-data:start */
+const TOKENS = {"palette":{"neutral-0":"#FFFFFF","neutral-50":"#F5F7FA","neutral-100":"#EEF1F5","neutral-150":"#E1E6ED","neutral-200":"#C7CFDA","neutral-300":"#93A1B2","neutral-400":"#7A8696","neutral-500":"#5B6675","neutral-600":"#334458","neutral-700":"#22303F","neutral-750":"#1A2432","neutral-800":"#0F1B2D","neutral-850":"#121A26","neutral-900":"#0B111A","graphite-200":"#D5DBE3","graphite-300":"#B8C0CB","graphite-400":"#9CA4AF","graphite-600":"#4A5363","graphite-700":"#3A4250","graphite-750":"#313844","graphite-800":"#282E37","graphite-850":"#232831","graphite-900":"#1F242C","brand-50":"#E8EEF5","brand-100":"#BFD3EC","brand-200":"#A9C4E8","brand-300":"#8FB3E0","brand-400":"#2C5282","brand-500":"#1E3A5F","brand-600":"#172E4C","brand-700":"#11233A","brand-800":"#16304F","brand-900":"#1A2A3E","agent-50":"#DDF3EF","agent-300":"#2DD4BF","agent-500":"#0E8F80","agent-600":"#0B7568","agent-900":"#123A37"},"light":{"color-bg":"#F5F7FA","color-surface":"#FFFFFF","color-surface-2":"#EEF1F5","color-surface-raised":"#FFFFFF","color-sidebar":"#EEF1F5","color-hover":"#E6EAF0","color-selected":"#E8EEF5","color-review-col":"#F3F2EE","color-scrim":"rgb(15 27 45 / 40%)","color-skeleton":"#E9EDF2","color-skeleton-shine":"#F3F5F8","color-line":"#E1E6ED","color-line-strong":"#C7CFDA","color-border-input":"#7A8696","color-text":"#0F1B2D","color-text-muted":"#5B6675","color-text-disabled":"#A3ADBA","color-primary":"#1E3A5F","color-primary-hover":"#172E4C","color-primary-active":"#11233A","color-on-primary":"#FFFFFF","color-primary-soft":"#E8EEF5","color-link":"#2C5282","color-focus":"#2C5282","color-agent":"#0B7568","color-agent-soft":"#DDF3EF","color-danger":"#C62828","color-danger-hover":"#A61F1F","color-on-danger":"#FFFFFF","color-danger-soft":"#FBEAEA","color-inverse-bg":"#0F1B2D","color-inverse-text":"#F5F7FA","color-inverse-muted":"#C7CFDA","color-inverse-action":"#8FB3E0","color-logo-bg":"#1E3A5F","color-review-bg":"#F9F0E6","color-review-icon":"#B45309","shadow-review":"none","status-backlog-fg":"#5B6675","status-backlog-solid":"#7A8696","status-backlog-soft":"#EEF1F5","status-todo-fg":"#334458","status-todo-solid":"#334458","status-todo-soft":"#EEF1F5","status-in-progress-fg":"#1D4FC4","status-in-progress-solid":"#2563EB","status-in-progress-soft":"#EAF0FB","status-in-review-fg":"#9A4508","status-in-review-solid":"#B45309","status-in-review-soft":"#F9F0E6","status-done-fg":"#116B33","status-done-solid":"#15803D","status-done-soft":"#E8F3EC","status-canceled-fg":"#5B6675","status-canceled-solid":"#7A8696","status-canceled-soft":"#EEF1F5","session-pending-fg":"#0B7568","session-pending-solid":"#0E8F80","session-pending-soft":"#DDF3EF","session-active-fg":"#1D4FC4","session-active-solid":"#2563EB","session-active-soft":"#EAF0FB","session-awaiting-input-fg":"#9A4508","session-awaiting-input-solid":"#B45309","session-awaiting-input-soft":"#F9F0E6","session-error-fg":"#C62828","session-error-solid":"#C62828","session-error-soft":"#FBEAEA","session-stale-fg":"#5B6675","session-stale-solid":"#6B7280","session-stale-soft":"#EEF1F5","session-stopping-fg":"#C62828","session-stopping-solid":"#C62828","session-stopping-soft":"#FBEAEA","session-stopped-fg":"#334458","session-stopped-solid":"#334458","session-stopped-soft":"#EEF1F5","session-complete-fg":"#116B33","session-complete-solid":"#15803D","session-complete-soft":"#E8F3EC","project-1":"#A8563F","project-2":"#94680F","project-3":"#66722A","project-4":"#2F7A55","project-5":"#1D7470","project-6":"#3A64A0","project-7":"#5A55A0","project-8":"#8E4A82","project-9":"#B0485F","project-10":"#64707E","shadow-sm":"0 0 0 1px rgb(15 27 45 / 6%), 0 1px 2px rgb(15 27 45 / 6%)","shadow-md":"0 0 0 1px rgb(15 27 45 / 6%), 0 4px 12px rgb(15 27 45 / 8%)","shadow-lg":"0 0 0 1px rgb(15 27 45 / 6%), 0 12px 32px rgb(15 27 45 / 12%)","shadow-overlay":"0 0 0 1px rgb(15 27 45 / 8%), 0 24px 56px rgb(15 27 45 / 18%)","shadow-button":"0 1px 0 rgb(15 27 45 / 10%)","shadow-drag":"0 0 0 1px rgb(15 27 45 / 8%), 0 12px 28px rgb(15 27 45 / 16%)"},"dark":{"color-bg":"#1F242C","color-surface":"#282E37","color-surface-2":"#313844","color-surface-raised":"#313844","color-sidebar":"#232831","color-hover":"#313844","color-selected":"#2F3A4A","color-review-col":"#353943","color-scrim":"rgb(10 12 16 / 55%)","color-skeleton":"#313844","color-skeleton-shine":"#3A4250","color-line":"#3A4250","color-line-strong":"#4A5363","color-border-input":"#9CA4AF","color-text":"#D5DBE3","color-text-muted":"#B8C0CB","color-text-disabled":"#5E6776","color-primary":"#8FB3E0","color-primary-hover":"#A9C4E8","color-primary-active":"#BFD3EC","color-on-primary":"#14171C","color-primary-soft":"#2F3A4A","color-link":"#A9C4E8","color-focus":"#8FB3E0","color-agent":"#73D0C2","color-agent-soft":"#2A403F","color-danger":"#F3ACAC","color-danger-hover":"#F7C2C2","color-on-danger":"#14171C","color-danger-soft":"#45333A","color-inverse-bg":"#D5DBE3","color-inverse-text":"#1F242C","color-inverse-muted":"#4A5363","color-inverse-action":"#2C5282","color-logo-bg":"#2A4568","color-review-bg":"#313844","color-review-icon":"#E2B36E","shadow-review":"inset 3px 0 0 #E2B36E","status-backlog-fg":"#BAC1CC","status-backlog-solid":"#9CA4AF","status-backlog-soft":"#363D49","status-todo-fg":"#C3CAD4","status-todo-solid":"#C3CAD4","status-todo-soft":"#363D49","status-in-progress-fg":"#A4C2EA","status-in-progress-solid":"#86AEE3","status-in-progress-soft":"#2F3B4E","status-in-review-fg":"#E8C07E","status-in-review-solid":"#D6A45E","status-in-review-soft":"#463C24","status-done-fg":"#95CDA9","status-done-solid":"#74BE8E","status-done-soft":"#2E4136","status-canceled-fg":"#BAC1CC","status-canceled-solid":"#9CA4AF","status-canceled-soft":"#363D49","session-pending-fg":"#73D0C2","session-pending-solid":"#73D0C2","session-pending-soft":"#2A403F","session-active-fg":"#A4C2EA","session-active-solid":"#86AEE3","session-active-soft":"#2F3B4E","session-awaiting-input-fg":"#E8C07E","session-awaiting-input-solid":"#D6A45E","session-awaiting-input-soft":"#463C24","session-error-fg":"#F3ACAC","session-error-solid":"#EE8C8C","session-error-soft":"#45333A","session-stale-fg":"#BAC1CC","session-stale-solid":"#9FA6B1","session-stale-soft":"#363D49","session-stopping-fg":"#F3ACAC","session-stopping-solid":"#EE8C8C","session-stopping-soft":"#45333A","session-stopped-fg":"#C3CAD4","session-stopped-solid":"#C3CAD4","session-stopped-soft":"#363D49","session-complete-fg":"#95CDA9","session-complete-solid":"#74BE8E","session-complete-soft":"#2E4136","project-1":"#D09482","project-2":"#CDA96C","project-3":"#A9B37A","project-4":"#84BC9C","project-5":"#7BBDB5","project-6":"#8FB3E0","project-7":"#A8A4D8","project-8":"#C99BBF","project-9":"#D99DAC","project-10":"#A3ADBA","shadow-sm":"0 0 0 1px rgb(255 255 255 / 4%), 0 1px 2px rgb(0 0 0 / 22%)","shadow-md":"0 0 0 1px rgb(255 255 255 / 5%), 0 6px 16px rgb(0 0 0 / 22%)","shadow-lg":"0 0 0 1px rgb(255 255 255 / 6%), 0 14px 36px rgb(0 0 0 / 30%)","shadow-overlay":"0 0 0 1px rgb(255 255 255 / 6%), 0 24px 64px rgb(0 0 0 / 42%)","shadow-button":"0 1px 0 rgb(0 0 0 / 28%)","shadow-drag":"0 0 0 1px rgb(255 255 255 / 6%), 0 14px 32px rgb(0 0 0 / 34%)"},"scale":{"font-sans":"Inter, \"SF Pro Text\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang TC\", \"Noto Sans TC\", \"Microsoft JhengHei\", sans-serif","font-mono":"\"JetBrains Mono\", ui-monospace, \"SF Mono\", Menlo, Consolas, monospace","font-weight-regular":"400","font-weight-semibold":"600","font-weight-bold":"600","font-size-xs":"12px","font-size-sm":"13px","font-size-md":"15px","font-size-lg":"17px","font-size-xl":"20px","font-size-2xl":"24px","font-size-3xl":"30px","line-height-tight":"1.25","line-height-snug":"1.4","line-height-normal":"1.6","space-0":"0px","space-0-5":"2px","space-1":"4px","space-1-5":"6px","space-2":"8px","space-3":"12px","space-4":"16px","space-5":"20px","space-6":"24px","space-8":"32px","space-10":"40px","space-12":"48px","space-16":"64px","radius-xs":"2px","radius-sm":"4px","radius-md":"6px","radius-lg":"8px","radius-pill":"999px","radius-round":"50%","size-control-sm":"28px","size-control-md":"36px","size-control-lg":"44px","size-icon-sm":"16px","size-icon-md":"20px","size-icon-lg":"24px","size-avatar-sm":"20px","size-avatar-md":"24px","size-avatar-lg":"32px","size-sidebar":"248px","size-peek":"480px","size-topbar":"52px","size-tabbar":"56px","size-board-col":"296px","size-modal-sm":"420px","size-modal-md":"600px","size-palette":"640px","size-toast":"420px","size-tooltip":"280px","icon-stroke":"1.5px","z-base":"0","z-sticky":"10","z-dropdown":"100","z-peek":"200","z-modal":"300","z-palette":"400","z-toast":"500","z-tooltip":"600","duration-instant":"80ms","duration-fast":"120ms","duration-base":"180ms","duration-slow":"240ms","duration-slower":"320ms","duration-toast":"4000ms","duration-toast-undo":"10000ms","duration-updated-flash":"5000ms","ease-standard":"cubic-bezier(0.2, 0, 0, 1)","ease-enter":"cubic-bezier(0, 0, 0.2, 1)","ease-exit":"cubic-bezier(0.4, 0, 1, 1)","ease-spring":"cubic-bezier(0.3, 1.3, 0.5, 1)","breakpoint-sm":"560px","breakpoint-md":"760px","breakpoint-lg":"1024px","breakpoint-xl":"1280px"}};
+/* tokens-data:end */
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const ic = (id, cls = '') => `<svg class="nl-icon ${cls}" aria-hidden="true"><use href="#${id}"/></svg>`;
+
+/* 主題切換 */
+const seg = document.querySelectorAll('[data-set-theme]');
+function setTheme(v){
+  if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme;
+  seg.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.setTheme === v)));
+  try { localStorage.setItem('nl-theme', v); } catch {}
+}
+seg.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+const qs = new URLSearchParams(location.search).get('theme');
+let saved = ''; try { saved = localStorage.getItem('nl-theme') || ''; } catch {}
+setTheme(qs ?? saved);
+
+/* 色票 */
+const STATUS = [['backlog','Backlog'],['todo','Todo'],['in-progress','In Progress'],['in-review','待驗收'],['done','Done'],['canceled','Canceled']];
+const SESSION = [['pending','等 agent 接手'],['active','進行中'],['awaiting-input','等你回覆'],['error','出錯'],['stale','太久沒更新'],['stopping','停止中…'],['stopped','已停止'],['complete','做完了']];
+const swatch = (name, hex) => `<div class="sw"><i style="background:${hex}"></i><div><div class="nm">${esc(name)}</div><div class="hx">${hex}</div></div></div>`;
+$('raw-palette').innerHTML = Object.entries(TOKENS.palette).map(([k,v]) => `<figure><i style="background:${v}"></i>${k}<br>${v}</figure>`).join('');
+const panes = (fn) => ['light','dark'].map(t => `<div class="pane" data-theme="${t}"><div class="pane-t">${t === 'light' ? '淺色' : '深色'}</div>${fn(TOKENS[t], t)}</div>`).join('');
+$('semantic').innerHTML = panes(t => `<div class="sw-list">${Object.entries(t).filter(([k,v]) => k.startsWith('color-') && v.startsWith('#')).map(([k,v]) => swatch(k.replace('color-',''), v)).join('')}</div>`);
+
+function badge(kind, key, label, extra = '', bare = false){
+  const v = kind === 'status' ? `--b-fg:var(--status-${key}-fg);--b-solid:var(--status-${key}-solid);--b-soft:var(--status-${key}-soft)` : `--b-fg:var(--session-${key}-fg);--b-solid:var(--session-${key}-solid);--b-soft:var(--session-${key}-soft)`;
+  const lead = kind === 'status' ? ic('s-' + key) : '<span class="dot"></span>';
+  return `<span class="nl-badge${bare ? ' nl-badge--bare' : ''}" ${kind === 'session' ? `data-session="${key}"` : `data-status="${key}"`} style="${v}">${lead}${esc(label)}${extra ? `<span class="meta">・${esc(extra)}</span>` : ''}</span>`;
+}
+const stateRows = (kind, list) => t => `<div style="display:grid;gap:10px">${list.map(([k,lb]) => `<div style="display:grid;grid-template-columns:minmax(0,118px) minmax(0,1fr);gap:10px;align-items:center">${badge(kind,k,lb)}<div class="row" style="gap:6px">${['fg','solid','soft'].map(p => `<span class="sw" style="grid-template-columns:18px auto;gap:4px" title="${kind}-${k}-${p}"><i style="width:18px;height:18px;border-radius:5px;background:${t[`${kind}-${k}-${p}`]}"></i><span class="hx">${t[`${kind}-${k}-${p}`]}</span></span>`).join('')}</div></div>`).join('')}</div>`;
+$('ticket-status').innerHTML = panes(stateRows('status', STATUS));
+$('session-status').innerHTML = panes(stateRows('session', SESSION));
+const PNAMES = ['紅陶','琥珀','橄欖','綠','青','藍','靛','梅','玫瑰','岩'];
+$('project-colors').innerHTML = panes(t => `<div class="sw-grid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))">${PNAMES.map((n,i) => swatch(`project-${i+1}・${n}`, t[`project-${i+1}`])).join('')}</div>`);
+
+$('ticket-badges').innerHTML = STATUS.map(([k,lb]) => badge('status',k,lb)).join('') + `<span style="width:100%"></span>` + STATUS.map(([k,lb]) => badge('status',k,lb,'',true)).join('');
+$('session-badges').innerHTML = SESSION.map(([k,lb]) => badge('session',k,lb)).join('') + `<span style="width:100%"></span>` +
+  badge('session','active','進行中','1 分鐘前') + badge('session','stale','太久沒更新','42 分鐘') + badge('session','awaiting-input','還沒開工','35 分鐘') + badge('session','pending','第 2 輪','等 agent 接手');
+
+/* 字體、尺度 */
+const S = TOKENS.scale;
+$('font-sans').textContent = S['font-sans']; $('font-mono').textContent = S['font-mono'];
+const TYPE = [['3xl','30 / 600','輪到誰，一眼就知道',S['font-weight-bold']],['2xl','24 / 600','Nextline 第二版',S['font-weight-bold']],['xl','20 / 600','票詳細頁標題',S['font-weight-bold']],['lg','17 / 600','區塊標題、modal 標題',S['font-weight-semibold']],['md','15 / 400','內文與卡片標題。Claude Code 正在做 NX-148。',S['font-weight-regular']],['sm','13 / 400','次要文字、表格、按鈕 sm',S['font-weight-regular']],['xs','12 / 600','徽章、票號 NX-148、時間',S['font-weight-semibold']]];
+$('type-scale').innerHTML = TYPE.map(([k,spec,txt,w]) => `<div class="type-row"><span class="cap">${k}・${spec}</span><span style="font-size:var(--font-size-${k});font-weight:${w};line-height:var(--line-height-tight)">${txt}</span></div>`).join('');
+$('space-scale').innerHTML = Object.entries(S).filter(([k]) => k.startsWith('space-')).map(([k,v]) => `<div class="space-row"><span class="cap">${k}</span><span class="cap">${v}</span><b style="width:${v}"></b></div>`).join('');
+$('radius-scale').innerHTML = Object.entries(S).filter(([k]) => k.startsWith('radius-')).map(([k,v]) => `<div class="state"><span class="radius-box" style="border-radius:${v}"></span><span class="lbl">${k.replace('radius-','')} ${v}</span></div>`).join('');
+$('size-scale').innerHTML = '<tbody>' + Object.entries(S).filter(([k]) => k.startsWith('size-')).map(([k,v]) => `<tr><td class="mono">${k}</td><td class="mono">${v}</td></tr>`).join('') + '</tbody>';
+$('shadow-scale').innerHTML = Object.keys(TOKENS.light).filter(k => k.startsWith('shadow-')).map(k => `<div class="shadow-box" style="box-shadow:var(--${k})">${k}</div>`).join('');
+$('z-scale').innerHTML = '<tbody>' + Object.entries(S).filter(([k]) => k.startsWith('z-')).map(([k,v]) => `<tr><td class="mono">${k}</td><td class="mono">${v}</td></tr>`).join('') + '</tbody>';
+const MOT = [['duration-fast','ease-standard','hover、按下'],['duration-base','ease-enter','選單、tooltip 出現'],['duration-slow','ease-spring','卡片放下、移欄'],['duration-slower','ease-enter','modal、預覽面板滑入']];
+$('motion-scale').innerHTML = MOT.map(([d,e,use]) => `<div class="motion-demo"><span class="cap" style="width:150px">${S[d]}・${e.replace('ease-','')}<br>${use}</span><button class="motion-track" type="button" aria-label="播放 ${d}"><span class="motion-dot" style="transition:left var(--${d}) var(--${e})"></span></button></div>`).join('') +
+  `<table class="tbl"><tbody>${['duration-toast','duration-toast-undo','duration-updated-flash'].map(k => `<tr><td class="mono">${k}</td><td class="mono">${S[k]}</td></tr>`).join('')}</tbody></table>`;
+document.querySelectorAll('.motion-track').forEach(b => b.addEventListener('click', () => b.classList.toggle('go')));
+
+const ICONS = ['board','ticket','agent','person','inbox','list','zones','sprint','folder','settings','search','plus','x','check','chev-down','chev-right','arrow-right','undo','history','more','stop','alert','expand','copy','filter'];
+$('icons').innerHTML = ICONS.map(n => `<figure style="text-align:center"><span style="display:flex;height:44px;align-items:center;justify-content:center;background:var(--color-surface-2);border-radius:var(--radius-sm);margin-bottom:4px;color:var(--color-text)">${ic('i-'+n)}</span>${n}</figure>`).join('');
+
+/* 按鈕狀態 */
+const BTN_STATES = [['default',''],['hover','is-hover'],['focus','is-focus'],['active','is-active'],['disabled','dis'],['loading','is-loading']];
+document.querySelectorAll('[data-btn]').forEach(el => {
+  const kind = el.dataset.btn, text = el.dataset.text;
+  el.innerHTML = BTN_STATES.map(([lb,cls]) => {
+    const inner = kind === 'icon' ? ic('i-more') : `<span>${esc(text)}</span>`;
+    const attrs = `${cls === 'dis' ? ' disabled' : ''}${cls === 'is-loading' ? ' aria-busy="true"' : ''}${kind === 'icon' ? ' aria-label="更多動作"' : ''}`;
+    return `<div class="state"><span class="lbl">${lb}</span><button type="button" class="nl-btn nl-btn--${kind} ${cls === 'dis' ? '' : cls}"${attrs}>${inner}</button></div>`;
+  }).join('');
+});
+
+/* 票卡片 */
+const who = (agent) => `<span class="nl-who"><span class="nl-avatar nl-avatar--human nl-avatar--sm" role="img" aria-label="負責人 Bolas">B</span>${ic('i-arrow-right')}${agent ? `<span class="nl-avatar nl-avatar--agent nl-avatar--sm" role="img" aria-label="代做 agent ${esc(agent)}">${ic('i-agent')}</span><span class="nm">${esc(agent)}</span>` : `<span class="nl-avatar nl-avatar--empty nl-avatar--sm" role="img" aria-label="還沒交給 agent">${ic('i-plus','nl-icon--sm')}</span>`}</span>`;
+function card({id, t, p = 1, pn = 'Nextline 第二版', agent = 'claude-nextline', s, sl, meta, cls = '', sel = false, flag = '', err = '', quote = '', extra = ''}){
+  return `<article class="nl-card ${cls}" tabindex="0" ${sel ? 'aria-selected="true"' : ''} aria-label="${id} ${esc(t)}">
+    <span class="cb" aria-hidden="true">${ic('i-check','nl-icon--sm')}</span>
+    ${flag ? `<div class="flag">${ic('i-history','nl-icon--sm')}${esc(flag)}</div>` : ''}
+    <div class="top"><span class="id">${id}</span><span class="proj"><span class="nl-pdot" style="--p:var(--project-${p})"></span>${esc(pn)}</span></div>
+    <p class="t">${esc(t)}</p>
+    ${quote ? `<p class="quote" style="--b-solid:var(--session-${s}-solid)">${esc(quote)}</p>` : ''}
+    <div class="foot">${who(agent)}${s ? badge('session', s, sl, meta) : ''}</div>
+    ${err ? `<div class="err">${ic('i-alert','nl-icon--sm')}${esc(err)}<button class="nl-btn nl-btn--ghost nl-btn--sm" type="button">重試</button></div>` : ''}
+    ${extra}
+    <div class="hover-act"><button class="nl-btn nl-btn--icon nl-btn--sm" type="button" aria-label="更多動作">${ic('i-more','nl-icon--sm')}</button></div>
+  </article>`;
+}
+const CARDS = [
+  ['default・沒有 agent', {id:'NX-143', t:'月報表：依分類畫圓餅圖', p:6, pn:'記帳 App', agent:null}],
+  ['hover', {id:'NX-148', t:'05 設計系統：design tokens 與元件規格', s:'active', sl:'進行中', meta:'1 分鐘前', cls:'is-hover'}],
+  ['focus（鍵盤）', {id:'NX-149', t:'06 關鍵畫面高保真原型（桌面＋手機）', s:'pending', sl:'等 agent 接手', cls:'is-focus'}],
+  ['selected（X 多選）', {id:'NX-147', t:'04 資訊架構與核心流程', s:'complete', sl:'做完了', sel:true}],
+  ['dragging', {id:'NX-135', t:'03 Nextline 遠端 MCP：Claude Code 與 Codex 都能讀寫票', pn:'Nextline 第一版', p:2, agent:'codex-nextline', s:'error', sl:'出錯', cls:'is-dragging'}],
+  ['放置位置', null],
+  ['等你回覆（卡片多一行問題）', {id:'NX-145', t:'02 產品定位：Nextline 是給誰的', agent:'阿澈', s:'awaiting-input', sl:'等你回覆', quote:'主推對象選 A 還是 B？我傾向 A。'}],
+  ['剛更新（agent 改的，5 秒）', {id:'NX-141', t:'08 網頁視覺改版：行動卡片版面', pn:'Nextline 第一版', p:2, s:'complete', sl:'做完了', cls:'is-updated', flag:'claude-nextline 移到待驗收・剛剛'}],
+  ['Done・agent 移的（可移回）', {id:'NX-137', t:'05 從 Linear 搬入 10 月以後建立的票', pn:'Nextline 第一版', p:2, s:'complete', sl:'做完了', cls:'nl-card--done', flag:'claude-nextline 移到 Done・3 分鐘前',
+    extra:`<div class="err" style="color:var(--color-text-muted)"><span>做錯了？</span><button class="nl-btn nl-btn--ghost nl-btn--sm" type="button">${ic('i-undo','nl-icon--sm')}<span>移回待驗收</span></button></div>`}],
+  ['error（儲存失敗）', {id:'NX-129', t:'02 建立本機共同剪輯台', pn:'旅遊剪片 Agent', p:4, agent:'codex-video', s:'stale', sl:'太久沒更新', meta:'42 分鐘', cls:'is-error', err:'儲存失敗：連線中斷'}],
+  ['disabled（已取消）', {id:'NX-120', t:'舊版看板拖拉（改由第二版處理）', agent:null, cls:'nl-card--done', extra:''}],
+  ['loading', 'skel'],
+];
+$('cards').innerHTML = CARDS.map(([lb, c]) => `<div class="state" style="align-items:stretch"><span class="lbl">${lb}</span>${
+  c === null ? '<div class="nl-card is-placeholder" aria-hidden="true"></div>' :
+  c === 'skel' ? '<div class="nl-card" aria-busy="true" style="cursor:default"><div class="top"><span class="nl-skel" style="width:48px;height:10px"></span><span class="nl-skel" style="width:90px;height:10px"></span></div><span class="nl-skel" style="width:90%;height:14px;margin:8px 0 12px"></span><div class="row" style="gap:6px"><span class="nl-skel" style="width:20px;height:20px;border-radius:50%"></span><span class="nl-skel" style="width:20px;height:20px;border-radius:30%"></span></div></div>' :
+  card(c)}</div>`).join('');
+// 已取消的卡片：狀態用 Canceled 徽章、標題刪除線
+document.querySelectorAll('#cards .nl-card[aria-label^="NX-120"]').forEach(el => {
+  el.querySelector('.foot').insertAdjacentHTML('beforeend', badge('status','canceled','Canceled'));
+  el.querySelector('.t').style.textDecoration = 'line-through';
+  el.setAttribute('aria-disabled','true'); el.style.cursor = 'default';
+});
+
+/* 看板欄 */
+const colHead = (k, name, n, plus = true) => `<div class="nl-col-h" style="--s-solid:var(--status-${k}-solid)">${ic('s-'+k)}<span>${name}</span><span class="n">${n}</span><span class="sp"></span>${plus ? `<button class="nl-btn nl-btn--icon nl-btn--sm" type="button" aria-label="在 ${name} 開票">${ic('i-plus','nl-icon--sm')}</button>` : ''}</div>`;
+$('board').innerHTML = `
+  <button class="nl-col nl-col--collapsed" type="button" aria-expanded="false" aria-label="展開 Backlog，23 張" style="--s-solid:var(--status-backlog-solid);color:var(--color-text)">${ic('s-backlog')}<span style="color:var(--color-text)">Backlog</span><span class="mono muted">23</span>${ic('i-chev-right','nl-icon--sm')}</button>
+  <section class="nl-col" aria-label="Todo，1 張">${colHead('todo','Todo',1)}${card({id:'NX-149', t:'06 關鍵畫面高保真原型', s:'pending', sl:'等 agent 接手'})}</section>
+  <section class="nl-col is-drop" aria-label="In Progress，放置目標">${colHead('in-progress','In Progress',1)}${card({id:'NX-148', t:'05 設計系統：design tokens 與元件規格', s:'active', sl:'進行中', meta:'1 分鐘前'})}<div class="nl-card is-placeholder" aria-hidden="true"></div></section>
+  <section class="nl-col nl-col--review" aria-label="待驗收，1 張">${colHead('in-review','待驗收',1,false)}${card({id:'NX-145', t:'02 產品定位', agent:'阿澈', s:'complete', sl:'做完了'})}</section>
+  <section class="nl-col" aria-label="Done，0 張">${colHead('done','Done・7 天',0)}<div class="nl-col-empty">拖一張票過來</div></section>
+  <button class="nl-col nl-col--collapsed" type="button" aria-expanded="false" aria-label="展開 Canceled，4 張" style="color:var(--color-text)"><span style="color:var(--status-canceled-solid);display:flex">${ic('s-canceled')}</span>Canceled<span class="mono muted">4</span>${ic('i-chev-right','nl-icon--sm')}</button>`;
+
+/* 列表 */
+const row = ({id, t, pn = 'nextline', p = 1, sp = '12', agent = 'cn', s, sl, upd, cls = '', sel = false}) => `<div class="nl-row ${cls}" role="row" tabindex="-1" ${sel ? 'aria-selected="true"' : 'aria-selected="false"'}>
+  <span role="gridcell"><span class="nl-cb ${sel ? 'on' : ''}" role="checkbox" aria-checked="${sel}" aria-label="選取 ${id}">${sel ? ic('i-check') : ''}</span></span>
+  <span class="id" role="gridcell">${id}</span><span class="ttl" role="gridcell">${esc(t)}</span>
+  <span class="c-muted" role="gridcell" style="display:flex;align-items:center;gap:6px"><span class="nl-pdot" style="--p:var(--project-${p})"></span>${pn}</span>
+  <span class="c-muted mono" role="gridcell">${sp}</span>
+  <span role="gridcell" style="display:flex;gap:3px"><span class="nl-avatar nl-avatar--human nl-avatar--sm" aria-label="Bolas" role="img">B</span>${agent ? `<span class="nl-avatar nl-avatar--agent nl-avatar--sm" role="img" aria-label="${agent}">${ic('i-agent')}</span>` : ''}</span>
+  <span role="gridcell">${s ? badge('session', s, sl) : ''}</span><span class="c-muted" role="gridcell">${upd}</span></div>`;
+$('list').innerHTML = `<div class="nl-row nl-row--group" role="row" style="--s-solid:var(--status-in-progress-solid)">${ic('s-in-progress')}<span>In Progress　3</span></div>` +
+  row({id:'NX-158', t:'API 加 In Review 狀態', s:'awaiting-input', sl:'等你回覆', upd:'3 分前'}) +
+  row({id:'NX-159', t:'members 資料表', s:'error', sl:'出錯', upd:'12 分前', cls:'is-hover'}) +
+  row({id:'NX-160', t:'agent session 資料表與 MCP 工具', s:'active', sl:'進行中', upd:'1 分前', sel:true}) +
+  row({id:'NX-161', t:'看板 position 欄位', s:'pending', sl:'等 agent 接手', upd:'1 小時前', cls:'is-focus', sp:'13'}) +
+  `<div class="nl-row" role="row" aria-busy="true"><span></span><span class="nl-skel" style="height:10px;width:44px"></span><span class="nl-skel" style="height:12px;width:70%"></span><span class="nl-skel" style="height:10px;width:60%"></span><span></span><span class="nl-skel" style="height:20px;width:20px;border-radius:50%"></span><span class="nl-skel" style="height:20px;width:80px;border-radius:999px"></span><span></span></div>`;
+
+/* 狀態選單 */
+$('status-menu').innerHTML = `<div class="search"><svg class="nl-icon nl-icon--sm"><use href="#i-search"/></svg><input aria-label="篩選狀態" placeholder="改成…"></div>` +
+  STATUS.map(([k,lb],i) => `<div class="nl-menu-item${k === 'in-progress' ? ' is-focus' : ''}" role="menuitemradio" aria-checked="${k === 'in-progress'}" style="${k === 'in-progress' ? '' : ''}"><span style="color:var(--status-${k}-solid);display:flex">${ic('s-'+k,'nl-icon--sm')}</span>${lb}<span class="sp"></span>${k === 'in-progress' ? ic('i-check','nl-icon--sm check') : ''}<span class="nl-kbd">${i+1}</span></div>`).join('');
+</script>
+</body>
+</html>

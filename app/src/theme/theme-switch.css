@@ -1,0 +1,28 @@
+.nl-seg {
+  display: inline-flex;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.nl-seg button {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-sans);
+  padding: 7px 12px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+.nl-seg button:hover {
+  color: var(--color-text);
+}
+.nl-seg button[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+.nl-seg button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

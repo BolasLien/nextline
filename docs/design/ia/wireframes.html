@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nextline 線框圖</title>
+<!-- NX-147 低保真線框：只用灰階方塊與文字，不代表視覺設計（品牌與設計系統見 NX-146、NX-148）。
+     流程與定義見同資料夾 README.md、flows.md。桌面畫面以 1100px、手機以 360px 為設計寬度，視窗不夠寬時整張等比縮小。 -->
+<style>
+  :root {
+    --ink: #1f1f1f; --mid: #5c5c5c; --soft: #8a8a8a; --line: #b8b8b8;
+    --fill: #f0f0f0; --fill2: #e0e0e0; --fill3: #cfcfcf; --bg: #ffffff; --page: #f7f7f7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--ink); font: 14px/1.5 -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; padding: 24px 16px 64px; }
+  header.doc, section.screen { max-width: 1248px; margin: 0 auto; }
+  header.doc h1 { font-size: 22px; margin: 0 0 4px; }
+  header.doc p { margin: 0 0 4px; color: var(--mid); }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 12px 0 8px; }
+  nav.toc a { color: var(--ink); }
+  section.screen { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+  section.screen h2 { font-size: 18px; margin: 0 0 4px; }
+  .q { margin: 0 0 12px; color: var(--mid); }
+  .q b { color: var(--ink); }
+  .frames { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .fit { min-width: 0; max-width: 100%; }
+  .fit.desk { flex: 1 1 100%; }
+  .fit.mob { flex: 0 1 360px; }
+  .fit > .label { font-size: 12px; color: var(--soft); margin-bottom: 4px; }
+  .frame { background: var(--bg); border: 2px solid var(--ink); border-radius: 8px; overflow: hidden; position: relative; }
+  .frame.d { width: 1100px; }
+  .frame.m { width: 360px; border-radius: 20px; }
+  .notes { flex: 1 1 280px; min-width: 0; color: var(--mid); font-size: 13px; }
+  .notes ul { margin: 0; padding-left: 18px; }
+
+  /* 框內元件 */
+  .url { background: var(--fill2); padding: 6px 12px; font: 12px/1.4 ui-monospace, Menlo, monospace; color: var(--mid); border-bottom: 1px solid var(--line); word-break: break-all; }
+  .app { display: flex; min-height: 560px; }
+  .side { width: 200px; flex: none; background: var(--fill); border-right: 1px solid var(--line); padding: 12px 10px; font-size: 13px; }
+  .side .it { padding: 4px 8px; border-radius: 4px; display: flex; justify-content: space-between; gap: 6px; }
+  .side .it.on { background: var(--fill3); font-weight: 600; }
+  .side .grp { margin: 12px 0 2px; font-size: 11px; color: var(--soft); padding: 0 8px; }
+  .side .btn { margin-bottom: 4px; }
+  .main { flex: 1; min-width: 0; padding: 12px 16px; position: relative; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .bar .title { font-weight: 700; font-size: 16px; margin-right: 8px; }
+  .chip { display: inline-block; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 0 8px; font-size: 12px; line-height: 20px; white-space: nowrap; }
+  .chip.solid { background: var(--fill3); border-color: var(--fill3); }
+  .btn { display: inline-block; border: 1px solid var(--ink); border-radius: 4px; padding: 2px 10px; font-size: 13px; background: var(--bg); white-space: nowrap; }
+  .btn.pri { background: var(--ink); color: var(--bg); }
+  .btn.ghost { border-color: var(--line); color: var(--mid); }
+  .btn.dis { border-color: var(--fill3); color: var(--soft); }
+  .kbd { font: 11px ui-monospace, Menlo, monospace; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; color: var(--mid); background: var(--bg); }
+  .sp { flex: 1; }
+  .board { display: flex; gap: 10px; align-items: flex-start; }
+  .col { flex: 1; min-width: 0; background: var(--fill); border-radius: 6px; padding: 8px; }
+  .col.closed { flex: 0 0 44px; writing-mode: vertical-rl; text-align: left; color: var(--mid); font-size: 12px; padding: 10px 0; display: flex; align-items: center; }
+  .col h4 { margin: 0 0 8px; font-size: 13px; display: flex; justify-content: space-between; }
+  .col.hl { outline: 2px dashed var(--mid); }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin-bottom: 8px; font-size: 12px; }
+  .card.new { outline: 2px solid var(--ink); }
+  .card .r { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .card .id { color: var(--soft); font-family: ui-monospace, Menlo, monospace; font-size: 11px; }
+  .card .t { font-size: 13px; margin: 4px 0 6px; color: var(--ink); }
+  .card .sub { color: var(--mid); margin: -2px 0 6px; font-size: 11px; }
+  .av { width: 20px; height: 20px; border-radius: 50%; background: var(--fill3); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex: none; }
+  .av.ag { border-radius: 4px; background: var(--fill2); border: 1px dashed var(--mid); }
+  .av.add { background: none; border: 1px dashed var(--line); color: var(--soft); }
+  .badge { margin-left: auto; border: 1px solid var(--mid); border-radius: 4px; padding: 0 6px; font-size: 11px; white-space: nowrap; }
+  .badge.strong { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .badge.dash { border-style: dashed; color: var(--mid); }
+  .tag { font-size: 10px; color: var(--soft); }
+  .toast { position: absolute; right: 16px; bottom: 16px; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 8px 12px; font-size: 13px; display: flex; gap: 12px; align-items: center; }
+  .toast u { color: var(--fill2); }
+  .ann { position: absolute; background: #fff; border: 1px solid var(--ink); font-size: 11px; padding: 2px 6px; border-radius: 3px; color: var(--ink); }
+  .box { border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: var(--bg); }
+  .box.fill { background: var(--fill); }
+  .box h5 { margin: 0 0 6px; font-size: 13px; }
+  .line { height: 8px; background: var(--fill2); border-radius: 4px; margin: 6px 0; }
+  table.list { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.list td, table.list th { border-bottom: 1px solid var(--fill2); padding: 6px 4px; text-align: left; vertical-align: middle; }
+  table.list th { color: var(--soft); font-weight: 400; }
+  table.list tr.grp td { background: var(--fill); font-weight: 600; }
+  table.list tr.sel td { background: var(--fill2); }
+  .cb { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--mid); border-radius: 2px; vertical-align: middle; }
+  .cb.on { background: var(--ink); }
+  .float { position: absolute; left: 50%; transform: translateX(-50%); bottom: 16px; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 6px 10px; display: flex; gap: 10px; font-size: 12px; white-space: nowrap; }
+  .float span { border-right: 1px solid var(--mid); padding-right: 10px; }
+  .float span:last-child { border: 0; padding: 0; }
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.35); }
+  .modal { position: absolute; background: var(--bg); border: 2px solid var(--ink); border-radius: 8px; padding: 14px; }
+  .input { border: 1px solid var(--mid); border-radius: 4px; padding: 6px 8px; background: var(--bg); }
+  .input.big { font-size: 16px; font-weight: 600; }
+  .input.area { min-height: 80px; color: var(--soft); }
+  .res { padding: 5px 8px; border-radius: 4px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+  .res.on { background: var(--fill2); }
+  .res .sp { flex: 1; }
+  .rgrp { font-size: 11px; color: var(--soft); margin: 8px 8px 2px; }
+  .field { display: grid; grid-template-columns: 76px 1fr; gap: 6px; align-items: center; font-size: 12px; padding: 4px 0; }
+  .field .k { color: var(--soft); }
+  .tl { font-size: 12px; border-left: 2px solid var(--fill3); padding-left: 10px; margin-left: 4px; }
+  .tl .e { margin: 6px 0; color: var(--mid); }
+  .tl .c { margin: 8px 0; border: 1px solid var(--line); border-radius: 6px; padding: 8px; color: var(--ink); background: var(--bg); }
+  .review { border: 2px solid var(--ink); border-radius: 6px; padding: 10px; display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .checklist { border: 2px dashed var(--mid); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+  .checklist .s { display: flex; gap: 8px; align-items: center; margin: 4px 0; font-size: 13px; }
+  .grid-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .grid-cards .cap { font-size: 11px; color: var(--mid); margin-top: -4px; }
+
+  /* 手機 */
+  .m .top { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .m .top b { font-size: 15px; }
+  .m .body { padding: 10px 14px 86px; min-height: 560px; position: relative; }
+  .m .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .m .tabs span { flex: 1; text-align: center; font-size: 12px; padding: 4px 0; border-radius: 4px; background: var(--fill); }
+  .m .tabs span.on { background: var(--ink); color: var(--bg); }
+  .m .nav { position: absolute; left: 0; right: 0; bottom: 0; display: flex; border-top: 1px solid var(--line); background: var(--bg); }
+  .m .nav span { flex: 1; text-align: center; font-size: 11px; padding: 8px 0 12px; color: var(--mid); }
+  .m .nav span.on { color: var(--ink); font-weight: 700; }
+  .m .fab { position: absolute; right: 14px; bottom: 64px; width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .m .sticky { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 14px 14px; border-top: 1px solid var(--line); background: var(--bg); display: flex; gap: 8px; }
+  .m .sticky .btn { flex: 1; text-align: center; padding: 8px 0; font-size: 14px; }
+  .m .toast { left: 14px; right: 14px; bottom: 64px; }
+  .m .sec { font-size: 12px; color: var(--soft); margin: 12px 0 6px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <h1>Nextline 第二版線框圖</h1>
+  <p>NX-147 資訊架構。只畫「放什麼、在哪裡、輪到誰」，不代表配色、字體與圖示。</p>
+  <p>桌面設計寬度 1100px、手機 360px；視窗不夠寬時整張等比縮小。灰色虛線框的方塊是代做 agent，圓形是人。</p>
+  <nav class="toc">
+    <a href="#board">看板</a><a href="#issues">全部的票</a><a href="#detail">票詳細頁</a><a href="#create">開票</a>
+    <a href="#cmdk">Cmd+K</a><a href="#agent">agent 工作中的卡片</a><a href="#first">第一次使用</a><a href="#me">等你</a>
+  </nav>
+</header>
+
+<!-- ============ 看板 ============ -->
+<section class="screen" id="board">
+  <h2>1. 看板（首頁）</h2>
+  <p class="q">這個畫面要回答：<b>每張票在哪一步、誰負責、agent 有沒有在動？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・/（＝ /board?sprint=current）</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/</div>
+        <div class="app">
+          <div class="side" data-side="board"></div>
+          <div class="main">
+            <div class="bar">
+              <span class="title">看板</span><span class="chip solid">Sprint 12 ▾</span>
+              <span class="chip">＋ 篩選</span><span class="sp"></span>
+              <span class="btn dis">存成 view</span><span class="btn pri">＋ 開票 <span class="kbd">C</span></span>
+            </div>
+            <div class="board">
+              <div class="col closed">Backlog　23 ▸</div>
+              <div class="col"><h4>Todo <span>3 ＋</span></h4>
+                <div data-card="NX-151|nextline|看板拖拉排序|B||"></div>
+                <div data-card="NX-153|coaching|整理 11/05 課後講義|B||"></div>
+                <div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|pend"></div>
+              </div>
+              <div class="col hl"><h4>In Progress <span>3 ＋</span></h4>
+                <div data-card="NX-147|nextline|資訊架構與核心流程|B|cn|active"></div>
+                <div data-card="NX-148|nextline|設計系統 tokens|B|cb|wait"></div>
+                <div data-card="NX-150|my-agent|晨報改讀 session 狀態|B||"></div>
+              </div>
+              <div class="col"><h4>待驗收 <span>2</span></h4>
+                <div data-card="NX-146|nextline|品牌識別初稿|B|cb|done|new"></div>
+                <div data-card="NX-144|nextline|第二版調查報告|B|阿|done"></div>
+              </div>
+              <div class="col"><h4>Done・7 天 <span>5</span></h4>
+                <div data-card="NX-145|nextline|產品定位|B||"></div>
+                <div data-card="NX-141|nextline|行動卡片版面|B|cn|"></div>
+              </div>
+              <div class="col closed">Canceled　4 ▸</div>
+            </div>
+            <div class="ann" style="left:262px;top:452px">拖曳中：能放的欄亮起</div>
+            <div class="toast">claude-brand 把 NX-146 移到待驗收 <u>打開</u></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・一次看一欄</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><b>看板</b><span class="chip solid">Sprint 12 ▾</span><span class="sp"></span><span class="chip">篩選</span></div>
+        <div class="body">
+          <div class="tabs"><span>Todo 3</span><span class="on">進行中 3</span><span>待驗收 2</span><span>Done 5</span><span>⋯</span></div>
+          <div data-card="NX-147|nextline|資訊架構與核心流程|B|cn|active"></div>
+          <div data-card="NX-148|nextline|設計系統 tokens|B|cb|wait"></div>
+          <div data-card="NX-150|my-agent|晨報改讀 session 狀態|B||"></div>
+          <div class="fab">＋</div>
+          <div data-nav="看板"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>欄依序：Backlog（收起）、Todo、In Progress、待驗收、Done（最近 7 天）、Canceled（收起）。</li>
+      <li>卡片固定四樣：票號＋Project、標題、負責人（圓）＋代做 agent（方）、session 徽章。</li>
+      <li>手機不拖拉；點卡片進詳細頁換狀態。「⋯」放 Backlog 與 Canceled。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ 全部的票 ============ -->
+<section class="screen" id="issues">
+  <h2>2. 全部的票（列表）</h2>
+  <p class="q">這個畫面要回答：<b>我要找的那張票在哪？能不能一次改很多張？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・篩選寫在網址、選取 3 張</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/issues?agent=claude-nextline&amp;session=awaiting_input,error&amp;group=status</div>
+        <div class="app">
+          <div class="side" data-side="issues"></div>
+          <div class="main">
+            <div class="bar">
+              <span class="title">全部的票</span>
+              <span class="chip solid">代做 agent：claude-nextline ✕</span><span class="chip solid">session：等你回覆、出錯 ✕</span><span class="chip">＋ 篩選 <span class="kbd">/</span></span>
+              <span class="sp"></span><span class="chip">分組：狀態 ▾</span><span class="chip">看板｜<b>列表</b></span><span class="btn">存成 view <span class="kbd">⌥V</span></span>
+            </div>
+            <table class="list">
+              <tr><th style="width:24px"></th><th style="width:70px">票號</th><th>標題</th><th>Project</th><th>Sprint</th><th>負責人／agent</th><th>session</th><th>更新</th></tr>
+              <tr class="grp"><td colspan="8">In Progress　2</td></tr>
+              <tr class="sel"><td><span class="cb on"></span></td><td>NX-158</td><td>API 加 In Review 狀態</td><td>nextline</td><td>12</td><td><span class="av">B</span> <span class="av ag">cn</span></td><td><span class="badge strong">等你回覆</span></td><td>3 分前</td></tr>
+              <tr class="sel"><td><span class="cb on"></span></td><td>NX-159</td><td>members 資料表</td><td>nextline</td><td>12</td><td><span class="av">B</span> <span class="av ag">cn</span></td><td><span class="badge strong">出錯</span></td><td>12 分前</td></tr>
+              <tr class="grp"><td colspan="8">Todo　1</td></tr>
+              <tr class="sel"><td><span class="cb on"></span></td><td>NX-161</td><td>看板 position 欄位</td><td>nextline</td><td>13</td><td><span class="av">B</span> <span class="av ag">cn</span></td><td><span class="badge strong">等你回覆</span></td><td>1 小時前</td></tr>
+            </table>
+            <div class="float"><span>已選 3 張</span><span>狀態</span><span>Project</span><span>Sprint</span><span>代做 agent</span><span>⋯</span><span>取消選取 Esc</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・列表</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><b>全部的票</b><span class="sp"></span><span class="chip">篩選 2</span></div>
+        <div class="body">
+          <div class="r" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="chip solid">claude-nextline ✕</span><span class="chip solid">等你回覆、出錯 ✕</span></div>
+          <div class="sec"><span>In Progress 2</span></div>
+          <div data-card="NX-158|nextline|API 加 In Review 狀態|B|cn|wait"></div>
+          <div data-card="NX-159|nextline|members 資料表|B|cn|err"></div>
+          <div class="sec"><span>Todo 1</span></div>
+          <div data-card="NX-161|nextline|看板 position 欄位|B|cn|wait"></div>
+          <div data-nav="全部"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>篩選晶片＝網址參數；複製網址打開就是同一畫面。</li>
+      <li>有篩選時「存成 view」才亮。</li>
+      <li>手機不做批次；長按卡片只開單張的狀態選單。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ 票詳細頁 ============ -->
+<section class="screen" id="detail">
+  <h2>3. 票詳細頁（待驗收時）</h2>
+  <p class="q">這個畫面要回答：<b>這張票現在要我做什麼？agent 做了什麼、改了什麼？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・/issues/NX-146</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/issues/NX-146</div>
+        <div class="app">
+          <div class="side" data-side=""></div>
+          <div class="main" style="display:flex;gap:16px">
+            <div style="flex:1;min-width:0">
+              <div class="bar"><span class="tag">nextline ／ NX-146</span></div>
+              <div class="review" style="margin-bottom:12px">
+                <span class="av ag">cb</span>
+                <div style="flex:1;min-width:200px"><b>claude-brand 做完了，等你驗收</b>
+                  <div style="color:var(--mid);font-size:12px">摘要：三個品牌方向放在 docs/design/brand/，推薦 B……（session 第 1 輪・42 分鐘）</div></div>
+                <span class="btn">退回</span><span class="btn pri">通過</span>
+              </div>
+              <div style="font-size:20px;font-weight:700;margin-bottom:8px">品牌識別初稿</div>
+              <div class="line" style="width:90%"></div><div class="line" style="width:75%"></div><div class="line" style="width:82%"></div>
+              <div class="box fill" style="margin:14px 0">
+                <h5>Session 第 1 輪・做完了 <span style="float:right" class="btn dis">停止</span></h5>
+                <div class="tl" style="border:0;padding:0;margin:0">
+                  <div class="e">動作：讀 2026-11-03_產品定位.md</div>
+                  <div class="e">動作：寫 docs/design/brand/README.md</div>
+                  <div class="e">回覆：三個方向，推薦 B（寫成 comment）</div>
+                </div>
+              </div>
+              <h5 style="margin:12px 0 4px">活動</h5>
+              <div class="tl">
+                <div class="e">Bolas 把代做 agent 設成 claude-brand・1 小時前</div>
+                <div class="e">claude-brand 把狀態從 In Progress 改成 待驗收・2 分鐘前 <u>還原</u></div>
+                <div class="c"><b>claude-brand</b>：三個方向放在……下一步：Bolas 驗收</div>
+              </div>
+              <div class="input" style="margin-top:8px;color:var(--soft)">寫 comment…（⌘↵ 送出）</div>
+            </div>
+            <div style="width:240px;flex:none" class="box">
+              <div class="field"><span class="k">狀態</span><span class="chip solid">待驗收 ▾</span></div>
+              <div class="field"><span class="k">負責人</span><span><span class="av">B</span> Bolas</span></div>
+              <div class="field"><span class="k">代做 agent</span><span><span class="av ag">cb</span> claude-brand ▾</span></div>
+              <div class="field"><span class="k">Project</span><span>nextline 第二版 ▾</span></div>
+              <div class="field"><span class="k">Sprint</span><span>12 ▾</span></div>
+              <div class="field"><span class="k">到期日</span><span style="color:var(--soft)">＋ 設定</span></div>
+              <div class="field"><span class="k">blocked by</span><span>NX-145 ✓</span></div>
+              <div class="field"><span class="k">blocks</span><span>NX-148、NX-149</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・驗收按鈕固定在底部</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><span>‹</span><b>NX-146</b><span class="sp"></span><span>⋯</span></div>
+        <div class="body">
+          <div style="font-size:17px;font-weight:700">品牌識別初稿</div>
+          <div class="r" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px"><span class="chip solid">待驗收</span><span class="chip">nextline</span><span class="chip">Sprint 12</span></div>
+          <div class="review"><span class="av ag">cb</span><div style="flex:1"><b>claude-brand 做完了</b><div style="color:var(--mid);font-size:12px">三個方向放在 docs/design/brand/，推薦 B……</div></div></div>
+          <div class="sec"><span>欄位</span><span>▸</span></div>
+          <div class="sec"><span>Session 第 1 輪・做完了</span><span>▸</span></div>
+          <div class="sec"><span>活動 3</span><span>▾</span></div>
+          <div class="tl"><div class="e">claude-brand 改成待驗收・2 分前</div><div class="c">三個方向放在……</div></div>
+          <div class="sticky"><span class="btn">退回</span><span class="btn pri">通過</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>驗收列只在「待驗收」出現，放在標題上方，第一眼就看到。</li>
+      <li>按「退回」：驗收列展開成 comment 框，寫字前送出鈕是停用的。</li>
+      <li>session 面板與「停止」在第一屏（產品原則 4）；做完的 session 停止鈕停用。</li>
+      <li>變更紀錄每筆寫「誰改的」，可單筆還原。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ 開票 ============ -->
+<section class="screen" id="create">
+  <h2>4. 開票</h2>
+  <p class="q">這個畫面要回答：<b>怎麼最快把一件事變成一張排好位置的票？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・任何畫面按 C</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/?new=1</div>
+        <div class="app">
+          <div class="side" data-side="board"></div>
+          <div class="main"><div class="board">
+            <div class="col"><h4>Todo</h4><div class="line"></div><div class="line"></div></div>
+            <div class="col"><h4>In Progress</h4><div class="line"></div></div>
+            <div class="col"><h4>待驗收</h4><div class="line"></div></div>
+            <div class="col"><h4>Done</h4><div class="line"></div></div>
+          </div></div>
+        </div>
+        <div class="dim"></div>
+        <div class="modal" style="left:250px;top:90px;width:600px">
+          <div class="tag" style="margin-bottom:6px">新的票</div>
+          <div class="input big">看板拖拉排序</div>
+          <div class="input area" style="margin-top:8px">描述（Markdown，可留空）</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+            <span class="chip solid">Todo <span class="kbd">S</span></span><span class="chip solid">nextline 第二版 <span class="kbd">P</span></span><span class="chip solid">Sprint 12 <span class="kbd">Y</span></span>
+            <span class="chip"><span class="av" style="width:14px;height:14px;font-size:8px">B</span> Bolas</span><span class="chip">＋ 代做 agent <span class="kbd">D</span></span><span class="chip">＋ 到期日</span><span class="chip">＋ blocked by</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px"><span class="cb"></span><span style="font-size:12px">建立後繼續開下一張</span><span class="sp"></span><span class="btn ghost">取消 Esc</span><span class="btn pri">建立 ⌘↵</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・右下角＋，整頁表單</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><span>✕</span><b>新的票</b><span class="sp"></span><span class="btn pri">建立</span></div>
+        <div class="body">
+          <div class="input big">看板拖拉排序</div>
+          <div class="input area" style="margin-top:8px">描述</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><span class="chip solid">Todo</span><span class="chip solid">nextline 第二版</span><span class="chip solid">Sprint 12</span><span class="chip">Bolas</span><span class="chip">＋ 代做 agent</span><span class="chip">＋ 到期日</span></div>
+          <div class="box fill" style="margin-top:16px;height:170px;display:flex;align-items:center;justify-content:center;color:var(--soft)">鍵盤</div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>只有標題必填；其他晶片預填目前畫面的值（在 Project 頁開的就填那個 Project，在看板開的填目前 Sprint）。</li>
+      <li>建立後 toast「已開 NX-12」＋「打開」，卡片出現在欄頂。</li>
+      <li>網址 ?new=1&amp;title=…&amp;project=… 可預填，給 agent 或書籤用。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ Cmd+K ============ -->
+<section class="screen" id="cmdk">
+  <h2>5. Cmd+K 指令面板</h2>
+  <p class="q">這個畫面要回答：<b>不用滑鼠，我要去哪裡、做什麼？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・在看板選取 NX-147 後按 ⌘K，打「交給」</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/</div>
+        <div class="app">
+          <div class="side" data-side="board"></div>
+          <div class="main"><div class="board">
+            <div class="col"><h4>Todo</h4><div class="line"></div></div>
+            <div class="col"><h4>In Progress</h4><div class="line"></div><div class="line"></div></div>
+            <div class="col"><h4>待驗收</h4><div class="line"></div></div>
+            <div class="col"><h4>Done</h4><div class="line"></div></div>
+          </div></div>
+        </div>
+        <div class="dim"></div>
+        <div class="modal" style="left:275px;top:70px;width:560px;padding:8px">
+          <div class="chip solid" style="margin:4px">NX-147 資訊架構與核心流程</div>
+          <div class="input big" style="margin:6px 4px">交給</div>
+          <div class="rgrp">對這張票</div>
+          <div class="res on">交給 agent…<span class="sp"></span><span class="kbd">D</span></div>
+          <div class="res">交給 agent：claude-nextline（最近用過）</div>
+          <div class="rgrp">跳到</div>
+          <div class="res">Agent 工作中（view）</div>
+          <div class="rgrp">票</div>
+          <div class="res"><span class="tag">NX-155</span> MCP 支援代做 agent</div>
+          <div class="res"><span class="tag">NX-162</span> 交給 agent 時產生開工指令</div>
+          <div class="tag" style="padding:8px">↑↓ 選擇　Enter 執行　Esc 關閉</div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・底部「搜尋」</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><div class="input" style="flex:1">交給</div><span>取消</span></div>
+        <div class="body">
+          <div class="rgrp">跳到</div>
+          <div class="res">Agent 工作中（view）</div>
+          <div class="rgrp">票</div>
+          <div class="res"><span class="tag">NX-155</span> MCP 支援代做 agent</div>
+          <div class="res"><span class="tag">NX-162</span> 交給 agent 時產生開工指令</div>
+          <div class="rgrp">最近看過</div>
+          <div class="res"><span class="tag">NX-146</span> 品牌識別初稿</div>
+          <div data-nav="搜尋"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>三組：對這張票（有選取才出現）、跳到、票。同時比對票號、標題、動作名稱。</li>
+      <li>動作右邊顯示快捷鍵，用久了就不用開面板。</li>
+      <li>手機沒有「對這張票」，因為手機不做選取。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ agent 卡片 ============ -->
+<section class="screen" id="agent">
+  <h2>6. agent 工作中的卡片</h2>
+  <p class="q">這個畫面要回答：<b>這個 agent 現在在做、在等我，還是卡住了？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・同一張卡片的 session 狀態，加上票詳細頁的 session 面板（進行中）</div>
+      <div class="frame d" data-w="1100">
+        <div class="main" style="padding:16px">
+          <div class="grid-cards">
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|pend"></div><div class="cap">剛指派，agent 還沒讀票。點徽章：複製開工指令</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|late"></div><div class="cap">指派超過 30 分鐘沒人接 → 進「等你」</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|active"></div><div class="cap">有活動。徽章帶最後活動時間</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|wait"></div><div class="cap">agent 問人 → 進「等你」。卡片多一行問題</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|err"></div><div class="cap">agent 回報錯誤 → 進「等你」</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|stale"></div><div class="cap">進行中但 30 分鐘沒活動 → 進「等你」</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|stopping"></div><div class="cap">人按了停止，等 agent 下次呼叫 MCP</div></div>
+            <div><div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|done"></div><div class="cap">做完，卡片自己在「待驗收」欄</div></div>
+          </div>
+          <div class="box fill" style="margin-top:16px;max-width:620px">
+            <h5>Session 第 2 輪・● 進行中・最後活動 1 分鐘前 <span style="float:right"><span class="btn">停止</span></span></h5>
+            <div class="tl" style="border:0;padding:0;margin:0">
+              <div class="e">想法：先看 worker/mcp/tools.ts 的 save_issue</div>
+              <div class="e">動作：改 worker/api/issues.ts，加 delegate_id</div>
+              <div class="e">動作：npm test（進行中）</div>
+            </div>
+            <div class="tag" style="margin-top:6px">想法和動作只顯示在這裡；問人和回覆同時寫成 comment。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・卡片同一套徽章</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><b>Agent 工作中</b><span class="sp"></span><span class="chip">依 agent</span></div>
+        <div class="body">
+          <div class="sec"><span>claude-nextline 3</span></div>
+          <div data-card="NX-155|nextline|MCP 支援代做 agent|B|cn|active"></div>
+          <div data-card="NX-158|nextline|API 加 In Review 狀態|B|cn|wait"></div>
+          <div data-card="NX-159|nextline|members 資料表|B|cn|err"></div>
+          <div class="sec"><span>claude-brand 1</span></div>
+          <div data-card="NX-148|nextline|設計系統 tokens|B|cb|stale"></div>
+          <div data-nav=""></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第一次使用 ============ -->
+<section class="screen" id="first">
+  <h2>7. 第一次使用</h2>
+  <p class="q">這個畫面要回答：<b>這是什麼、我第一步要做什麼？</b></p>
+  <div class="frames">
+    <div class="fit desk"><div class="label">桌面・第一次打開 /，已完成第 1 步</div>
+      <div class="frame d" data-w="1100">
+        <div class="url">nextline.app/</div>
+        <div class="app">
+          <div class="side" data-side="first"></div>
+          <div class="main">
+            <div class="checklist">
+              <div style="display:flex;align-items:center"><b>開始使用　1／4</b><span class="sp"></span><span class="btn ghost">清掉範例</span></div>
+              <div class="s"><span class="cb on"></span><s>按 C 開第一張票</s></div>
+              <div class="s"><span class="cb"></span>把它拖到 In Progress</div>
+              <div class="s"><span class="cb"></span>連上你的 agent：<span class="btn">複製 MCP 設定</span></div>
+              <div class="s"><span class="cb"></span>把票交給 agent（卡片上的 ＋）</div>
+            </div>
+            <div class="board">
+              <div class="col"><h4>Todo <span>2</span></h4>
+                <div data-card="NX-1|範例|我的第一張票|B||" ></div>
+                <div data-card="NX-2|範例|範例：寫 README|B||"></div>
+              </div>
+              <div class="col"><h4>In Progress <span>1</span></h4><div data-card="NX-3|範例|範例：修登入 bug|B|ex|active"></div></div>
+              <div class="col"><h4>待驗收 <span>1</span></h4><div data-card="NX-4|範例|範例：加深色模式|B|ex|done"></div></div>
+              <div class="col"><h4>Done <span>0</span></h4><div class="card" style="color:var(--soft);text-align:center;border-style:dashed">拖一張票過來</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・清單收成一行</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><b>看板</b><span class="chip solid">範例 ▾</span></div>
+        <div class="body">
+          <div class="checklist"><b>開始使用　1／4</b><div class="s"><span class="cb"></span>下一步：把它拖到 In Progress</div><div class="tag">手機上：點卡片 → 改狀態</div></div>
+          <div class="tabs"><span class="on">Todo 2</span><span>進行中 1</span><span>待驗收 1</span><span>Done 0</span></div>
+          <div data-card="NX-1|範例|我的第一張票|B||"></div>
+          <div data-card="NX-2|範例|範例：寫 README|B||"></div>
+          <div class="fab">＋</div>
+          <div data-nav="看板"></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>不給空白看板：範例 Project「一個 repo、兩個 agent」示範每種卡片怎麼讀。</li>
+      <li>四步做完清單自動收起；「清掉範例」把範例票移到 Canceled，可復原。</li>
+      <li>空的欄只放一句話，不放插圖。</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ 等你 ============ -->
+<section class="screen" id="me">
+  <h2>8. 等你（輪到我的）</h2>
+  <p class="q">這個畫面要回答：<b>現在有哪些事輪到我，先處理哪一件？</b></p>
+  <div class="frames">
+    <div class="fit mob"><div class="label">手機・/me（從底部「等你」進來）</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><b>等你</b><span class="chip solid">4</span></div>
+        <div class="body">
+          <div class="sec"><span>等你回覆・出錯　1</span></div>
+          <div data-card="NX-158|nextline|API 加 In Review 狀態|B|cn|wait"></div>
+          <div class="sec"><span>待驗收　2</span></div>
+          <div data-card="NX-146|nextline|品牌識別初稿|B|cb|done"></div>
+          <div data-card="NX-144|nextline|第二版調查報告|B|阿|done"></div>
+          <div class="sec"><span>你自己做的　1</span></div>
+          <div data-card="NX-153|coaching|整理 11/05 課後講義|B||"></div>
+          <div class="toast">NX-145 完成 <u>復原</u></div>
+          <div data-nav="等你"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fit mob"><div class="label">手機・點待驗收的票 → 底部兩顆按鈕</div>
+      <div class="frame m" data-w="360">
+        <div class="top"><span>‹ 等你</span><b>NX-144</b></div>
+        <div class="body">
+          <div style="font-size:17px;font-weight:700">第二版調查報告</div>
+          <div class="review" style="margin-top:8px"><span class="av ag">阿</span><div style="flex:1"><b>阿澈做完了</b><div style="color:var(--mid);font-size:12px">報告在 docs/report.md</div></div></div>
+          <div class="sec"><span>回覆或退回理由</span></div>
+          <div class="input" style="color:var(--soft)">寫 comment…</div>
+          <div class="sticky"><span class="btn">退回</span><span class="btn pri">通過</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ul>
+      <li>排序固定：agent 在等你回覆或出錯 → 待驗收 → 你自己做的。</li>
+      <li>卡片多一行：等你回覆的寫 agent 的問題，待驗收的寫摘要，不用點開就知道要做什麼。</li>
+      <li>桌面版同一個網址，版面是列表，依同樣三組分組。</li>
+    </ul></div>
+  </div>
+</section>
+
+<script>
+  // 側欄：data-side 是目前選取的項目。
+  const SIDE = [
+    ['grp', ''], ['btn', '搜尋 ⌘K'], ['btn', '＋ 開票 C'],
+    ['me', '等你', '4'], ['board', '看板', ''], ['issues', '全部的票', ''], ['zones', '三區', ''],
+    ['grp', 'Sprint'], ['s12', '目前・Sprint 12', '14'], ['s13', '下一期・13', '5'],
+    ['grp', 'Project'], ['p1', 'nextline 第二版', '9'], ['p2', 'coaching', '4'], ['p3', '全部 Project', ''],
+    ['grp', '我的 view'], ['v1', 'Agent 工作中', '4'], ['v2', 'nextline agent 卡住的', '2'],
+    ['grp', ''], ['set', '設定', ''],
+  ];
+  document.querySelectorAll('[data-side]').forEach((el) => {
+    const on = el.dataset.side;
+    const first = on === 'first';
+    el.innerHTML = SIDE.map(([k, t, n]) => {
+      if (k === 'grp') return `<div class="grp">${t}</div>`;
+      if (k === 'btn') return `<div class="it btn ghost">${t}</div>`;
+      if (first && k === 'v2') return '';
+      if (first && k === 'p1') return `<div class="it"><span>範例：一個 repo、兩個 agent</span><span>4</span></div>`;
+      if (first && k === 'p2') return `<div class="it"><span>開始使用 1／4</span><span></span></div>`;
+      const cls = k === (first ? 'board' : on) ? 'it on' : 'it';
+      return `<div class="${cls}"><span>${t}</span><span>${n ?? ''}</span></div>`;
+    }).join('');
+  });
+
+  // 卡片：data-card="票號|Project|標題|負責人|代做 agent|session 狀態|new"
+  const BADGE = {
+    pend: ['dash', '等 agent 接手'], late: ['strong', '還沒開工・45 分'], active: ['', '● 進行中・1 分前'],
+    wait: ['strong', '等你回覆'], err: ['strong', '出錯'], stale: ['strong', '太久沒更新・42 分'],
+    stopping: ['dash', '停止中…'], done: ['', '做完了'],
+  };
+  const EXTRA = { wait: '問：description 要整份重送嗎？', err: 'npm test 失敗：3 項', done: '摘要：已完成，見 comment' };
+  document.querySelectorAll('[data-card]').forEach((el) => {
+    const [id, proj, title, owner, agent, st, flag] = el.dataset.card.split('|');
+    const b = BADGE[st];
+    const agentEl = agent ? `<span class="av ag">${agent}</span>` : '<span class="av add">＋</span>';
+    el.outerHTML = `<div class="card${flag === 'new' ? ' new' : ''}">
+      <div class="r"><span class="id">${id}</span><span class="tag">${proj}</span></div>
+      <div class="t">${title}</div>
+      ${EXTRA[st] ? `<div class="sub">${EXTRA[st]}</div>` : ''}
+      <div class="r"><span class="av">${owner}</span>${agentEl}${b ? `<span class="badge ${b[0]}">${b[1]}</span>` : ''}</div>
+    </div>`;
+  });
+
+  // 手機底部分頁列。
+  document.querySelectorAll('[data-nav]').forEach((el) => {
+    const on = el.dataset.nav;
+    el.outerHTML = `<div class="nav">${['等你 4', '看板', '全部', '搜尋'].map((t) => `<span class="${t.startsWith(on) && on ? 'on' : ''}">${t}</span>`).join('')}</div>`;
+  });
+
+  // 視窗不夠寬時整張框等比縮小（用 zoom，版面高度跟著縮，不會撐出橫向捲動）。
+  function fit() {
+    document.querySelectorAll('.frame').forEach((f) => {
+      const w = Number(f.dataset.w);
+      const avail = f.parentElement.clientWidth;
+      f.style.zoom = String(Math.min(1, avail / w));
+    });
+  }
+  fit();
+  addEventListener('resize', fit);
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+/* 開票對話框（components.md 第 13 節 Modal；視覺照 早期設計原型（未收進公開版） 的 .overlay／.nl-modal） */
+
+.nl-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: var(--color-scrim);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 16px 16px;
+  overflow-y: auto;
+  animation: nl-scrim-in var(--duration-slower) var(--ease-enter);
+}
+.nl-modal {
+  width: 100%;
+  max-width: var(--size-modal-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  animation: nl-modal-up var(--duration-slower) var(--ease-enter);
+}
+.nl-modal .hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 0 20px;
+}
+.nl-modal .hd h2 {
+  flex: 1;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+.nl-modal .bd {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 20px;
+  min-width: 0;
+}
+.nl-modal .ft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 16px 16px 20px;
+  border-top: 1px solid var(--color-line);
+}
+.nl-modal .ft .sp,
+.create-confirm .sp {
+  flex: 1;
+}
+@keyframes nl-modal-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes nl-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 標題：無框大字（nl-title-input），不用票詳細就地編輯的外框 */
+.create-modal .create-title {
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.create-modal .create-title::placeholder {
+  color: var(--color-text-muted);
+}
+.create-modal .create-title[aria-invalid='true'] {
+  box-shadow: none;
+}
+.create-modal .nl-error {
+  margin-top: -6px;
+}
+
+/* 欄位晶片 */
+.create-modal .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.create-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--size-control-sm);
+  max-width: 100%;
+  min-width: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  /* 深色模式 surface-2 跟對話框底色（surface-raised）一樣，加一圈細線才看得出是可以點的晶片 */
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  color: var(--color-text);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.create-chip:hover:not(:disabled) {
+  background: var(--color-hover);
+  box-shadow: inset 0 0 0 1.5px var(--color-line-strong);
+}
+.create-chip:focus-visible,
+.create-due:focus-within {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.create-chip:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+.create-chip > .nl-icon,
+.create-chip .ic .nl-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-muted);
+}
+.create-chip .ic {
+  display: inline-flex;
+}
+.create-chip .ic .nl-icon {
+  color: inherit;
+}
+.create-chip .lbl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.create-chip .nl-kbd {
+  height: 18px;
+  min-width: 18px;
+  margin-right: -4px;
+}
+.create-due input {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  outline: 0;
+  min-width: 0;
+  color-scheme: light dark;
+}
+.create-due input.is-empty {
+  color: var(--color-text-muted);
+}
+
+/* 已選的 blocked by */
+.create-blockers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.create-blockers .blk-id {
+  flex: none;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1.6 var(--font-mono);
+  color: var(--color-text-muted);
+}
+.create-blockers .blk-t {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+}
+.create-modal textarea.nl-input {
+  min-height: 96px;
+}
+
+/* 丟掉草稿的確認（對話框裡的一列，不用瀏覽器的 confirm） */
+.create-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.nl-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.nl-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+/* 手機：整個畫面的頁面，建立按鈕固定在底部 */
+@media (max-width: 759px) {
+  .nl-modal-scrim {
+    padding: 0;
+    align-items: stretch;
+    overflow: hidden;
+  }
+  .create-modal {
+    max-width: none;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .create-modal .hd {
+    padding: calc(12px + env(safe-area-inset-top)) 12px 0 16px;
+  }
+  .create-modal .bd {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+  }
+  .create-modal .ft {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: var(--color-surface-raised);
+  }
+  .create-modal .nl-kbd,
+  .create-modal .create-cancel {
+    display: none;
+  }
+  .create-modal .create-submit {
+    --h: var(--size-control-lg);
+    flex: 1 1 100%;
+  }
+  .create-chip {
+    height: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nl-modal-scrim,
+  .nl-modal {
+    animation: none;
+  }
+}

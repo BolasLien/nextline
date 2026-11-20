@@ -1,0 +1,14 @@
+node_modules
+dist
+.scratch
+*.local
+.DS_Store
+.wrangler
+.dev.vars*
+*.sqlite*
+*.db
+*.db-*
+.env
+.env.*
+*.key
+*.pem

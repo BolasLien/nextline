@@ -1,0 +1,13 @@
+.login-page { min-height: 100%; height: 100%; overflow-y: auto; display: grid; place-items: center; padding: var(--space-6); }
+.login-card { width: min(100%, 400px); padding: var(--space-8); background: var(--color-surface); border: 1px solid var(--color-border-input); border-radius: var(--radius-lg); }
+.login-brand { display: flex; gap: var(--space-3); align-items: center; font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-8); }
+.login-card h1 { font-size: var(--font-size-xl); margin: 0 0 var(--space-2); }
+.login-card p { color: var(--color-text-muted); line-height: var(--line-height-normal); }
+.login-card form { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
+.login-card input { min-width: 0; width: 100%; height: var(--size-control-lg); border: 1px solid var(--color-border-input); border-radius: var(--radius-sm); padding: var(--space-3); background: var(--color-surface); color: var(--color-text); font: inherit; font-size: 16px; }
+.login-card input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.login-card input[aria-invalid="true"] { border-color: var(--color-danger); }
+.login-card .login-error { color: var(--color-danger); margin: 0; }
+.login-help { margin: var(--space-6) 0 0; font-size: var(--font-size-sm); }
+.logout { padding: var(--space-3); }
+@media (max-width: 480px) { .login-page { padding: var(--space-4); } .login-card { padding: var(--space-6); } .logout .nl-btn { min-height: var(--size-control-lg); } }

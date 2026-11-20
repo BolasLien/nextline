@@ -1,0 +1,366 @@
+/* 看板（components.md 第 7、8 節；視覺照 早期設計原型（未收進公開版） 的看板） */
+
+.nl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--size-control-sm);
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+/* 收起的欄（Backlog、Canceled）放在標題列 */
+.collapsed-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.nl-col.nl-col--collapsed {
+  display: inline-flex;
+  flex: none;
+  flex-direction: row;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  align-items: center;
+  gap: var(--space-2);
+  /* 拖曳中大小不變：放置區的位置在拿起時就量好，版面一動就對不準 */
+  height: var(--size-control-md);
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: var(--font-weight-bold) var(--font-size-sm) / 1 var(--font-sans);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.nl-col--collapsed:hover {
+  background: var(--color-hover);
+}
+.nl-col--collapsed:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.nl-col--collapsed .n {
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1.6 var(--font-mono);
+  color: var(--color-text-muted);
+}
+.nl-col--collapsed[aria-expanded='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--color-line-strong);
+}
+/* 拖曳中：收起的欄變成放置區 */
+.nl-col--collapsed.is-target {
+  background: var(--color-surface);
+  outline: 2px dashed var(--color-line-strong);
+  outline-offset: -2px;
+}
+.nl-col--collapsed.is-target.is-drop {
+  background: var(--color-primary-soft);
+  outline-color: var(--color-primary);
+}
+
+/* 看板：欄寬 232～296，放不下時只有看板框內橫捲 */
+.board-view {
+  display: flex;
+  flex-direction: column;
+}
+.board-wrap {
+  overflow-x: auto;
+  padding: 2px 2px 12px;
+  margin: 0 -2px;
+}
+.nl-board {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: min-content;
+}
+.nl-col {
+  flex: 1 1 0;
+  min-width: 232px;
+  max-width: var(--size-board-col);
+  background: var(--color-surface-2);
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nl-col-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--size-control-sm);
+  padding: 0 2px;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+.nl-col-h > .nl-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--s-solid);
+}
+.nl-col-h .ttl {
+  white-space: nowrap;
+}
+.nl-col-h .n {
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1.6 var(--font-mono);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-pill);
+  padding: 0 7px;
+}
+.nl-col-h .sp {
+  flex: 1;
+}
+.nl-col-h .nl-btn--icon {
+  --h: var(--size-control-sm);
+  width: var(--size-control-sm);
+  height: var(--size-control-sm);
+}
+.nl-col--review {
+  background: var(--color-review-col);
+  outline: 2px dashed var(--status-in-review-solid);
+  outline-offset: -2px;
+}
+.board-wrap.is-dragging .nl-col:not(.is-drop) {
+  outline: 2px dashed var(--color-line-strong);
+  outline-offset: -2px;
+}
+.board-wrap.is-dragging .nl-col--review:not(.is-drop) {
+  outline-color: var(--status-in-review-solid);
+}
+.nl-col.is-drop {
+  background: var(--color-primary-soft);
+  outline: 2px dashed var(--color-primary);
+  outline-offset: -2px;
+}
+.nl-col .cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 44px;
+}
+.nl-col-empty {
+  border: 1.5px dashed var(--color-line-strong);
+  border-radius: var(--radius-md);
+  padding: 14px 12px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* 票卡片 */
+.nl-card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+  min-width: 0;
+  transition: box-shadow var(--duration-fast) var(--ease-standard);
+}
+.nl-card:hover {
+  box-shadow: var(--shadow-md);
+}
+.nl-card .hit {
+  display: block;
+  padding: 10px 12px 12px;
+  border-radius: inherit;
+  cursor: grab;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.nl-card .hit[aria-disabled='true'],
+.nl-card .hit[role='button']:not([aria-roledescription]) {
+  cursor: pointer;
+}
+.nl-card .hit:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.nl-card .top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  min-width: 0;
+  padding-right: 24px;
+}
+.nl-card .id {
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1.4 var(--font-mono);
+  color: var(--color-text-muted);
+  flex: none;
+}
+.nl-card .proj {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.nl-card .proj .nl-pdot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.nl-card .proj .nm {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nl-card .t {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nl-card .next {
+  margin: 8px 0 0;
+  padding-left: 8px;
+  border-left: 3px solid var(--color-line-strong);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.nl-card .next .k {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  margin-right: 6px;
+}
+.nl-card--done .t {
+  color: var(--color-text-muted);
+}
+.nl-card--canceled .t {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.nl-card .more {
+  --h: var(--size-control-sm);
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: var(--size-control-sm);
+  height: var(--size-control-sm);
+  background: var(--color-surface);
+  opacity: 0;
+}
+.nl-card:hover .more,
+.nl-card:focus-within .more,
+.nl-card .more[aria-expanded='true'] {
+  opacity: 1;
+}
+/* 拖曳中：原位置留 2px 虛框，跟著游標的那張旋轉、放大、加陰影 */
+.nl-card.is-placeholder {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--color-line-strong);
+}
+/* 用 opacity 而不是 visibility，鍵盤拖拉時焦點留在原本的卡片上 */
+.nl-card.is-placeholder > * {
+  opacity: 0;
+}
+.nl-card.is-lifted {
+  transform: rotate(1.5deg) scale(1.02);
+  box-shadow: var(--shadow-drag);
+}
+.nl-card.is-lifted .hit {
+  cursor: grabbing;
+}
+
+/* 手機：一次看一欄，分頁切換 */
+.col-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 12px;
+}
+.col-tabs button {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: var(--size-control-lg);
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.col-tabs button .n {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+.col-tabs button[aria-selected='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+.col-tabs button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.col-tabs .more {
+  flex: 0 0 auto;
+  padding: 0 12px;
+}
+@media (max-width: 759px) {
+  .board-wrap {
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+  .nl-board {
+    display: block;
+    min-width: 0;
+  }
+  .nl-col {
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+    background: transparent;
+    padding: 0;
+  }
+  .nl-col--review {
+    outline: 0;
+  }
+  .nl-col-h {
+    display: none;
+  }
+  .nl-card .hit {
+    cursor: pointer;
+  }
+  .nl-card .more {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nl-card.is-lifted {
+    transform: none;
+  }
+}
+
+/* 右側預覽正開著的那張（照原型列表的 .is-peek） */
+.nl-card.is-peek {
+  background: var(--color-selected);
+  box-shadow: var(--shadow-sm), inset 3px 0 0 var(--color-primary);
+}

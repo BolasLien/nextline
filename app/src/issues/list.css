@@ -1,0 +1,254 @@
+/* 列表（components.md 第 9 節；視覺照 早期設計原型（未收進公開版） 的「全部的票」）。只用 tokens.css 的變數。 */
+
+/* 篩選列 */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  min-width: 0;
+}
+.filters .sp {
+  flex: 1;
+}
+.filters .search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 240px;
+  min-width: 160px;
+}
+.filters .search > .nl-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+.filters .search .nl-input {
+  height: var(--size-control-sm);
+  padding-left: 32px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+.nl-fchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--size-control-sm);
+  max-width: 100%;
+  padding: 0 10px 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1.2 var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.nl-fchip .lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nl-fchip > .nl-icon {
+  color: var(--color-text-muted);
+  flex: none;
+}
+.nl-fchip:hover {
+  background: var(--color-hover);
+  box-shadow: inset 0 0 0 1.5px var(--color-line-strong);
+}
+.nl-fchip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.nl-fchip.on {
+  background: var(--color-primary-soft);
+}
+.nl-fchip[aria-expanded='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--color-line-strong);
+}
+.list-count {
+  font: var(--font-weight-semibold) var(--font-size-sm) / 1 var(--font-mono);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.menu-proj {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 列表本體：窄的時候（手機、桌面開著預覽面板）換成三行版面 */
+.nl-list {
+  container-type: inline-size;
+  border-radius: var(--radius-md);
+  overflow: clip;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+}
+.nl-list .grp + .grp {
+  border-top: 1px solid var(--color-line);
+}
+.nl-list .grp-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 12px;
+  background: var(--color-surface-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  position: sticky;
+  top: calc(-1 * var(--space-4));
+  z-index: 1;
+}
+.nl-list .grp-h .ic {
+  display: inline-flex;
+}
+.nl-list .grp-h .n {
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1.6 var(--font-mono);
+  color: var(--color-text-muted);
+}
+.nl-list .rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* 畫面外的列不排版、不繪製（幾百張也捲得順），高度先用 44px 佔位 */
+.nl-row-li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 44px;
+}
+.nl-row-li + .nl-row-li {
+  border-top: 1px solid var(--color-line);
+}
+.nl-row {
+  display: grid;
+  grid-template-columns: 16px 64px minmax(160px, 2fr) minmax(0, 160px) minmax(0, 1.4fr) 72px;
+  grid-template-areas: 'st id ttl proj next upd';
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 12px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+.nl-row:hover {
+  background: var(--color-hover);
+}
+.nl-row:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+.nl-row.is-peek {
+  background: var(--color-selected);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+.nl-row .st {
+  grid-area: st;
+  display: inline-flex;
+}
+.nl-row .id {
+  grid-area: id;
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-mono);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.nl-row .ttl {
+  grid-area: ttl;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nl-row.is-canceled .ttl {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+.nl-row .proj {
+  grid-area: proj;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--color-text-muted);
+}
+.nl-row .proj .nm {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nl-row .next {
+  grid-area: next;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-muted);
+}
+.nl-row .next .k {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  margin-right: 6px;
+  color: var(--color-text-muted);
+}
+.nl-row .upd {
+  grid-area: upd;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+@container (max-width: 720px) {
+  .nl-row {
+    grid-template-columns: 16px auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'st id proj upd'
+      'ttl ttl ttl ttl'
+      'next next next next';
+    row-gap: 4px;
+    padding: 10px 12px;
+  }
+  .nl-row .next:empty {
+    display: none;
+  }
+}
+@media (max-width: 759px) {
+  .filters .search {
+    flex: 1 1 100%;
+  }
+  .nl-row-li {
+    contain-intrinsic-size: auto 84px;
+  }
+  .nl-row {
+    min-height: var(--size-control-lg);
+  }
+  .nl-list .grp-h {
+    top: calc(-1 * var(--space-3));
+  }
+}
+
+/* 「已封存」列表：每列右邊有「取消封存」（按鈕不能放在連結裡，跟連結並排） */
+.nl-row-li.has-act {
+  display: flex;
+  align-items: center;
+}
+.nl-row-li.has-act .nl-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.nl-row-li .row-act {
+  flex: none;
+  margin-right: 12px;
+}

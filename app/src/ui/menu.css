@@ -1,0 +1,82 @@
+/* components.md 第 19 節 選單 */
+/* 選單掛在 body 上，要蓋過右側預覽面板（z-peek）與 modal，所以照原型（.menu-layer）疊在指令面板之上一層 */
+.nl-menu {
+  position: fixed;
+  z-index: calc(var(--z-palette) + 1);
+  min-width: 220px;
+  max-width: calc(100vw - 16px);
+  padding: 6px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+  max-height: min(440px, calc(100dvh - 16px));
+  overflow-y: auto;
+  animation: nl-menu-in var(--duration-base) var(--ease-enter);
+}
+.nl-menu .grp + .grp {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-line);
+}
+.nl-menu .ttl {
+  padding: 4px 10px 2px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+}
+.nl-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font: var(--font-weight-regular) var(--font-size-md) / 1.2 var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+.nl-menu-item:hover,
+.nl-menu-item:focus {
+  background: var(--color-hover);
+}
+.nl-menu-item:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}
+.nl-menu-item .ic {
+  display: inline-flex;
+}
+.nl-menu-item .lbl {
+  flex: 1;
+  min-width: 0;
+}
+.nl-menu-item .check {
+  display: inline-flex;
+  width: 16px;
+  color: var(--color-primary);
+}
+.nl-menu-item .right {
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-mono);
+  color: var(--color-text-muted);
+}
+@media (max-width: 759px) {
+  .nl-menu-item {
+    min-height: var(--size-control-lg);
+  }
+}
+@keyframes nl-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nl-menu {
+    animation: none;
+  }
+}
