@@ -257,13 +257,14 @@ try {
   await settle(page);
   await dismissToasts(page);
 
-  // 1d. 從預覽改狀態（待驗收按「通過」）：Project 看板跟著動
-  await page.locator('.nl-peek').getByRole('button', { name: /^通過/ }).click();
-  await expectOnBoard('1d. 預覽按「通過」：Project 看板上那張馬上到 Done', d.r1.identifier, 'Done');
-  await poll(() => issueOf(d.r1.identifier), (i) => i.status === 'Done', '通過寫進 API');
+  // 1d. 從預覽改狀態（狀態選單移到 Done；NX-239 起待驗收沒有「通過」）：Project 看板跟著動
+  await page.locator('.nl-peek').getByRole('button', { name: /^狀態：/ }).click();
+  await page.getByRole('menuitem', { name: 'Done' }).click();
+  await expectOnBoard('1d. 預覽狀態選單改 Done：Project 看板上那張馬上到 Done', d.r1.identifier, 'Done');
+  await poll(() => issueOf(d.r1.identifier), (i) => i.status === 'Done', '改 Done 寫進 API');
   await undoToast(d.r1.identifier);
   await expectOnBoard('1d. 復原：回到待驗收', d.r1.identifier, 'In Review');
-  await poll(() => issueOf(d.r1.identifier), (i) => i.status === 'In Review', '通過的復原寫進 API');
+  await poll(() => issueOf(d.r1.identifier), (i) => i.status === 'In Review', '改 Done 的復原寫進 API');
   await settle(page);
   await dismissToasts(page);
 

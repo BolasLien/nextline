@@ -1,14 +1,13 @@
 // 票詳細：右側預覽面板（layout="peek"）與整頁 /issues/NX-n（layout="page"）共用。
 // 版面與互動照 早期設計原型（未收進公開版） 的 renderPeek／renderDetailPage、components.md 第 14 節：
-//   標題列 → 驗收列（只在待驗收，摘要＝最新的下一步）→ 狀態／Project／票號 → 標題（就地編輯）→ 最新的下一步（待驗收時不顯示，NX-161）→ 描述（Markdown）
+//   標題列 → 「等你回覆」（只在待驗收：最新的下一步或「要你決定」的問題與選項＋回覆框，NX-239）→ 狀態／Project／票號 → 標題（就地編輯）→ 最新的下一步（待驗收時不顯示，NX-161）→ 描述（Markdown）
 //   → 欄位（狀態、Project、到期日、blocked by；整頁放右欄。產品不放 Sprint，NX-160）→ 變更紀錄（每筆可還原）→ comment。
 // 負責人、代做 agent、session 是階段二，這裡不做。
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { ISSUE_STATUSES, type IssueDetail, type IssueEvent, type IssueSummary, type Project } from '../api/types';
 import { useRegisterActiveIssue } from '../palette/activeIssue';
 import { projectColorClass } from '../shell/sprints';
-import { isTyping } from '../shell/actions';
 import { Icon } from '../ui/Icon';
 import { Menu, type MenuGroup } from '../ui/Menu';
 import { StatusBadge } from '../ui/StatusBadge';
@@ -16,6 +15,7 @@ import { EmptyState, ErrorState, Skeleton, Delayed } from '../ui/states';
 import { STATUS_ICON, STATUS_LABEL, STATUS_TOKEN } from '../ui/status';
 import { fullTime, relativeTime } from '../ui/time';
 import { BlockerPicker } from './BlockerPicker';
+import { type Decision, latestDecision } from './decision';
 import type { EditActions } from './edits';
 import { canRevert, type EventNames, eventText, newestFirst, revertLabel } from './events';
 import { Markdown, MarkdownEditor } from './Markdown';
@@ -170,8 +170,6 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
   const names: EventNames = useMemo(() => ({ projects: projectMap, sprints: sprintMap }), [projectMap, sprintMap]);
   const project = issue.project_id === null ? undefined : projectMap.get(issue.project_id);
   const [menu, setMenu] = useState<MenuState | null>(null);
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const rejectRef = useRef<HTMLDivElement>(null);
   const inReview = issue.status === 'In Review';
   const archived = issue.archived_at !== null;
   const moreMenu = (anchor: HTMLElement) => {
@@ -189,32 +187,9 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
   // 指令面板的「改狀態成…」「移回…」用這張票的寫入流程
   useRegisterActiveIssue({ issue, events, actions });
 
-  // 換票時收起退回表單
-  useEffect(() => { setRejectOpen(false); }, [issue.number]);
-
-  // Cmd/Ctrl+Enter＝通過（只在待驗收、焦點不在輸入框時；輸入框裡的 Cmd+Enter 是送出那一格）
-  useEffect(() => {
-    if (!inReview) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.defaultPrevented || e.key !== 'Enter' || !(e.metaKey || e.ctrlKey) || isTyping(e.target)) return;
-      e.preventDefault();
-      void actions.approve();
-    }
-    window.addEventListener('keydown', onKey);
-    return () => { window.removeEventListener('keydown', onKey); };
-  }, [inReview, actions]);
-
-  const openReject = () => {
-    setRejectOpen(true);
-    setTimeout(() => {
-      rejectRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      rejectRef.current?.querySelector('textarea')?.focus();
-    }, 0);
-  };
-
-  const review = inReview ? (
-    <ReviewBar issue={issue} actions={actions} open={rejectOpen} onOpen={openReject} onCancel={() => { setRejectOpen(false); }} containerRef={rejectRef} />
-  ) : null;
+  // 待驗收：人只回覆，狀態由 agent 讀了回覆再決定（NX-239）。回覆框放頂端，comment 區就不再放第二個。
+  const decision = useMemo(() => (inReview ? latestDecision(comments) : null), [inReview, comments]);
+  const review = inReview ? <ReplyBar issue={issue} decision={decision} actions={actions} /> : null;
 
   const fields = (
     <Fields
@@ -263,7 +238,7 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
       <DescriptionEditor issue={issue} actions={actions} />
       {layout === 'peek' && fields}
       <History events={events} names={names} actions={actions} />
-      <Comments issueKey={issue.identifier} comments={comments} actions={actions} />
+      <Comments issueKey={issue.identifier} comments={comments} actions={actions} form={!inReview} />
     </>
   );
 
@@ -275,23 +250,13 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
           {main}
         </div>
       ) : (
-        <div className={`view${inReview && !rejectOpen ? ' has-review-bar' : ''}`}>
+        <div className="view">
           <div className="detail-page" data-detail={issue.number}>
             <div className="main-col detail">{main}</div>
             <aside className="side-fields" aria-label="欄位">
               {fields}
             </aside>
           </div>
-          {inReview && !rejectOpen && (
-            <div className="m-review-bar" role="group" aria-label="驗收（手機）">
-              <button type="button" className="nl-btn nl-btn--secondary nl-btn--lg" onClick={openReject}>
-                退回
-              </button>
-              <button type="button" className="nl-btn nl-btn--primary nl-btn--lg" onClick={() => void actions.approve()}>
-                通過
-              </button>
-            </div>
-          )}
         </div>
       )}
       {menu !== null && (
@@ -310,90 +275,49 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
   );
 }
 
-// ---- 驗收列 ----
+// ---- 等你回覆（NX-239）----
+// 待驗收的票頂端只有回覆：摘要是最新的下一步；最新 comment 有「要你決定」時改列問題與選項（純文字）。
+// 回覆的 author 是 Bolas，後端照 NX-221 把票移到 In Progress，之後的狀態交給 agent。
 
-function ReviewBar({ issue, actions, open, onOpen, onCancel, containerRef }: {
-  issue: IssueDetail;
-  actions: EditActions;
-  open: boolean;
-  onOpen: () => void;
-  onCancel: () => void;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const errId = useId();
+function ReplyBar({ issue, decision, actions }: { issue: IssueDetail; decision: Decision | null; actions: EditActions }) {
+  const [draft, setDraft] = useState('');
+  const [sending, setSending] = useState(false);
+  useEffect(() => { setDraft(''); }, [issue.number]);
 
   async function send() {
-    if (busy) return;
-    setBusy(true);
-    const res = await actions.reject(reason);
-    setBusy(false);
-    if (res.ok) {
-      setReason('');
-      setError(null);
-      onCancel();
-    } else {
-      setError(res.error);
-    }
+    if (sending || draft.trim() === '') return;
+    setSending(true);
+    const ok = await actions.comment(draft);
+    setSending(false);
+    if (ok) setDraft('');
   }
 
   return (
-    <div className="nl-review" role="group" aria-label="驗收" ref={containerRef}>
+    <div className="nl-review" role="group" aria-label="等你回覆">
       <div className="who">
         <span className="rv-ic" aria-hidden="true">
           <Icon name="status-in-review" />
         </span>
         <div>
-          <b>等你驗收</b>
-          <p>{issue.next_step ?? '確認內容與變更紀錄後通過；需要修改則退回並寫明原因。'}</p>
+          <b>等你回覆</b>
+          <p>{decision === null ? (issue.next_step ?? '看完後回覆你的意思，agent 會接著處理。') : `要你決定：${decision.question}`}</p>
         </div>
       </div>
-      {open && (
-        <div className="nl-field">
-          <MarkdownEditor
-            label="退回原因（必填）"
-            value={reason}
-            onChange={(v) => { setReason(v); if (error !== null && v.trim() !== '') setError(null); }}
-            onSubmit={() => void send()}
-            onCancel={onCancel}
-            placeholder="寫明需要修改的地方，agent 依此繼續"
-            hint="⌘↵ 送出"
-            autoFocus
-            required
-            invalid={error !== null}
-            {...(error === null ? {} : { describedBy: errId })}
-          />
-          {error !== null && (
-            <p className="nl-error" id={errId}>
-              <Icon name="alert" size="sm" />
-              {error}
-            </p>
-          )}
-        </div>
+      {decision !== null && (
+        <ol className="rv-options" aria-label="選項">
+          {decision.options.map((o) => (
+            <li key={o.n} value={o.n}>
+              {o.text}
+            </li>
+          ))}
+        </ol>
       )}
+      <MarkdownEditor label="回覆" value={draft} onChange={setDraft} onSubmit={() => void send()} placeholder="直接寫你的意思，agent 會決定下一步" hint="⌘↵ 送出" />
       <div className="acts">
-        {open ? (
-          <>
-            <button type="button" className="nl-btn nl-btn--secondary" onClick={onCancel}>
-              取消退回
-            </button>
-            <button type="button" className="nl-btn nl-btn--primary" disabled={reason.trim() === '' || busy} aria-busy={busy} onClick={() => void send()}>
-              退回，回到 In Progress
-            </button>
-          </>
-        ) : (
-          <>
-            <button type="button" className="nl-btn nl-btn--secondary" onClick={onOpen}>
-              退回
-            </button>
-            <button type="button" className="nl-btn nl-btn--primary" aria-keyshortcuts="Meta+Enter" onClick={() => void actions.approve()}>
-              通過（移到 Done）
-              <span className="nl-kbd">⌘↵</span>
-            </button>
-          </>
-        )}
+        <button type="button" className="nl-btn nl-btn--primary" aria-keyshortcuts="Meta+Enter" disabled={draft.trim() === '' || sending} aria-busy={sending} onClick={() => void send()}>
+          回覆
+          <span className="nl-kbd">⌘↵</span>
+        </button>
       </div>
     </div>
   );
@@ -745,7 +669,8 @@ function History({ events, names, actions }: { events: IssueEvent[]; names: Even
 
 // ---- comment ----
 
-function Comments({ issueKey, comments, actions }: { issueKey: string; comments: DetailData['comments']; actions: EditActions }) {
+// form＝false（待驗收）時不放輸入框：回覆在頂端「等你回覆」（NX-239）
+function Comments({ issueKey, comments, actions, form }: { issueKey: string; comments: DetailData['comments']; actions: EditActions; form: boolean }) {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   useEffect(() => { setDraft(''); }, [issueKey]);
@@ -778,15 +703,17 @@ function Comments({ issueKey, comments, actions }: { issueKey: string; comments:
           ))}
         </ol>
       )}
-      <div className="cmt-form">
-        <MarkdownEditor label="寫 comment（Markdown）" value={draft} onChange={setDraft} onSubmit={() => void send()} placeholder="寫 comment…" hint="⌘↵ 送出" />
-        <div className="form-acts">
-          <button type="button" className="nl-btn nl-btn--secondary nl-btn--sm" aria-keyshortcuts="Meta+Enter" disabled={draft.trim() === '' || sending} aria-busy={sending} onClick={() => void send()}>
-            送出
-            <span className="nl-kbd">⌘↵</span>
-          </button>
+      {form && (
+        <div className="cmt-form">
+          <MarkdownEditor label="寫 comment（Markdown）" value={draft} onChange={setDraft} onSubmit={() => void send()} placeholder="寫 comment…" hint="⌘↵ 送出" />
+          <div className="form-acts">
+            <button type="button" className="nl-btn nl-btn--secondary nl-btn--sm" aria-keyshortcuts="Meta+Enter" disabled={draft.trim() === '' || sending} aria-busy={sending} onClick={() => void send()}>
+              送出
+              <span className="nl-kbd">⌘↵</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

@@ -1,11 +1,10 @@
-// 票詳細（預覽面板與整頁）上的寫入：就地編輯、blocked by、comment、通過／退回、變更紀錄還原。
+// 票詳細（預覽面板與整頁）上的寫入：就地編輯、blocked by、comment（含待驗收的回覆）、變更紀錄還原。
 // 跟 React 分開，方便用假的 API 測（edits.test.ts）。
 //
 // - 欄位編輯用樂觀更新：先改畫面，API 成功換成 API 回的票並出 toast「復原」；
 //   失敗把票改回原本、出錯誤 toast（附「重試」）。
 // - 「復原」和變更紀錄的「還原」是同一套：找到那一筆變更，用 revert API 改回去（變更紀錄標「已還原」）。
-// - 退回一定要寫原因：先寫 comment，再改回 In Progress；原因空白時什麼都不送。
-// - 待驗收的票寫 comment（含退回），後端直接移到 In Progress（NX-221）；畫面跟著換，toast 附「復原」。
+// - 待驗收的票只有回覆（NX-239，沒有通過／退回）：寫 comment 後端直接移到 In Progress（NX-221）；畫面跟著換，toast 附「復原」。
 // - 還原遇到 409（已經還原過、之後又改過、值已經不一樣），toast 說明 API 給的原因。
 // - 封存／取消封存（NX-160，不做永久刪除）：同樣先改畫面、toast 附「復原」，復原走同一套 revert。
 import { ApiError, type ApiClient } from '../api/client';
@@ -261,29 +260,6 @@ export function createEditActions(deps: EditDeps) {
     return true;
   }
 
-  function approve(): Promise<boolean> {
-    const issue = get();
-    return edit({ status: 'Done' }, `${issue.identifier} 已完成`);
-  }
-
-  // 退回：原因必填。先寫 comment（agent 照這段繼續做），再改回 In Progress。
-  async function reject(reason: string): Promise<{ ok: true } | { ok: false; error: string }> {
-    const text = reason.trim();
-    if (text === '') return { ok: false, error: '退回原因必填：寫明需要修改的地方。' };
-    const issue = get();
-    const message = `${issue.identifier} 已退回「${STATUS_LABEL['In Progress']}」`;
-    const posted = await postComment(`退回：${text}`);
-    if (!posted.ok) return { ok: false, error: 'comment 送出失敗。票仍在待驗收。' };
-    // 後端寫 comment 時已經移到 In Progress（NX-221）：不再改一次，只出可復原的 toast。
-    const from = posted.handedBack;
-    if (from !== null) {
-      toast({ message, onUndo: () => undoField({ status: 'In Progress' }, from) });
-      return { ok: true };
-    }
-    const moved = await edit({ status: 'In Progress' }, message);
-    return moved ? { ok: true } : { ok: false, error: '退回原因已寫入 comment，狀態變更失敗。' };
-  }
-
   // 變更紀錄的「還原」。409 時 toast 說明原因（API 的 error 已經是中文）。
   async function revert(event: IssueEvent, describe: string): Promise<boolean> {
     try {
@@ -303,7 +279,7 @@ export function createEditActions(deps: EditDeps) {
     }
   }
 
-  return { edit, addBlocker, removeBlocker, comment, approve, reject, revert, archive: () => setArchived(true), unarchive: () => setArchived(false) };
+  return { edit, addBlocker, removeBlocker, comment, revert, archive: () => setArchived(true), unarchive: () => setArchived(false) };
 }
 
 export type EditActions = ReturnType<typeof createEditActions>;

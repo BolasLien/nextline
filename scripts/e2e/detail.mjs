@@ -3,8 +3,8 @@
 //   桌面：從看板開預覽 → 改標題（Esc 取消、Enter 儲存）→ 改狀態（看板跟著換欄）→ 寫 comment（下一步跟著變）
 //         → 描述 Markdown 預覽（防 XSS）→ Project／到期日（沒有 Sprint 欄位，NX-160）→ blocked by 加入與移除
 //         → 還原一筆變更紀錄（標「已還原」）→ 還原遇到 409（toast 說原因）→ 寫入失敗退回
-//         → 待驗收按通過再復原 → 退回一定要寫 comment → 展開成整頁。
-//   手機（375）：點卡片直接進整頁，通過／退回固定在底部；?peek 轉成整頁。
+//         → 待驗收只有「等你回覆」（沒有通過／退回，NX-239）→ 回覆後交回 agent 並可復原 → 展開成整頁。
+//   手機（375）：點卡片直接進整頁，回覆框在第一屏、沒有底部通過／退回；?peek 轉成整頁。
 // 每一步都對照 /app-api 的資料，截圖 1280（預覽面板、整頁）／375 × 淺色／深色，量測沒有橫向捲動。
 //
 // 用法（repo 根目錄，.dev.vars 要有 DEV_SKIP_ACCESS=1）：
@@ -325,53 +325,47 @@ try {
   await page.unroute('**/app-api/issues/*');
   await dismissToasts(page);
 
-  // 11. 待驗收：通過 → 復原
+  // 11. 待驗收：頂端只有「等你回覆」＋回覆框（NX-239），沒有通過／退回，comment 區不放第二個輸入框
   await card(d.r1).locator('.hit').click();
   await page.waitForURL(`**/?peek=${d.r1.identifier}`);
-  await peek.locator('.nl-review').waitFor();
-  step('待驗收的票：預覽頂端有驗收列（摘要＝最新的下一步、通過、退回）', (await peek.locator('.nl-review').textContent()).includes('Bolas 驗收 toast 的復原'));
-  await peek.getByRole('button', { name: /^通過/ }).click();
-  await inCol(d.r1, 'done').waitFor({ timeout: 3000 });
-  await waitIssue(d.r1.identifier, (i) => i.status === 'Done', '通過寫進 API');
-  const doneToast = page.locator('.nl-toast', { hasText: `${d.r1.identifier} 已完成` });
-  await doneToast.waitFor();
-  step('通過：API 改成 Done、看板卡片移到 Done、驗收列消失、toast「完成」附復原', (await peek.locator('.nl-review').count()) === 0 && (await doneToast.getByRole('button', { name: '復原' }).count()) === 1);
-  await doneToast.getByRole('button', { name: '復原' }).click();
-  await waitIssue(d.r1.identifier, (i) => i.status === 'In Review', '復原寫進 API');
-  await inCol(d.r1, 'in-review').waitFor({ timeout: 3000 });
-  await peek.locator('.nl-review').waitFor();
-  const rEvents = (await api('GET', `/issues/${d.r1.identifier}/events`)).events;
-  step('通過後復原：回到待驗收，變更紀錄是「還原」、原本那筆標已還原', rEvents.length === 2 && rEvents[0].reverted_by_event_id === rEvents[1].id, { events: rEvents.map((e) => [e.id, e.from_value, e.to_value, e.revert_of_event_id, e.reverted_by_event_id]) });
+  const reply = peek.locator('.nl-review');
+  await reply.waitFor();
+  step('待驗收的票：預覽頂端是「等你回覆」，摘要＝最新的下一步', ((await reply.textContent()) ?? '').includes('等你回覆') && ((await reply.textContent()) ?? '').includes('Bolas 驗收 toast 的復原'));
+  step('待驗收的票：沒有通過、退回按鈕', (await peek.getByRole('button', { name: /^通過/ }).count()) === 0 && (await peek.getByRole('button', { name: /^退回/ }).count()) === 0);
+  step('待驗收的票：comment 區沒有輸入框，回覆框只有頂端一個', (await peek.locator('.cmt-form').count()) === 0 && (await peek.getByRole('textbox', { name: '回覆' }).count()) === 1);
+  await peek.locator('.ttl-edit').focus();
+  await page.keyboard.press('ControlOrMeta+Enter');
+  await page.waitForTimeout(600);
+  step('待驗收的票：焦點不在輸入框時 ⌘↵ 不再改狀態', (await api('GET', `/issues/${d.r1.identifier}`)).status === 'In Review');
+  const replyBtn = reply.getByRole('button', { name: /^回覆/ });
+  step('回覆：沒寫內容時按鈕停用', await replyBtn.isDisabled());
+  await peek.getByRole('textbox', { name: '回覆' }).fill('   ');
+  step('回覆：只打空白也不能送', await replyBtn.isDisabled());
 
-  // 12. 退回：一定要寫原因
-  await peek.getByRole('button', { name: '退回', exact: true }).click();
-  const send = peek.getByRole('button', { name: '退回，回到 In Progress' });
-  step('退回：沒寫原因時送出按鈕是停用的', await send.isDisabled());
-  await peek.getByRole('textbox', { name: '退回原因（必填）' }).fill('   ');
-  step('退回：只打空白也不能送', await send.isDisabled());
-  await peek.getByRole('textbox', { name: '退回原因（必填）' }).fill('toast 在手機上擋到底部分頁列，往上移一點');
-  await send.click();
-  await waitIssue(d.r1.identifier, (i) => i.status === 'In Progress', '退回寫進 API');
+  // 12. 回覆：author Bolas，票交回 agent（In Progress，NX-221），狀態之後交給 agent
+  await peek.getByRole('textbox', { name: '回覆' }).fill('toast 在手機上擋到底部分頁列，往上移一點');
+  await replyBtn.click();
+  await waitIssue(d.r1.identifier, (i) => i.status === 'In Progress', '回覆寫進 API');
   const rc = (await api('GET', `/issues/${d.r1.identifier}/comments`)).comments;
   await inCol(d.r1, 'in-progress').waitFor({ timeout: 3000 });
-  step('退回：comment 先寫進去（作者 Bolas、開頭「退回：」），狀態回 In Progress，看板跟著移', rc.at(-1).author === 'Bolas' && rc.at(-1).body.startsWith('退回：toast 在手機上'));
+  step('回覆：comment 原文寫進去（作者 Bolas），狀態回 In Progress，看板跟著移', rc.at(-1).author === 'Bolas' && rc.at(-1).body === 'toast 在手機上擋到底部分頁列，往上移一點');
   const rjEvents = (await api('GET', `/issues/${d.r1.identifier}/events`)).events.filter((e) => e.from_value === 'In Review' && e.to_value === 'In Progress');
-  const rjToast = page.locator('.nl-toast', { hasText: `${d.r1.identifier} 已退回` });
-  step('退回（NX-221）：變更紀錄只有一筆「In Review → In Progress」，toast 附復原', rjEvents.length === 1 && (await rjToast.getByRole('button', { name: '復原' }).count()) === 1, { events: rjEvents.length });
+  const rjToast = page.locator('.nl-toast', { hasText: `${d.r1.identifier} 已交回 agent` });
+  step('回覆（NX-221）：變更紀錄只有一筆「In Review → In Progress」，toast 附復原；「等你回覆」收起、comment 區輸入框回來', rjEvents.length === 1 && (await rjToast.getByRole('button', { name: '復原' }).count()) === 1 && (await reply.count()) === 0 && (await peek.locator('.cmt-form').count()) === 1, { events: rjEvents.length });
   await dismissToasts(page);
 
-  // 12b. 待驗收的票寫 comment → 票自動交回 agent（In Progress），可復原（NX-221）
+  // 12b. 在回覆框按 ⌘↵ 送出 → 票自動交回 agent（In Progress），可復原（NX-221）
   await card(d.r2).locator('.hit').click();
   await page.waitForURL(`**/?peek=${d.r2.identifier}`);
   await peek.locator('.nl-review').waitFor();
-  await peek.getByRole('textbox', { name: '寫 comment（Markdown）' }).fill('1.1 2.1 3.1');
+  await peek.getByRole('textbox', { name: '回覆' }).fill('1.1 2.1 3.1');
   await page.keyboard.press('ControlOrMeta+Enter');
   await waitIssue(d.r2.identifier, (i) => i.status === 'In Progress', '回覆後移到 In Progress');
   await inCol(d.r2, 'in-progress').waitFor({ timeout: 3000 });
   const handToast = page.locator('.nl-toast', { hasText: `${d.r2.identifier} 已交回 agent` });
   await handToast.waitFor();
   const hEvents = (await api('GET', `/issues/${d.r2.identifier}/events`)).events.filter((e) => e.field === 'status');
-  step('待驗收寫 comment（NX-221）：API 變 In Progress、看板卡片移欄、驗收列消失、變更紀錄一筆（Bolas）、toast 附復原',
+  step('待驗收回覆（NX-221）：API 變 In Progress、看板卡片移欄、「等你回覆」消失、變更紀錄一筆（Bolas）、toast 附復原',
     (await peek.locator('.nl-review').count()) === 0 && hEvents.length === 1 && hEvents[0].actor === 'Bolas' && hEvents[0].from_value === 'In Review' && (await handToast.getByRole('button', { name: '復原' }).count()) === 1,
     { events: hEvents.map((e) => [e.from_value, e.to_value, e.actor]) });
   await page.screenshot({ path: join(outDir, 'peek-1280-light-handback.png') });
@@ -443,13 +437,12 @@ try {
     await mp.locator(`.nl-card[data-n="${n(d.r2)}"] .hit`).tap();
     await mp.waitForURL(`**/issues/${d.r2.identifier}`);
     await mp.locator('.detail-page .ttl-edit').waitFor();
-    const bar = mp.locator('.m-review-bar');
     await settle(mp);
-    const barBox = await bar.boundingBox();
+    const box = await mp.getByRole('textbox', { name: '回覆' }).boundingBox();
     if (scheme === 'light') {
       step('手機：點卡片直接進整頁（不開預覽）', (await mp.locator('.nl-peek').count()) === 0);
-      step('手機：待驗收的通過／退回固定在底部分頁列上方', barBox !== null && Math.round(barBox.y + barBox.height) === 812 - 56 && (await bar.getByRole('button', { name: '通過' }).count()) === 1, { barBox });
-      step('手機：驗收列裡的按鈕收起來，只留底部那一組', !(await mp.locator('.nl-review .acts').isVisible()));
+      step('手機：沒有底部固定的通過／退回', (await mp.locator('.m-review-bar').count()) === 0 && (await mp.getByRole('button', { name: /^通過/ }).count()) === 0);
+      step('手機：回覆框在第一屏（底部分頁列上方）', box !== null && box.y + box.height <= 812 - 56, { box });
     }
     await mp.screenshot({ path: join(outDir, `page-375-${scheme}.png`) });
     measures[`page-375-${scheme}`] = await measure(mp);
@@ -458,20 +451,16 @@ try {
     await mp.screenshot({ path: join(outDir, `page-375-${scheme}-bottom.png`) });
     measures[`page-375-${scheme}-bottom`] = await measure(mp);
     if (scheme === 'light') {
-      await bar.getByRole('button', { name: '通過' }).tap();
-      await waitIssue(d.r2.identifier, (i) => i.status === 'Done', '手機通過');
-      const t = mp.locator('.nl-toast', { hasText: `${d.r2.identifier} 已完成` });
+      await mp.getByRole('textbox', { name: '回覆' }).fill('可以');
+      await mp.locator('.nl-review').getByRole('button', { name: /^回覆/ }).tap();
+      await waitIssue(d.r2.identifier, (i) => i.status === 'In Progress', '手機回覆');
+      const t = mp.locator('.nl-toast', { hasText: `${d.r2.identifier} 已交回 agent` });
       await t.waitFor();
-      step('手機：按底部「通過」→ API 改成 Done、底部按鈕收起', (await bar.count()) === 0);
+      step('手機：回覆 → API 改成 In Progress、「等你回覆」收起', (await mp.locator('.nl-review').count()) === 0);
       await t.getByRole('button', { name: '復原' }).tap();
       await waitIssue(d.r2.identifier, (i) => i.status === 'In Review', '手機復原');
-      await bar.waitFor();
-      step('手機：復原回到待驗收，底部按鈕回來', true);
-      await bar.getByRole('button', { name: '退回' }).tap();
-      await mp.getByRole('textbox', { name: '退回原因（必填）' }).waitFor();
-      step('手機：按底部「退回」打開必填的退回原因', (await mp.getByRole('button', { name: '退回，回到 In Progress' }).isDisabled()) && (await bar.count()) === 0);
-      await mp.screenshot({ path: join(outDir, 'page-375-light-reject.png') });
-      measures['page-375-light-reject'] = await measure(mp);
+      await mp.locator('.nl-review').waitFor();
+      step('手機：復原回到待驗收，「等你回覆」回來', true);
       await mp.goto(`${BASE}/?peek=${d.t1.identifier}`);
       await mp.waitForURL(`**/issues/${d.t1.identifier}`);
       step('手機：網址帶 ?peek 時直接換成整頁', true, { url: mp.url() });

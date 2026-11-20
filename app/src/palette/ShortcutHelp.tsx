@@ -13,7 +13,7 @@ const ROWS: readonly { keys: readonly string[][]; label: string }[] = [
   { keys: [['G', 'B']], label: '跳到看板' },
   { keys: [['G', 'I']], label: '跳到全部的票' },
   { keys: [['G', 'M']], label: '跳到等你' },
-  { keys: [['⌘', '↵']], label: '送出開票、comment；預覽裡＝通過' },
+  { keys: [['⌘', '↵']], label: '送出開票、comment、回覆' },
   { keys: [['?']], label: '顯示這份說明' },
 ];
 

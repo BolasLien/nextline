@@ -132,9 +132,6 @@
 .detail-page .nl-fields {
   grid-template-columns: 76px minmax(0, 1fr);
 }
-.m-review-bar {
-  display: none;
-}
 @media (max-width: 1023px) {
   .detail-page {
     grid-template-columns: minmax(0, 1fr);
@@ -154,35 +151,6 @@
   .detail-page .side-fields {
     padding: 14px;
     border-radius: var(--radius-md);
-  }
-  /* 手機：通過／退回固定在底部分頁列上方 */
-  .m-review-bar {
-    display: flex;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: calc(var(--size-tabbar) + env(safe-area-inset-bottom));
-    gap: var(--space-2);
-    padding: 10px 12px;
-    background: var(--color-surface);
-    box-shadow: 0 -1px 0 var(--color-line);
-    z-index: var(--z-sticky);
-  }
-  .m-review-bar .nl-btn {
-    flex: 1;
-  }
-  .view.has-review-bar {
-    padding-bottom: calc(var(--size-tabbar) + env(safe-area-inset-bottom) + 80px + var(--size-control-lg));
-  }
-  .view.has-review-bar .nl-review .acts {
-    display: none;
-  }
-}
-/* 有底部驗收列時，FAB 讓位（照原型 .has-review-bar .nl-fab） */
-@media (max-width: 759px) {
-  .app:has(.has-review-bar) ~ .nl-tabbar .nl-fab,
-  body:has(.has-review-bar) .nl-fab {
-    display: none;
   }
 }
 
@@ -351,6 +319,16 @@
 }
 .nl-review textarea {
   min-height: 72px;
+}
+/* 「要你決定」的選項：照原文列出，跟問題同一欄對齊（圖示 20px＋間距 10px） */
+.nl-review .rv-options {
+  margin: 0;
+  padding-left: calc(30px + 1.4em);
+  font-size: var(--font-size-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-wrap: anywhere;
 }
 
 /* 欄位 */

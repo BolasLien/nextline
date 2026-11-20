@@ -144,58 +144,6 @@ describe('變更紀錄還原', () => {
   });
 });
 
-describe('驗收', () => {
-  it('通過：改成 Done，toast「NX-7 已完成」附復原', async () => {
-    const s = setup();
-    expect(await s.actions.approve()).toBe(true);
-    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { status: 'Done', actor: ACTOR });
-    expect(s.toasts[0]?.message).toBe('NX-7 已完成');
-    expect(s.toasts[0]?.onUndo).toBeTypeOf('function');
-  });
-
-  it('退回一定要寫原因：空白或只有空格時什麼都不送', async () => {
-    const s = setup();
-    for (const reason of ['', '   \n ']) {
-      const res = await s.actions.reject(reason);
-      expect(res.ok).toBe(false);
-    }
-    expect(s.api.createComment).not.toHaveBeenCalled();
-    expect(s.api.updateIssue).not.toHaveBeenCalled();
-    expect(s.now().status).toBe('In Review');
-  });
-
-  it('退回：先寫 comment，再改回 In Progress', async () => {
-    const s = setup();
-    const res = await s.actions.reject('  深色模式的對比還不夠  ');
-    expect(res.ok).toBe(true);
-    expect(s.api.createComment).toHaveBeenCalledWith('NX-7', { author: ACTOR, body: '退回：深色模式的對比還不夠' });
-    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { status: 'In Progress', actor: ACTOR });
-    expect(s.api.createComment.mock.invocationCallOrder[0]).toBeLessThan(s.api.updateIssue.mock.invocationCallOrder[0] ?? 0);
-    expect(s.comments).toHaveLength(1);
-    expect(s.now().status).toBe('In Progress');
-  });
-
-  it('退回：後端寫 comment 時已移到 In Progress（NX-221），不再改一次；toast 可復原', async () => {
-    const s = setup();
-    s.api.getIssue.mockImplementation(() => Promise.resolve({ ...s.now(), status: 'In Progress' as const }));
-    const res = await s.actions.reject('要改');
-    expect(res.ok).toBe(true);
-    expect(s.api.updateIssue).not.toHaveBeenCalled();
-    expect(s.now().status).toBe('In Progress');
-    expect(s.toasts.map((t) => t.message)).toEqual(['NX-7 已退回「In Progress」']);
-    expect(s.toasts[0]?.onUndo).toBeTypeOf('function');
-    expect(s.refreshEvents).toHaveBeenCalled();
-  });
-
-  it('退回時 comment 沒送出：狀態不動', async () => {
-    const s = setup({ comment: () => Promise.reject(new ApiError(0, '連不上')) });
-    const res = await s.actions.reject('要改');
-    expect(res.ok).toBe(false);
-    expect(s.api.updateIssue).not.toHaveBeenCalled();
-    expect(s.now().status).toBe('In Review');
-  });
-});
-
 describe('comment 與 blocked by', () => {
   it('comment：空白不送；送出後加進時間軸並重抓票（下一步）', async () => {
     const s = setup();

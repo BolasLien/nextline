@@ -2,7 +2,7 @@
 // 用 Playwright 在瀏覽器實際操作：
 //   1. 開票對話框（桌面與手機全螢幕）：畫面由上到下是 標題 → 描述（編輯／預覽切換在描述的標題列）→ 欄位晶片；Tab 的 focus 順序一樣
 //   2. 手機 375：下一步、描述、comment 含長路徑與網址的待驗收票，整頁沒有任何元素橫向溢出（量 scrollWidth 與右邊界）；看板、列表也一樣
-//   3. 待驗收的票：頂端「等你驗收」顯示下一步＋通過／退回，沒有另外的「下一步」區塊；進行中的票照舊有「下一步」區塊
+//   3. 待驗收的票：頂端顯示下一步（NX-161 時是「等你驗收」＋通過／退回，NX-239 起改成「等你回覆」、沒有通過／退回），沒有另外的「下一步」區塊；進行中的票照舊有「下一步」區塊
 // 用法（repo 根目錄）：
 //   PLAYWRIGHT_MODULE=<playwright 套件的 index.mjs> [CHROMIUM_PATH=<chromium>] [E2E_PORT=8796] node scripts/e2e/nx161.mjs
 //   E2E_LABEL=before：只截圖、失敗的步驟照記不中斷（修改前對照用），截圖檔名以 before- 開頭
@@ -214,7 +214,7 @@ try {
   await settle(page);
   await shot(page, 'review-peek-1280-light');
   const reviewText = (await peek.locator('.nl-review').textContent()) ?? '';
-  step('3. 桌面預覽待驗收：「等你驗收」顯示下一步與通過／退回', reviewText.includes(LONG_PATH) && (await peek.locator('.nl-review').getByRole('button', { name: /通過/ }).count()) === 1 && (await peek.locator('.nl-review').getByRole('button', { name: '退回' }).count()) === 1);
+  step('3. 桌面預覽待驗收：「等你回覆」顯示下一步（NX-239 起沒有通過／退回）', reviewText.includes(LONG_PATH) && (await peek.locator('.nl-review').getByRole('button', { name: /通過/ }).count()) === 0);
   step('3. 桌面預覽待驗收：沒有獨立的「下一步」區塊', (await peek.locator('.next-step').count()) === 0, { nextStep: await peek.locator('.next-step').count() });
   await page.goto(`${BASE}/?peek=${progressRef}`);
   await peek.locator('.ttl-edit').waitFor();
@@ -241,7 +241,7 @@ try {
     await mp.locator('.comments').scrollIntoViewIfNeeded();
     await shot(mp, `review-375-${scheme}-comments`);
     step(`3. 375 ${scheme}：待驗收沒有獨立的「下一步」區塊，「等你驗收」有下一步`, (await mp.locator('.next-step').count()) === 0 && ((await mp.locator('.nl-review').textContent()) ?? '').includes(LONG_PATH));
-    step(`3. 375 ${scheme}：手機底部固定的通過／退回還在`, await mp.locator('.m-review-bar').isVisible());
+    step(`3. 375 ${scheme}：沒有手機底部固定的通過／退回（NX-239）`, (await mp.locator('.m-review-bar').count()) === 0);
 
     // 進行中整頁
     await mp.goto(`${BASE}/issues/${progressRef}`);

@@ -15,7 +15,7 @@
 
 ```
 找票            往前推              交給 agent              驗收
-側欄／Cmd+K ─▶  拖到下一欄     ─▶   卡片上選「代做 agent」 ─▶ 「待驗收」欄 → 通過 / 退回
+側欄／Cmd+K ─▶  拖到下一欄     ─▶   卡片上選「代做 agent」 ─▶ 「待驗收」欄 → 回覆（狀態交給 agent）
 ```
 
 ---
@@ -154,10 +154,10 @@ Nextline
 
 ```
              人：拖拉／狀態選單          agent：save_issue
- ┌─────────┐       ┌──────┐      ┌─────────────┐   agent 做完     ┌────────┐ 人或 agent：通過 ┌──────┐
+ ┌─────────┐       ┌──────┐      ┌─────────────┐   agent 做完     ┌────────┐  agent：移 Done  ┌──────┐
  │ Backlog │ ────▶ │ Todo │ ───▶ │ In Progress │ ──────────────▶ │ 待驗收  │ ──────────────▶ │ Done │
  └─────────┘ ◀──── └──────┘ ◀─── └─────────────┘ ◀────────────── └────────┘ ◀────────────── └──────┘
-                                       │   人：退回（必寫 comment）／回覆 comment  移回（復原／還原）▲
+                                       │   人：回覆（自動交回 agent）              移回（復原／還原）▲
                                        │                                                   │
                                        └──── 人或 agent：直接完成（跳過待驗收）────────────────┘
  任何狀態 ──人：取消──▶ Canceled         Done／Canceled ──人或 agent：重新打開──▶ Todo
@@ -179,8 +179,8 @@ agent             ─▶ Done 欄卡片標「claude-nextline 移到 Done・3 分
 | 開工 | Todo | In Progress | ✓ | ✓（agent 開始做時自動移） | 同上 |
 | 交給 agent | 任何未結束狀態 | 不變（Todo 會自動移到 In Progress） | ✓ 卡片「代做 agent」、`D` | ✓ 只限總管 agent（阿澈）派工 | 卡片出現 agent 頭像＋「等 agent 接手」；toast 附「複製開工指令」 |
 | 做完送驗收 | In Progress | 待驗收 | ✓（自己做的票也能送） | ✓ 代做 agent 送出回覆後 | 卡片移到待驗收欄；側欄「等你」+1；徽章「做完了」 |
-| 通過 | 待驗收 | Done | ✓ 按「通過」或拖到 Done | ✓ `save_issue` 改成 Done | 人做的：卡片移到 Done；toast「NX-12 完成」＋「復原」10 秒。agent 做的：下次重新抓時卡片移到 Done，標「claude-nextline 移到 Done」＋「移回待驗收」。兩種都結束 session、寫進變更紀錄（可還原） |
-| 退回 | 待驗收 | In Progress | ✓ 必寫 comment | ✗ | 卡片回 In Progress；開新一輪 session（`pending`），徽章「第 2 輪・等 agent 接手」 |
+| 通過 | 待驗收 | Done | ✓ 只能拖拉或狀態選單（票詳細不再有「通過」，NX-239） | ✓ `save_issue` 改成 Done；讀了 Bolas 的回覆判斷可以收時 | 人做的：卡片移到 Done；toast「NX-12 完成」＋「復原」10 秒。agent 做的：下次重新抓時卡片移到 Done，標「claude-nextline 移到 Done」＋「移回待驗收」。兩種都結束 session、寫進變更紀錄（可還原） |
+| 退回 | 待驗收 | In Progress | 不再有「退回」按鈕（NX-239）：要改就回覆，見「回覆 agent」 | ✗ | 卡片回 In Progress；開新一輪 session（`pending`），徽章「第 2 輪・等 agent 接手」 |
 | 直接完成 | In Progress（任何未結束狀態） | Done | ✓ 任何票都可以，有代做 agent 也一樣，不跳確認 | ✓ agent 判斷不用人看就能完成時 | 同「通過」 |
 | 移回 | Done | 待驗收（agent 做的）／原本的狀態（自己做的） | ✓ toast「復原」、Done 卡片「移回待驗收」、變更紀錄「還原」 | ✓ 發現自己做錯時 | 卡片回原欄；變更紀錄多一筆「Bolas 還原了 claude-nextline 的狀態變更」，被還原的那筆加刪除線、標「已還原」 |
 | 取消 | 任何 | Canceled | ✓ | ✗ | 卡片收進 Canceled 欄；toast＋「復原」；有 session 就同時送停止 |
@@ -188,10 +188,11 @@ agent             ─▶ Done 欄卡片標「claude-nextline 移到 Done・3 分
 | 停止 agent | session `active`／`awaiting_input`／`stale` | 狀態不變 | ✓ 票詳細頁「停止」 | ✗ | 徽章「停止中…」→ agent 下次呼叫 MCP 後「已停止」 |
 | 移除代做 agent | — | 狀態不變 | ✓ | ✗ | agent 頭像消失；沒結束的 session 送停止 |
 | 問人 | — | 狀態不變 | ✗ | ✓ | 徽章「等你回覆」；側欄「等你」+1；問題同時寫成 comment |
-| 回覆 agent | 待驗收（其他狀態不變） | In Progress | ✓ 寫 comment（`author` 是 Bolas） | ✗ agent 寫的 comment 不觸發 | 待驗收的票：卡片回 In Progress、側欄「等你」−1；toast「已交回 agent」＋「復原」；變更紀錄記一筆（可還原）。其他狀態只多一則 comment（NX-221） |
+| 回覆 agent | 待驗收（其他狀態不變） | In Progress | ✓ 票詳細頂端「等你回覆」的回覆框（`author` 是 Bolas；待驗收時 comment 區不放輸入框） | ✗ agent 寫的 comment 不觸發 | 待驗收的票：卡片回 In Progress、側欄「等你」−1；toast「已交回 agent」＋「復原」；變更紀錄記一筆（可還原）。其他狀態只多一則 comment（NX-221） |
 
 人和 agent 的分工：
 
+- **人在「等我」只回覆，狀態由 agent 管**（2026-11-20 Bolas，NX-239）：待驗收的票詳細頁與預覽面板沒有「通過」「退回」，頂端是「等你回覆」＋回覆框。Bolas 只寫自己的意思，不用判斷這算通過、退回還是留言；回覆後票交回 In Progress，agent 讀了回覆再決定移 Done、繼續做或再問。agent 要 Bolas 選時，在 comment 寫「要你決定：〈問題〉」加 `1.` `2.` 編號選項，頂端會照原文列出（純文字，不做按鈕）。看板拖拉與狀態選單照留，Bolas 還是可以自己改狀態。
 - **agent 不能做的只有兩件：取消、換負責人**。移到 Done 人和 agent 都可以（2026-11-03 Bolas 決定，第 6 段第 2 題）；其餘欄位、comment、開票、送驗收也都跟人一樣，符合產品原則 1。agent 自己判斷：要人看過的送待驗收，確定沒問題的直接移 Done；阿澈現在自己移 Done 的做法照舊。
 - **做錯了再移回來**：任何票都可以直接移到 Done（有代做 agent 也不跳確認）。每次移到 Done 都寫進變更紀錄、標明是誰；人做的有 toast「復原」10 秒，agent 做的在 Done 欄卡片上有「移回待驗收」，任何時候都能在變更紀錄一鍵還原（產品原則 4）。
 - **「等你」＝待驗收**（2026-11-03 NX-160；三區不放進產品）：側欄「等你」連到 `/issues?status=in_review`，張數就是待驗收（`In Review`）的張數。階段二有負責人、代做 agent、session 之後再擴大成：

@@ -1,6 +1,6 @@
 // NX-158：切換上線前的核心流程端對端測試。跑本機 wrangler dev（.dev.vars 的 DEV_SKIP_ACCESS=1）與一份新的本機 D1，
 // 用 Playwright 在瀏覽器走一次：
-//   看板按 C 開票 → 拖到 In Progress → 拖到待驗收 → 預覽「通過」→ Done → toast「復原」回到待驗收。
+//   看板按 C 開票 → 拖到 In Progress → 拖到待驗收 → 預覽只有「等你回覆」（沒有通過，NX-239）→ 狀態選單移到 Done → toast「復原」回到待驗收。
 // 每一步對照 /app-api 的狀態與變更紀錄；另外確認 /legacy 舊網址 301 轉到新網頁對應的路徑。
 // 最後截上線用的畫面：看板、全部的票、票詳細、等你（待驗收） × 1280／375 × 淺色／深色，量測沒有橫向捲動。
 //
@@ -218,17 +218,19 @@ try {
   step('3. 拖到待驗收：API 是 In Review、沒有 zone 欄位（NX-160）', (await page.locator(`section[data-col="in-review"] .nl-card .id`, { hasText: ref }).count()) === 1 && inReview.status === 'In Review' && !('zone' in inReview), { status: inReview.status });
   await dismissToasts(page);
 
-  // 4. 預覽「通過」→ Done
+  // 4. 預覽只有「等你回覆」（NX-239 拿掉通過／退回）；人要自己收票時用狀態選單移到 Done
   await card(page, ref).locator('.hit').click();
   await page.waitForURL(`**/?peek=${ref}`);
   const peek = page.locator('.nl-peek');
   await peek.locator('.nl-review').waitFor();
-  await peek.getByRole('button', { name: /^通過/ }).click();
+  const noApprove = (await peek.getByRole('button', { name: /^通過/ }).count()) === 0 && ((await peek.locator('.nl-review').textContent()) ?? '').includes('等你回覆');
+  await peek.getByRole('button', { name: /^狀態：/ }).click();
+  await page.getByRole('menuitem', { name: 'Done' }).click();
   await waitStatus(ref, 'Done');
   const doneToast = page.locator('.nl-toast', { hasText: `${ref} 已完成` });
   await doneToast.waitFor();
   await page.locator(`section[data-col="done"] .nl-card .id`, { hasText: ref }).waitFor({ timeout: 3000 });
-  step('4. 預覽按「通過」：API 是 Done、卡片在 Done 欄、toast 附復原', (await doneToast.getByRole('button', { name: '復原' }).count()) === 1);
+  step('4. 預覽沒有「通過」、頂端是「等你回覆」；狀態選單改 Done：API 是 Done、卡片在 Done 欄、toast 附復原', noApprove && (await doneToast.getByRole('button', { name: '復原' }).count()) === 1);
   await page.screenshot({ path: join(outDir, 'core-flow-1280-light-done.png') });
 
   // 5. 復原

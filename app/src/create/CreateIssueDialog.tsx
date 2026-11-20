@@ -190,7 +190,7 @@ export function CreateIssueDialog({ prefill, onClose, onOpenIssue }: {
 
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      // 描述框自己會處理（已 preventDefault），這裡只擋住外面的快捷鍵（例如預覽面板的「通過」）
+      // 描述框自己會處理（已 preventDefault），這裡只擋住外面的快捷鍵
       e.stopPropagation();
       if (!e.defaultPrevented) {
         e.preventDefault();
