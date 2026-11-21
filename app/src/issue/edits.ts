@@ -9,11 +9,9 @@
 // - 封存／取消封存（NX-160，不做永久刪除）：同樣先改畫面、toast 附「復原」，復原走同一套 revert。
 import { ApiError, type ApiClient } from '../api/client';
 import type { Comment, IssueDetail, IssueEvent, IssueStatus, IssueSummary, IssueUpdate } from '../api/types';
-import { ACTOR } from '../board/moves';
+import { actor } from '../owner/owner';
 import type { ToastInput } from '../toast/toastStore';
 import { STATUS_LABEL } from '../ui/status';
-
-export { ACTOR };
 
 export type FieldPatch =
   | { title: string }
@@ -99,8 +97,8 @@ export function createEditActions(deps: EditDeps) {
       const { events } = await api.listIssueEvents(ref());
       const event = findEvent(events, EVENT_FIELD[key], from, to);
       const issue = event === undefined
-        ? await api.updateIssue(ref(), { ...(back as IssueUpdate), actor: ACTOR })
-        : (await api.revertIssueEvent(ref(), event.id, ACTOR)).issue;
+        ? await api.updateIssue(ref(), { ...(back as IssueUpdate), actor: actor() })
+        : (await api.revertIssueEvent(ref(), event.id, actor())).issue;
       set({ ...get(), ...issue });
     } catch (e) {
       set({ ...get(), ...pickPatch(before, key), updated_at: before.updated_at, completed_at: before.completed_at, canceled_at: before.canceled_at });
@@ -117,7 +115,7 @@ export function createEditActions(deps: EditDeps) {
     const id = original.identifier;
     set({ ...original, archived_at: on ? new Date().toISOString() : null });
     try {
-      const saved = await api.updateIssue(id, { archived: on, actor: ACTOR });
+      const saved = await api.updateIssue(id, { archived: on, actor: actor() });
       set({ ...get(), ...saved });
       toast({ message: on ? `已封存 ${id}` : `已取消封存 ${id}`, onUndo: () => undoArchived(original.archived_at, saved.archived_at) });
       refreshEvents();
@@ -137,8 +135,8 @@ export function createEditActions(deps: EditDeps) {
       const { events } = await api.listIssueEvents(ref());
       const event = findEvent(events, 'archived', from, to);
       const issue = event === undefined
-        ? await api.updateIssue(ref(), { archived: from !== null, actor: ACTOR })
-        : (await api.revertIssueEvent(ref(), event.id, ACTOR)).issue;
+        ? await api.updateIssue(ref(), { archived: from !== null, actor: actor() })
+        : (await api.revertIssueEvent(ref(), event.id, actor())).issue;
       set({ ...get(), ...issue });
     } catch (e) {
       set({ ...get(), archived_at: before });
@@ -153,7 +151,7 @@ export function createEditActions(deps: EditDeps) {
     if (isNoop(original, patch)) return true;
     set(applyPatch(original, patch));
     try {
-      const saved = await api.updateIssue(original.identifier, { ...(patch as IssueUpdate), actor: ACTOR });
+      const saved = await api.updateIssue(original.identifier, { ...(patch as IssueUpdate), actor: actor() });
       set({ ...get(), ...saved });
       toast({ message, onUndo: () => undoField(patch, original) });
       refreshEvents();
@@ -170,7 +168,7 @@ export function createEditActions(deps: EditDeps) {
     if (original.blocked_by.some((b) => b.number === target.number)) return true;
     set({ ...original, blocked_by: [...original.blocked_by, target].sort((a, b) => a.number - b.number) });
     try {
-      const res = await api.addBlocker(original.identifier, target.identifier, ACTOR);
+      const res = await api.addBlocker(original.identifier, target.identifier, actor());
       set({ ...get(), blocked_by: res.blocked_by, blocks: res.blocks });
       toast({ message: `${original.identifier} 已加入 blocked by ${target.identifier}`, onUndo: () => removeBlockerNow(target) });
       refreshEvents();
@@ -187,7 +185,7 @@ export function createEditActions(deps: EditDeps) {
     const before = get().blocked_by;
     set({ ...get(), blocked_by: before.filter((b) => b.number !== target.number) });
     try {
-      const res = await api.removeBlocker(ref(), target.identifier, ACTOR);
+      const res = await api.removeBlocker(ref(), target.identifier, actor());
       set({ ...get(), blocked_by: res.blocked_by, blocks: res.blocks });
       refreshEvents();
     } catch (e) {
@@ -200,7 +198,7 @@ export function createEditActions(deps: EditDeps) {
     const original = get();
     set({ ...original, blocked_by: original.blocked_by.filter((b) => b.number !== target.number) });
     try {
-      const res = await api.removeBlocker(original.identifier, target.identifier, ACTOR);
+      const res = await api.removeBlocker(original.identifier, target.identifier, actor());
       set({ ...get(), blocked_by: res.blocked_by, blocks: res.blocks });
       toast({
         message: `${original.identifier} 已移除 blocked by ${target.identifier}`,
@@ -208,7 +206,7 @@ export function createEditActions(deps: EditDeps) {
           const before = get().blocked_by;
           set({ ...get(), blocked_by: [...before, target].sort((a, b) => a.number - b.number) });
           try {
-            const back = await api.addBlocker(ref(), target.identifier, ACTOR);
+            const back = await api.addBlocker(ref(), target.identifier, actor());
             set({ ...get(), blocked_by: back.blocked_by, blocks: back.blocks });
             refreshEvents();
           } catch (e) {
@@ -231,7 +229,7 @@ export function createEditActions(deps: EditDeps) {
   async function postComment(text: string): Promise<{ ok: false } | { ok: true; handedBack: IssueDetail | null }> {
     const original = get();
     try {
-      const created = await api.createComment(ref(), { author: ACTOR, body: text });
+      const created = await api.createComment(ref(), { author: actor(), body: text });
       deps.addComment(created);
       try {
         set({ ...get(), ...(await api.getIssue(ref())) });
@@ -263,7 +261,7 @@ export function createEditActions(deps: EditDeps) {
   // 變更紀錄的「還原」。409 時 toast 說明原因（API 的 error 已經是中文）。
   async function revert(event: IssueEvent, describe: string): Promise<boolean> {
     try {
-      const res = await api.revertIssueEvent(ref(), event.id, ACTOR);
+      const res = await api.revertIssueEvent(ref(), event.id, actor());
       set({ ...get(), ...res.issue });
       toast({ message: `已還原：${describe}` });
       refreshEvents();

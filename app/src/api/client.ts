@@ -17,6 +17,7 @@ import type {
   IssueList,
   IssueListQuery,
   IssueUpdate,
+  Owner,
   Project,
   ProjectCreate,
   ProjectUpdate,
@@ -125,6 +126,8 @@ export function createApiClient(options: ApiClientOptions = {}) {
   }
 
   return {
+    // 網頁上的人是誰（NX-244，app/src/owner/owner.ts）
+    getOwner: () => request<Owner>('GET', '/owner'),
     // 票
     listIssues: (q: IssueListQuery = {}) =>
       request<IssueList>('GET', '/issues', {

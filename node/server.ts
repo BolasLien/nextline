@@ -83,12 +83,12 @@ export function createNodeServer(config: Config, db: DatabaseSync) {
       }
       return reject(404, '找不到這個路徑。');
     }
-    return routeRequest(request, { DB: adapter, API_TOKEN_SHA256: auth.tokenHash() }, {
+    return routeRequest(request, { DB: adapter, API_TOKEN_SHA256: auth.tokenHash(), OWNER_NAME: config.ownerName }, {
       page,
       browserApi: (req, browserUrl) => {
         if (!auth.authenticated(req)) return Promise.resolve(reject(401, '登入已過期，請重新登入。'));
         if (!isSafeMethod(req.method) && !isSameOrigin(req, browserUrl)) return Promise.resolve(reject(403, '請從 Nextline 網頁送出。'));
-        return routeApi(req, adapter, browserUrl);
+        return routeApi(req, adapter, browserUrl, config.ownerName);
       },
     });
   }

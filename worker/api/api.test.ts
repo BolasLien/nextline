@@ -381,16 +381,16 @@ describe('comment', () => {
     expect((await call('GET', `/api/comments/${id}`)).body.body).toBe('改過了');
   });
 
-  it('Bolas 在待驗收的票留言 → 移到 In Progress，寫一筆變更紀錄，可以還原（NX-221）', async () => {
+  it('人（你）在待驗收的票留言 → 移到 In Progress，寫一筆變更紀錄，可以還原（NX-221）', async () => {
     await newIssue({ status: 'In Review' });
-    expect((await call('POST', '/api/issues/NX-1/comments', { author: 'Bolas', body: '1.1 2.1' })).status).toBe(201);
+    expect((await call('POST', '/api/issues/NX-1/comments', { author: '你', body: '1.1 2.1' })).status).toBe(201);
     expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Progress');
     const events = (await call('GET', '/api/issues/NX-1/events')).body.events as Json[];
     const moved = events.filter((e) => e.field === 'status');
     expect(moved).toHaveLength(1);
-    expect(moved[0]).toMatchObject({ from_value: 'In Review', to_value: 'In Progress', actor: 'Bolas' });
+    expect(moved[0]).toMatchObject({ from_value: 'In Review', to_value: 'In Progress', actor: '你' });
 
-    const reverted = await call('POST', `/api/issues/NX-1/events/${String(moved[0]?.id)}/revert`, { actor: 'Bolas' });
+    const reverted = await call('POST', `/api/issues/NX-1/events/${String(moved[0]?.id)}/revert`, { actor: '你' });
     expect(reverted.status).toBe(200);
     expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Review');
   });
@@ -400,16 +400,42 @@ describe('comment', () => {
     for (const author of ['nextline agent', '阿澈', 'mcp', 'api']) {
       await call('POST', '/api/issues/NX-1/comments', { author, body: `${author} 的回報` });
     }
-    await call('POST', '/api/issues/NX-1/comments', { author: 'Bolas', body: '從 Linear 搬來', linear_id: 'lin-1' });
+    await call('POST', '/api/issues/NX-1/comments', { author: '你', body: '從 Linear 搬來', linear_id: 'lin-1' });
     expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Review');
 
     for (const status of ['Backlog', 'Todo', 'In Progress', 'Done', 'Canceled']) {
       const issue = await newIssue({ status });
-      await call('POST', `/api/issues/${String(issue.identifier)}/comments`, { author: 'Bolas', body: '看一下' });
+      await call('POST', `/api/issues/${String(issue.identifier)}/comments`, { author: '你', body: '看一下' });
       expect((await call('GET', `/api/issues/${String(issue.identifier)}`)).body.status).toBe(status);
     }
     const statusEvents = (await call('GET', '/api/issues/NX-1/events')).body.events as Json[];
     expect(statusEvents.filter((e) => e.field === 'status')).toHaveLength(0);
+  });
+
+  it('GET /api/owner：沒設定 OWNER_NAME 時是中性的「你」（NX-244）', async () => {
+    expect((await call('GET', '/api/owner')).body).toEqual({ name: '你' });
+    env = { ...env, OWNER_NAME: '  ' };
+    expect((await call('GET', '/api/owner')).body).toEqual({ name: '你' });
+  });
+
+  it('沒設定 OWNER_NAME 時，作者寫 Bolas 的留言不會把待驗收的票交回（NX-244）', async () => {
+    await newIssue({ status: 'In Review' });
+    await call('POST', '/api/issues/NX-1/comments', { author: 'Bolas', body: '好' });
+    expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Review');
+  });
+
+  it('設定 OWNER_NAME 後，只有這個名字回覆待驗收的票會交回 In Progress；Bolas、agent 不會（NX-244）', async () => {
+    env = { ...env, OWNER_NAME: ' Alice ' };
+    expect((await call('GET', '/api/owner')).body).toEqual({ name: 'Alice' });
+    await newIssue({ status: 'In Review' });
+    for (const author of ['Bolas', 'nextline agent', 'mcp']) {
+      await call('POST', '/api/issues/NX-1/comments', { author, body: `${author} 的回報` });
+    }
+    expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Review');
+    await call('POST', '/api/issues/NX-1/comments', { author: 'Alice', body: '選 1' });
+    expect((await call('GET', '/api/issues/NX-1')).body.status).toBe('In Progress');
+    const moved = ((await call('GET', '/api/issues/NX-1/events')).body.events as Json[]).filter((e) => e.field === 'status');
+    expect(moved).toEqual([expect.objectContaining({ from_value: 'In Review', to_value: 'In Progress', actor: 'Alice' })]);
   });
 
   it('GET /api/comments?created_since 跨所有票列出（含 Done、Canceled、封存），跟逐張查的結果一致', async () => {

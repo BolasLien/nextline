@@ -1,7 +1,7 @@
 // 開票對話框的草稿：初始值、算不算「有草稿」（Esc 時要不要先問）、轉成 API 的內容、送出與同步。
 import type { ApiClient } from '../api/client';
 import type { IssueCreate, IssueDetail, IssueStatus, IssueSummary } from '../api/types';
-import { ACTOR } from '../board/moves';
+import { actor } from '../owner/owner';
 import type { IssueSync } from '../issue/issueSync';
 
 export interface CreateDraft {
@@ -57,7 +57,7 @@ export async function submitDraft(api: ApiClient, sync: IssueSync, d: CreateDraf
   const blockerErrors: string[] = [];
   for (const b of d.blockers) {
     try {
-      const res = await api.addBlocker(issue.identifier, b.identifier, ACTOR);
+      const res = await api.addBlocker(issue.identifier, b.identifier, actor());
       issue = { ...issue, blocked_by: res.blocked_by, blocks: res.blocks };
     } catch (e) {
       blockerErrors.push(`${b.identifier}：${e instanceof Error ? e.message : String(e)}`);

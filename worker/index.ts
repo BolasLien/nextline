@@ -15,6 +15,8 @@ export interface Env {
   ACCESS_AUD?: string;
   // 只放 .dev.vars：設成 1 時，localhost 的網頁與 /app-api 請求跳過 Access 檢查（見 docs/auth.md）。
   DEV_SKIP_ACCESS?: string;
+  // wrangler vars：「人」的名字（worker/api/owner.ts，NX-244），沒設定是「你」。
+  OWNER_NAME?: string;
 }
 
 // 路徑與驗證方式的對照見 docs/auth.md：/api、/mcp 驗 token；/app-api 與其他網頁路徑驗 Cloudflare Access JWT；/legacy 只轉址到新網頁（NX-158）。

@@ -26,6 +26,8 @@ npm run selfhost:init
 npm start
 ```
 
+網頁上的人預設叫「你」（comment 作者、移票紀錄都記這個名字）；要換成自己的名字，在 `npm start` 前設 `export NEXTLINE_OWNER_NAME="你的名字"`（Cloudflare 跑法改設 `wrangler.jsonc` 的 vars `OWNER_NAME`）。agent 留言時用自己的名字，只有這個名字回覆待驗收的票會把票交回 In Progress。
+
 初始化會在終端機詢問密碼（12–256 字元，輸入不回顯）；沒有公開註冊頁。開啟 **http://127.0.0.1:3000**，登入後就能開票、拖拉與留言。請使用該網址，不要在未修改設定時換成 localhost，因為服務會核對 Host。
 
 資料放在 `NEXTLINE_DATA_DIR/nextline.sqlite`，與程式碼／`dist` 分開。這是專用私人資料目錄，權限設為 0700、DB 為 0600。預設即上述路徑；使用本機磁碟，不用網路共享檔案系統。SQLite 使用 WAL、外鍵及 5 秒鎖定等候；按 Ctrl+C 正常關機。重跑初始化會保留密碼、token 和既有資料，失敗的 migration 會整批撤回；較新或被改過的 migration 版本會拒絕啟動。

@@ -1,4 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { loadOwner } from '../owner/owner';
 import { type ApiClient, ApiError, createApiClient, MESSAGES } from './client';
 
 interface ApiContextValue {
@@ -13,6 +14,8 @@ export function ApiProvider({ children, client }: { children: ReactNode; client?
   const [sessionExpired, setSessionExpired] = useState(false);
   const api = useMemo(() => client ?? createApiClient({ onUnauthorized: () => { setSessionExpired(true); } }), [client]);
   const value = useMemo(() => ({ api, sessionExpired }), [api, sessionExpired]);
+  // 網頁上的人是誰（comment 作者、變更紀錄的 actor），App 一開就抓一次
+  useEffect(() => { void loadOwner(api); }, [api]);
   return <ApiContext value={value}>{children}</ApiContext>;
 }
 

@@ -2,10 +2,9 @@
 import type { ApiClient } from '../api/client';
 import { ApiError } from '../api/client';
 import type { IssueDetail, IssueStatus, IssueUpdate } from '../api/types';
+import { actor } from '../owner/owner';
 import type { Placement } from './columns';
 
-// 網頁上的變更都記在 Bolas 名下（變更紀錄的 actor）。
-export const ACTOR = 'Bolas';
 
 export interface MoveTarget {
   status: IssueStatus;
@@ -14,7 +13,7 @@ export interface MoveTarget {
 
 // 搬到 status 欄、放在 placement 指的位置。狀態沒變就只改位置（後端不寫變更紀錄）。
 export function saveMove(api: Pick<ApiClient, 'updateIssue'>, ref: string, fromStatus: IssueStatus, to: MoveTarget): Promise<IssueDetail> {
-  const body: IssueUpdate = { actor: ACTOR, ...(to.placement ?? {}) };
+  const body: IssueUpdate = { actor: actor(), ...(to.placement ?? {}) };
   if (to.status !== fromStatus) body.status = to.status;
   return api.updateIssue(ref, body);
 }
@@ -46,11 +45,11 @@ export async function undoMove(
         e.revert_of_event_id === null,
     );
   let issue = event === undefined
-    ? await api.updateIssue(record.ref, { status: record.from.status, actor: ACTOR })
-    : (await api.revertIssueEvent(record.ref, event.id, ACTOR)).issue;
+    ? await api.updateIssue(record.ref, { status: record.from.status, actor: actor() })
+    : (await api.revertIssueEvent(record.ref, event.id, actor())).issue;
   if (record.from.placement !== undefined) {
     try {
-      issue = await api.updateIssue(record.ref, { ...record.from.placement, actor: ACTOR });
+      issue = await api.updateIssue(record.ref, { ...record.from.placement, actor: actor() });
     } catch (e) {
       if (!(e instanceof ApiError && e.status === 400)) throw e;
     }

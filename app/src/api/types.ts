@@ -117,6 +117,11 @@ export interface Blockers {
   blocks: IssueSummary[];
 }
 
+// GET /owner：「人」的名字（worker/api/owner.ts，NX-244）
+export interface Owner {
+  name: string;
+}
+
 export interface Comment {
   id: number;
   issue_number: number;

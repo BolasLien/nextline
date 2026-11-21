@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/client';
 import type { IssueDetail, IssueEvent, IssueUpdate } from '../api/types';
-import { ACTOR, saveMove, undoMove } from './moves';
+import { actor } from '../owner/owner';
+import { saveMove, undoMove } from './moves';
 
 function detail(status: IssueDetail['status']): IssueDetail {
   return {
@@ -33,7 +34,7 @@ function event(id: number, from: string, to: string, extra: Partial<IssueEvent> 
     field: 'status',
     from_value: from,
     to_value: to,
-    actor: ACTOR,
+    actor: actor(),
     revert_of_event_id: null,
     reverted_by_event_id: null,
     created_at: '',
@@ -60,13 +61,13 @@ describe('寫回搬移', () => {
   it('換欄：帶 status、位置與 actor', async () => {
     const { api, updates } = fakeApi([]);
     await saveMove(api, 'NX-7', 'Todo', { status: 'In Progress', placement: { before: 'NX-3' } });
-    expect(updates).toEqual([{ actor: ACTOR, before: 'NX-3', status: 'In Progress' }]);
+    expect(updates).toEqual([{ actor: actor(), before: 'NX-3', status: 'In Progress' }]);
   });
 
   it('同欄調順序：只帶位置，不帶 status', async () => {
     const { api, updates } = fakeApi([]);
     await saveMove(api, 'NX-7', 'Todo', { status: 'Todo', placement: { after: 'NX-2' } });
-    expect(updates).toEqual([{ actor: ACTOR, after: 'NX-2' }]);
+    expect(updates).toEqual([{ actor: actor(), after: 'NX-2' }]);
   });
 });
 
@@ -80,15 +81,15 @@ describe('復原', () => {
       event(3, 'Todo', 'In Progress'),
     ]);
     await undoMove(api, record);
-    expect(api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 3, ACTOR);
-    expect(updates).toEqual([{ before: 'NX-2', actor: ACTOR }]);
+    expect(api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 3, actor());
+    expect(updates).toEqual([{ before: 'NX-2', actor: actor() }]);
   });
 
   it('找不到那筆變更紀錄時，直接把狀態改回去', async () => {
     const { api, updates } = fakeApi([event(1, 'Backlog', 'Todo')]);
     await undoMove(api, record);
     expect(api.revertIssueEvent).not.toHaveBeenCalled();
-    expect(updates).toEqual([{ status: 'Todo', actor: ACTOR }, { before: 'NX-2', actor: ACTOR }]);
+    expect(updates).toEqual([{ status: 'Todo', actor: actor() }, { before: 'NX-2', actor: actor() }]);
   });
 
   it('原本在空欄（沒有鄰居）就只還原狀態', async () => {

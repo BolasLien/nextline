@@ -219,19 +219,29 @@ describe('comment', () => {
     ]);
   });
 
-  it('Bolas 在待驗收的票留言 → In Progress；agent 留言、其他狀態不變（NX-221）', async () => {
+  it('人（你）在待驗收的票留言 → In Progress；agent 留言、其他狀態不變（NX-221）', async () => {
     await tool('save_issue', { title: '待驗收', state: 'In Review' });
     await tool('save_issue', { title: 'Todo 的票', state: 'Todo' });
-    await tool('save_comment', { issueId: 'NX-1', body: '證據在這\n\n下一步：Bolas 驗收', author: 'nextline agent' });
+    await tool('save_comment', { issueId: 'NX-1', body: '證據在這\n\n下一步：你驗收', author: 'nextline agent' });
     await tool('save_comment', { issueId: 'NX-1', body: '預設 author' });
     expect((await tool<Issue>('get_issue', { id: 'NX-1' })).status).toBe('In Review');
-    await tool('save_comment', { issueId: 'NX-2', body: '先看看', author: 'Bolas' });
+    await tool('save_comment', { issueId: 'NX-2', body: '先看看', author: '你' });
     expect((await tool<Issue>('get_issue', { id: 'NX-2' })).status).toBe('Todo');
 
-    await tool('save_comment', { issueId: 'NX-1', body: '1.1 2.1 3.1', author: 'Bolas' });
+    await tool('save_comment', { issueId: 'NX-1', body: '1.1 2.1 3.1', author: '你' });
     expect((await tool<Issue>('get_issue', { id: 'NX-1' })).status).toBe('In Progress');
     const { events } = await tool<{ events: { field: string; from: string | null; to: string | null; actor: string }[] }>('list_issue_events', { issueId: 'NX-1' });
-    expect(events.filter((e) => e.field === 'status').map((e) => [e.from, e.to, e.actor])).toEqual([['In Review', 'In Progress', 'Bolas']]);
+    expect(events.filter((e) => e.field === 'status').map((e) => [e.from, e.to, e.actor])).toEqual([['In Review', 'In Progress', '你']]);
+  });
+
+  it('設定 OWNER_NAME 後，save_comment 只有這個名字會把待驗收的票交回 In Progress（NX-244）', async () => {
+    env = { ...env, OWNER_NAME: 'Alice' };
+    await tool('save_issue', { title: '待驗收', state: 'In Review' });
+    await tool('save_comment', { issueId: 'NX-1', body: '舊的名字', author: 'Bolas' });
+    await tool('save_comment', { issueId: 'NX-1', body: '回報', author: 'nextline agent' });
+    expect((await tool<Issue>('get_issue', { id: 'NX-1' })).status).toBe('In Review');
+    await tool('save_comment', { issueId: 'NX-1', body: '選 1', author: 'Alice' });
+    expect((await tool<Issue>('get_issue', { id: 'NX-1' })).status).toBe('In Progress');
   });
 
   it('list_recent_comments：跨票列出某個時間之後的 comment（含 Done、封存），跟逐張 list_comments 一致', async () => {

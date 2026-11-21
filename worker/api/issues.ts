@@ -779,7 +779,7 @@ export async function listRecentComments(db: Database, url: URL): Promise<Respon
   });
 }
 
-export async function createComment(db: Database, ref: string, request: Request): Promise<Response> {
+export async function createComment(db: Database, ref: string, request: Request, owner: string): Promise<Response> {
   const body = await readBody(request);
   const issue = await resolveIssue(db, ref);
   const author = requiredStr(body, 'author');
@@ -798,18 +798,17 @@ export async function createComment(db: Database, ref: string, request: Request)
     )
     .bind(issue.number, author, text, linearId, createdAt, updatedAt)
     .first<CommentRow>();
-  if (linearId === null) await handBackToAgent(db, issue, author);
+  if (linearId === null) await handBackToAgent(db, issue, author, owner);
   return json(row, 201);
 }
 
 // 人在待驗收（In Review）的票寫 comment，票自動交回 agent：移到 In Progress（NX-221）。
 // 跟「退回」一樣寫一筆 status 變更紀錄（actor＝comment 的 author），可以用還原改回去。
-// 「人」只有 Bolas；agent 用「阿澈」「<repo> agent」「mcp」等名稱，不觸發。搬家匯入（帶 linear_id）也不觸發。
-export const HUMAN_AUTHORS: readonly string[] = ['Bolas'];
-
-async function handBackToAgent(db: Database, issue: IssueRow, author: string): Promise<void> {
+// 「人」只有一個，名字是設定的 owner（./owner.ts，預設「你」，NX-244）；agent 用「阿澈」「<repo> agent」「mcp」等名稱，不觸發。
+// 搬家匯入（帶 linear_id）也不觸發。
+async function handBackToAgent(db: Database, issue: IssueRow, author: string, owner: string): Promise<void> {
   const who = author.trim();
-  if (issue.status !== 'In Review' || !HUMAN_AUTHORS.includes(who)) return;
+  if (issue.status !== 'In Review' || who !== owner) return;
   await applyChanges(db, issue, { status: 'In Progress' }, who);
 }
 

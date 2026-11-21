@@ -88,6 +88,20 @@ describe('Node self-host ingress and credentials', () => {
     expect((await f.call('/app-api/issues', { headers: { Cookie: `nextline_session=${'a'.repeat(43)}` } })).status).toBe(401);
   });
 
+  it('NEXTLINE_OWNER_NAME sets the human name for the browser and In Review hand-back (NX-244)', async () => {
+    expect(configFromEnv({}).ownerName).toBe('你');
+    const f = await fixture({ ownerName: configFromEnv({ NEXTLINE_OWNER_NAME: 'Alice' }).ownerName });
+    const cookie = (await f.login()).headers.get('set-cookie')?.split(';')[0] ?? '';
+    const write = { Cookie: cookie, Origin: f.base, 'Content-Type': 'application/json' };
+    expect(await (await f.call('/app-api/owner', { headers: { Cookie: cookie } })).json()).toEqual({ name: 'Alice' });
+    expect(await (await f.call('/api/owner', { headers: f.agent })).json()).toEqual({ name: 'Alice' });
+    await f.call('/app-api/issues', { method: 'POST', headers: write, body: '{"title":"review","status":"In Review"}' });
+    await f.call('/api/issues/NX-1/comments', { method: 'POST', headers: { ...f.agent, 'Content-Type': 'application/json' }, body: '{"author":"nextline agent","body":"done"}' });
+    expect(((await (await f.call('/api/issues/NX-1', { headers: f.agent })).json()) as { status: string }).status).toBe('In Review');
+    await f.call('/app-api/issues/NX-1/comments', { method: 'POST', headers: write, body: '{"author":"Alice","body":"ok"}' });
+    expect(((await (await f.call('/api/issues/NX-1', { headers: f.agent })).json()) as { status: string }).status).toBe('In Progress');
+  });
+
   it('limits login attempts persistently and rotates agent tokens without a restart', async () => {
     const f = await fixture();
     for (let i = 0; i < 5; i++) expect((await f.call('/auth/login', { method: 'POST', headers: { Origin: f.base }, body: '{"password":"wrong"}' })).status).toBe(401);

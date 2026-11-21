@@ -323,7 +323,7 @@ async function issueById(db: Database, ref: string) {
   return issueDetailOut(detail, l);
 }
 
-export function registerTools(server: McpServer, db: Database): void {
+export function registerTools(server: McpServer, db: Database, owner: string): void {
   server.registerTool(
     'list_issues',
     {
@@ -562,7 +562,7 @@ export function registerTools(server: McpServer, db: Database): void {
     'save_comment',
     {
       description:
-        '不帶 id 是在 issueId 的票上新增 comment，帶 id 是修改那則 comment 的內容。新增時票在 In Review 而 author 是 Bolas（人），票會同時移到 In Progress（寫進變更紀錄，可還原）；agent 的 author 不會改狀態。',
+        `不帶 id 是在 issueId 的票上新增 comment，帶 id 是修改那則 comment 的內容。新增時票在 In Review 而 author 是 ${owner}（人），票會同時移到 In Progress（寫進變更紀錄，可還原）；agent 的 author 不會改狀態。`,
       inputSchema: {
         id: z.string().optional().describe('要修改的 comment id；新增時不要帶'),
         issueId: z.string().optional().describe('票號（新增時必填）'),
@@ -579,7 +579,7 @@ export function registerTools(server: McpServer, db: Database): void {
           return commentOut(await data<ApiComment>(updateComment(db, id, jsonRequest('PATCH', { body: args.body }))));
         }
         if (args.issueId === undefined) throw new HttpError(400, '新增 comment 要帶 issueId');
-        const created = createComment(db, args.issueId, jsonRequest('POST', { author: args.author ?? 'mcp', body: args.body }));
+        const created = createComment(db, args.issueId, jsonRequest('POST', { author: args.author ?? 'mcp', body: args.body }), owner);
         return commentOut(await data<ApiComment>(created));
       }),
   );

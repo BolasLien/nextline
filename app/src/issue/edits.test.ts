@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/client';
 import type { Comment, IssueDetail, IssueEvent, IssueUpdate } from '../api/types';
 import type { ToastInput } from '../toast/toastStore';
-import { ACTOR, applyPatch, createEditActions, findEvent } from './edits';
+import { actor } from '../owner/owner';
+import { applyPatch, createEditActions, findEvent } from './edits';
 
 function detail(extra: Partial<IssueDetail> = {}): IssueDetail {
   return {
@@ -29,7 +30,7 @@ function detail(extra: Partial<IssueDetail> = {}): IssueDetail {
 }
 
 function event(id: number, field: string, from: string | null, to: string | null, extra: Partial<IssueEvent> = {}): IssueEvent {
-  return { id, issue_number: 7, field, from_value: from, to_value: to, actor: ACTOR, revert_of_event_id: null, reverted_by_event_id: null, created_at: '', ...extra };
+  return { id, issue_number: 7, field, from_value: from, to_value: to, actor: actor(), revert_of_event_id: null, reverted_by_event_id: null, created_at: '', ...extra };
 }
 
 function setup(opts: { issue?: IssueDetail; update?: (body: IssueUpdate) => Promise<IssueDetail>; events?: IssueEvent[]; revert?: (id: number) => Promise<IssueDetail>; comment?: () => Promise<Comment> } = {}) {
@@ -68,7 +69,7 @@ describe('就地編輯', () => {
     const s = setup({ update: () => new Promise((r) => { resolve = r; }) });
     const done = s.actions.edit({ title: '新標題' }, 'NX-7 改了標題');
     expect(s.now().title).toBe('新標題');
-    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { title: '新標題', actor: ACTOR });
+    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { title: '新標題', actor: actor() });
     resolve(detail({ title: '新標題', updated_at: '2026-11-03T00:00:00.000Z' }));
     expect(await done).toBe(true);
     expect(s.now().updated_at).toBe('2026-11-03T00:00:00.000Z');
@@ -103,7 +104,7 @@ describe('就地編輯', () => {
     const s = setup({ events: [event(5, 'project', null, '2'), event(6, 'title', '舊標題', '新標題')] });
     await s.actions.edit({ project_id: 2 }, 'NX-7 移到 Project');
     await s.toasts[0]?.onUndo?.();
-    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, ACTOR);
+    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, actor());
   });
 
   it('toast「復原」找不到那筆紀錄時，直接改回舊值', async () => {
@@ -111,7 +112,7 @@ describe('就地編輯', () => {
     await s.actions.edit({ due_date: '2026-11-30' }, 'x');
     await s.toasts[0]?.onUndo?.();
     expect(s.api.revertIssueEvent).not.toHaveBeenCalled();
-    expect(s.api.updateIssue).toHaveBeenLastCalledWith('NX-7', { due_date: null, actor: ACTOR });
+    expect(s.api.updateIssue).toHaveBeenLastCalledWith('NX-7', { due_date: null, actor: actor() });
   });
 
   it('findEvent 跳過已還原的和「還原」本身', () => {
@@ -129,7 +130,7 @@ describe('變更紀錄還原', () => {
   it('成功：換成 API 回的票、toast 說還原了什麼、重抓變更紀錄', async () => {
     const s = setup({ revert: () => Promise.resolve(detail({ title: '更早的標題' })) });
     expect(await s.actions.revert(event(4, 'title', '更早的標題', '舊標題'), '標題改回 更早的標題')).toBe(true);
-    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 4, ACTOR);
+    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 4, actor());
     expect(s.now().title).toBe('更早的標題');
     expect(s.toasts[0]?.message).toBe('已還原：標題改回 更早的標題');
     expect(s.refreshEvents).toHaveBeenCalled();
@@ -162,7 +163,7 @@ describe('comment 與 blocked by', () => {
     expect(s.refreshEvents).toHaveBeenCalled();
     expect(s.toasts[0]?.message).toBe('NX-7 已交回 agent，移到「In Progress」');
     await s.toasts[0]?.onUndo?.();
-    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, ACTOR);
+    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, actor());
     expect(s.now().status).toBe('In Review');
   });
 
@@ -179,9 +180,9 @@ describe('comment 與 blocked by', () => {
     const p = s.actions.addBlocker(target);
     expect(s.now().blocked_by.map((b) => b.number)).toEqual([3]);
     expect(await p).toBe(true);
-    expect(s.api.addBlocker).toHaveBeenCalledWith('NX-7', 'NX-3', ACTOR);
+    expect(s.api.addBlocker).toHaveBeenCalledWith('NX-7', 'NX-3', actor());
     await s.toasts[0]?.onUndo?.();
-    expect(s.api.removeBlocker).toHaveBeenCalledWith('NX-7', 'NX-3', ACTOR);
+    expect(s.api.removeBlocker).toHaveBeenCalledWith('NX-7', 'NX-3', actor());
     expect(s.now().blocked_by).toEqual([]);
   });
 
@@ -201,7 +202,7 @@ describe('封存（NX-160）', () => {
     const done = s.actions.archive();
     expect(s.now().archived_at).not.toBeNull();
     expect(await done).toBe(true);
-    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { archived: true, actor: ACTOR });
+    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { archived: true, actor: actor() });
     expect(s.now().archived_at).toBe('2026-11-04T01:00:00.000Z');
     expect(s.toasts[0]?.message).toBe('已封存 NX-7');
     expect(s.toasts[0]?.onUndo).toBeTypeOf('function');
@@ -218,7 +219,7 @@ describe('封存（NX-160）', () => {
     const undo = s.toasts[0]?.onUndo?.();
     expect(s.now().archived_at).toBeNull();
     await undo;
-    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, ACTOR);
+    expect(s.api.revertIssueEvent).toHaveBeenCalledWith('NX-7', 5, actor());
     expect(s.now().archived_at).toBeNull();
   });
 
@@ -235,7 +236,7 @@ describe('封存（NX-160）', () => {
   it('取消封存：送 archived: false，toast「已取消封存」', async () => {
     const s = setup({ issue: detail({ archived_at: '2026-11-04T01:00:00.000Z' }), update: () => Promise.resolve(detail({ archived_at: null })) });
     expect(await s.actions.unarchive()).toBe(true);
-    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { archived: false, actor: ACTOR });
+    expect(s.api.updateIssue).toHaveBeenCalledWith('NX-7', { archived: false, actor: actor() });
     expect(s.toasts[0]?.message).toBe('已取消封存 NX-7');
   });
 });

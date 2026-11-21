@@ -24,6 +24,8 @@
   "vars": {
     "ACCESS_TEAM_DOMAIN": "https://<your-team>.cloudflareaccess.com",
     "ACCESS_AUD": "<your-access-aud>"
+    // 網頁上的人叫什麼（comment 作者、移票紀錄；只有這個名字回覆待驗收的票會交回 In Progress）。沒設定是「你」。
+    // "OWNER_NAME": "<your-name>"
   },
   "d1_databases": [
     {

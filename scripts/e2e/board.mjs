@@ -119,7 +119,7 @@ async function seed(beforeIssues) {
   await say(p1, 'claude-nextline', '篩選列做好一半。\n下一步：claude-nextline 接著做存成 view');
   await say(r1, 'claude-nextline', '對比都過了，截圖在 .scratch。\n下一步：Bolas 驗收深色模式截圖');
   await say(p2, '阿澈', '素材整理好了');
-  await say(b1, 'Bolas', '下一步：等 Sprint 2 再排');
+  await say(b1, '你', '下一步：等 Sprint 2 再排');
   return { sprint, t1, t2, t3, p1, p2, r1, d1 };
 }
 

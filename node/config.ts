@@ -1,6 +1,7 @@
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { isIP } from 'node:net';
+import { ownerName } from '../worker/api/owner';
 
 export interface Config {
   dataDir: string;
@@ -11,6 +12,8 @@ export interface Config {
   origin: string;
   secure: boolean;
   trustedProxies: string[];
+  // 「人」的名字（worker/api/owner.ts，NX-244）；NEXTLINE_OWNER_NAME 沒設定時用預設值。
+  ownerName: string;
 }
 
 export function configFromEnv(env = process.env): Config {
@@ -30,6 +33,7 @@ export function configFromEnv(env = process.env): Config {
     dataDir: resolve(env.NEXTLINE_DATA_DIR ?? resolve(homedir(), '.local/share/nextline')),
     clientDir: resolve('dist/client'), migrationsDir: resolve('migrations'),
     host, port, origin: originUrl.origin, secure, trustedProxies,
+    ownerName: ownerName({ OWNER_NAME: env.NEXTLINE_OWNER_NAME }),
   };
 }
 

@@ -2,7 +2,7 @@
 // 先改畫面（issueSync：從已封存列表拿掉、放回看板與列表），API 失敗再換回來；toast 附「復原」（再封存回去）。
 import type { ApiClient } from '../api/client';
 import type { Issue } from '../api/types';
-import { ACTOR } from '../board/moves';
+import { actor } from '../owner/owner';
 import { errorText, findEvent } from '../issue/edits';
 import type { IssueSync } from '../issue/issueSync';
 import type { ToastInput } from '../toast/toastStore';
@@ -17,7 +17,7 @@ export async function unarchiveFromList(
   const from = issue.archived_at;
   sync.publish({ ...issue, archived_at: null });
   try {
-    const saved = await api.updateIssue(id, { archived: false, actor: ACTOR });
+    const saved = await api.updateIssue(id, { archived: false, actor: actor() });
     sync.publish(saved);
     toast({
       message: `已取消封存 ${id}`,
@@ -26,7 +26,7 @@ export async function unarchiveFromList(
         try {
           const { events } = await api.listIssueEvents(id);
           const event = findEvent(events, 'archived', from, null);
-          sync.publish(event === undefined ? await api.updateIssue(id, { archived: true, actor: ACTOR }) : (await api.revertIssueEvent(id, event.id, ACTOR)).issue);
+          sync.publish(event === undefined ? await api.updateIssue(id, { archived: true, actor: actor() }) : (await api.revertIssueEvent(id, event.id, actor())).issue);
         } catch (e) {
           sync.publish(saved);
           throw e;

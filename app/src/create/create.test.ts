@@ -169,7 +169,7 @@ describe('送出後的資料同步', () => {
     expect(archivedList.map((i) => i.number)).toEqual([created.number]);
   });
 
-  it('blocked by 開票後逐一加上（actor Bolas）；加失敗不退回票，另外回報', async () => {
+  it('blocked by 開票後逐一加上（actor 你）；加失敗不退回票，另外回報', async () => {
     const { api, calls } = fakeApi(board, { failBlocker: 'NX-9' });
     const sync = new IssueSync();
     const published: IssueDetail[] = [];
@@ -180,8 +180,8 @@ describe('送出後的資料同步', () => {
     ];
     const { issue: created, blockerErrors } = await submitDraft(api, sync, { ...emptyDraft({ status: 'In Progress', projectId: null }), title: 'x', blockers });
     expect(calls.blockers).toEqual([
-      [created.identifier, 'NX-2', 'Bolas'],
-      [created.identifier, 'NX-9', 'Bolas'],
+      [created.identifier, 'NX-2', '你'],
+      [created.identifier, 'NX-9', '你'],
     ]);
     expect(created.blocked_by.map((b) => b.identifier)).toEqual(['NX-2']);
     expect(blockerErrors).toEqual(['NX-9：blocked_by 的票不存在']);

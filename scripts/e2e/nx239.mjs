@@ -4,7 +4,7 @@
 //      comment 區不放第二個輸入框
 //   2. 最新 comment 有「要你決定：」＋編號選項：頂端寫「要你決定：〈問題〉」，照原文列出選項（純文字，沒有按鈕），下面是回覆框；
 //      之後有新 comment（不是這個格式）就不再顯示
-//   3. 手機回覆：comment 作者 Bolas、原文照存，票移到 In Progress（NX-221），toast 可復原
+//   3. 手機回覆：comment 作者「你」、原文照存，票移到 In Progress（NX-221），toast 可復原
 //   4. 1280（預覽、整頁）／375 × 淺色／深色截圖，量測沒有橫向捲動
 // 用法（repo 根目錄）：
 //   PLAYWRIGHT_MODULE=<playwright 套件的 index.mjs> [CHROMIUM_PATH=<chromium>] [E2E_PORT=8800] node scripts/e2e/nx239.mjs
@@ -196,8 +196,8 @@ try {
       const toast = mp.locator('.nl-toast', { hasText: `${d.decide.identifier} 已交回 agent` });
       await toast.waitFor();
       const cs = (await api('GET', `/issues/${d.decide.identifier}/comments`)).comments;
-      step('375 回覆：comment 作者 Bolas、原文照存，票移到 In Progress，「等你回覆」收起、toast 附復原',
-        cs.at(-1).author === 'Bolas' && cs.at(-1).body === '選 1' && (await mp.locator('.nl-review').count()) === 0 && (await toast.getByRole('button', { name: '復原' }).count()) === 1);
+      step('375 回覆：comment 作者「你」、原文照存，票移到 In Progress，「等你回覆」收起、toast 附復原',
+        cs.at(-1).author === '你' && cs.at(-1).body === '選 1' && (await mp.locator('.nl-review').count()) === 0 && (await toast.getByRole('button', { name: '復原' }).count()) === 1);
       await mp.screenshot({ path: join(outDir, 'e2e-decision-replied-375-light.png') });
       await toast.getByRole('button', { name: '復原' }).tap();
       await waitIssue(d.decide.identifier, (i) => i.status === 'In Review', '復原回待驗收');

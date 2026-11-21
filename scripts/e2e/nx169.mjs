@@ -97,7 +97,7 @@ async function seed() {
   const review = await mk('品牌識別改成方向 A「定線 Steady」', 'In Review', p1, {
     description: '## 目標\nBolas 長時間看 Nextline 時，眼睛不吃力。\n\n## 範圍\n- 色彩：主色墨藍、agent 青綠、冷灰中性色\n- 字體：Inter、JetBrains Mono\n- 圖示：線寬 1.5、轉角 2\n\n`docs/design/system/tokens.ts` 是正本。',
   });
-  await api('POST', `/issues/${review.identifier}/comments`, { author: 'Bolas', body: 'B 版顏色看久了眼睛吃力，改 A。' });
+  await api('POST', `/issues/${review.identifier}/comments`, { author: '你', body: 'B 版顏色看久了眼睛吃力，改 A。' });
   await api('POST', `/issues/${review.identifier}/comments`, { author: 'nextline agent', body: '色票、字體、圖示、logo 都換好，截圖在 `.scratch/screenshots/nx169/`。\n\n下一步：阿澈驗收' });
   await mk('錄音轉逐字稿的可疑詞清單', 'In Review', p3);
   await mk('拿掉 Project 狀態', 'Done', p1);

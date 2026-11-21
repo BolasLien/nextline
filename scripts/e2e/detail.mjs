@@ -230,7 +230,7 @@ try {
   await peek.locator('.cmt').first().waitFor();
   await peek.locator('.next-step').waitFor();
   await settle(page);
-  step('寫 comment：API 多一則（作者 Bolas），時間軸出現，輸入框清空', comments.comments[0].author === 'Bolas' && (await peek.locator('.cmt').count()) === 1 && (await peek.getByRole('textbox', { name: '寫 comment（Markdown）' }).inputValue()) === '');
+  step('寫 comment：API 多一則（作者「你」），時間軸出現，輸入框清空', comments.comments[0].author === '你' && (await peek.locator('.cmt').count()) === 1 && (await peek.getByRole('textbox', { name: '寫 comment（Markdown）' }).inputValue()) === '');
   step('寫 comment：comment 的 Markdown 有轉（粗體）、作者和時間用小字', (await peek.locator('.cmt .md strong').count()) === 1 && (await peek.locator('.cmt .who small').textContent()) === '剛剛');
   step('寫 comment：「最新的下一步」區塊和看板卡片都換成新的下一步', (await peek.locator('.next-step p').textContent()).includes('Bolas 看') && (await card(d.t1).locator('.next').textContent()).includes('Bolas 看'));
 
@@ -296,7 +296,7 @@ try {
   // 變更紀錄預設只列最近 10 筆，比較舊的要按「顯示全部」
   const showAll = peek.getByRole('button', { name: /^顯示全部/ });
   if ((await showAll.count()) > 0) await showAll.click();
-  step('還原：標題改回原本，那一筆標「已還原」加刪除線，多一筆「還原了…」', titleEvent.reverted_by_event_id !== null && (await row.locator('.done-tag').textContent()) === '已還原' && (await row.getAttribute('class')).includes('is-reverted') && (await peek.locator('.nl-hist', { hasText: '還原了 Bolas 的標題變更' }).count()) === 1);
+  step('還原：標題改回原本，那一筆標「已還原」加刪除線，多一筆「還原了…」', titleEvent.reverted_by_event_id !== null && (await row.locator('.done-tag').textContent()) === '已還原' && (await row.getAttribute('class')).includes('is-reverted') && (await peek.locator('.nl-hist', { hasText: '還原了 你 的標題變更' }).count()) === 1);
   step('還原：看板卡片標題也改回來', (await card(d.t1).locator('.t').textContent()) === d.t1.title);
   await page.screenshot({ path: join(outDir, 'peek-1280-light-history.png') });
 
@@ -342,13 +342,13 @@ try {
   await peek.getByRole('textbox', { name: '回覆' }).fill('   ');
   step('回覆：只打空白也不能送', await replyBtn.isDisabled());
 
-  // 12. 回覆：author Bolas，票交回 agent（In Progress，NX-221），狀態之後交給 agent
+  // 12. 回覆：author 是網頁上的人（預設「你」），票交回 agent（In Progress，NX-221），狀態之後交給 agent
   await peek.getByRole('textbox', { name: '回覆' }).fill('toast 在手機上擋到底部分頁列，往上移一點');
   await replyBtn.click();
   await waitIssue(d.r1.identifier, (i) => i.status === 'In Progress', '回覆寫進 API');
   const rc = (await api('GET', `/issues/${d.r1.identifier}/comments`)).comments;
   await inCol(d.r1, 'in-progress').waitFor({ timeout: 3000 });
-  step('回覆：comment 原文寫進去（作者 Bolas），狀態回 In Progress，看板跟著移', rc.at(-1).author === 'Bolas' && rc.at(-1).body === 'toast 在手機上擋到底部分頁列，往上移一點');
+  step('回覆：comment 原文寫進去（作者「你」），狀態回 In Progress，看板跟著移', rc.at(-1).author === '你' && rc.at(-1).body === 'toast 在手機上擋到底部分頁列，往上移一點');
   const rjEvents = (await api('GET', `/issues/${d.r1.identifier}/events`)).events.filter((e) => e.from_value === 'In Review' && e.to_value === 'In Progress');
   const rjToast = page.locator('.nl-toast', { hasText: `${d.r1.identifier} 已交回 agent` });
   step('回覆（NX-221）：變更紀錄只有一筆「In Review → In Progress」，toast 附復原；「等你回覆」收起、comment 區輸入框回來', rjEvents.length === 1 && (await rjToast.getByRole('button', { name: '復原' }).count()) === 1 && (await reply.count()) === 0 && (await peek.locator('.cmt-form').count()) === 1, { events: rjEvents.length });
@@ -365,8 +365,8 @@ try {
   const handToast = page.locator('.nl-toast', { hasText: `${d.r2.identifier} 已交回 agent` });
   await handToast.waitFor();
   const hEvents = (await api('GET', `/issues/${d.r2.identifier}/events`)).events.filter((e) => e.field === 'status');
-  step('待驗收回覆（NX-221）：API 變 In Progress、看板卡片移欄、「等你回覆」消失、變更紀錄一筆（Bolas）、toast 附復原',
-    (await peek.locator('.nl-review').count()) === 0 && hEvents.length === 1 && hEvents[0].actor === 'Bolas' && hEvents[0].from_value === 'In Review' && (await handToast.getByRole('button', { name: '復原' }).count()) === 1,
+  step('待驗收回覆（NX-221）：API 變 In Progress、看板卡片移欄、「等你回覆」消失、變更紀錄一筆（你）、toast 附復原',
+    (await peek.locator('.nl-review').count()) === 0 && hEvents.length === 1 && hEvents[0].actor === '你' && hEvents[0].from_value === 'In Review' && (await handToast.getByRole('button', { name: '復原' }).count()) === 1,
     { events: hEvents.map((e) => [e.from_value, e.to_value, e.actor]) });
   await page.screenshot({ path: join(outDir, 'peek-1280-light-handback.png') });
   await handToast.getByRole('button', { name: '復原' }).click();

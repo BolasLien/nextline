@@ -18,6 +18,7 @@ import {
   updateComment,
   updateIssue,
 } from './issues';
+import { DEFAULT_OWNER_NAME, ownerName } from './owner';
 import { createProject, getProject, listProjects, updateProject } from './projects';
 import { createSprint, getSprint, listSprints, updateSprint } from './sprints';
 
@@ -25,6 +26,8 @@ export interface ApiEnv {
   DB: Database;
   API_TOKEN?: string;
   API_TOKEN_SHA256?: string;
+  // 「人」的名字（./owner.ts，NX-244）
+  OWNER_NAME?: string;
 }
 
 type Handler = () => Promise<Response>;
@@ -37,14 +40,15 @@ export async function handleApi(request: Request, env: ApiEnv, url: URL): Promis
       headers: { 'Content-Type': 'application/json', 'WWW-Authenticate': 'Bearer' },
     });
   }
-  return routeApi(request, env.DB, url);
+  return routeApi(request, env.DB, url, ownerName(env));
 }
 
 // 驗證過後的路由，/api（token）與 /app-api（瀏覽器的 Access JWT，見 ./browser.ts）共用同一套。
 // 路徑的第一段（api 或 app-api）在 match 裡略過，所以兩邊的子路徑完全相同。
-export async function routeApi(request: Request, db: Database, url: URL): Promise<Response> {
+// owner 是「人」的名字（./owner.ts）：待驗收的票只有他寫 comment 會交回 agent，GET /owner 回給前端。
+export async function routeApi(request: Request, db: Database, url: URL, owner: string = DEFAULT_OWNER_NAME): Promise<Response> {
   try {
-    const routes = match(request, db, url);
+    const routes = match(request, db, url, owner);
     if (routes === null) return errorResponse(404, '找不到這個 API 路徑');
     const handler = routes[request.method];
     if (handler === undefined) {
@@ -61,7 +65,7 @@ export async function routeApi(request: Request, db: Database, url: URL): Promis
   }
 }
 
-function match(request: Request, db: Database, url: URL): Routes | null {
+function match(request: Request, db: Database, url: URL, owner: string): Routes | null {
   const parts = url.pathname
     .replace(/\/+$/, '')
     .split('/')
@@ -79,7 +83,7 @@ function match(request: Request, db: Database, url: URL): Routes | null {
         return { GET: () => getIssue(db, id), PATCH: () => updateIssue(db, id, request) };
       }
       if (parts.length === 3 && sub === 'comments') {
-        return { GET: () => listComments(db, id), POST: () => createComment(db, id, request) };
+        return { GET: () => listComments(db, id), POST: () => createComment(db, id, request, owner) };
       }
       if (parts.length === 3 && sub === 'events') {
         return { GET: () => listEvents(db, id) };
@@ -94,6 +98,9 @@ function match(request: Request, db: Database, url: URL): Routes | null {
         }
       }
       return null;
+    case 'owner':
+      if (id !== undefined) return null;
+      return { GET: () => Promise.resolve(Response.json({ name: owner })) };
     case 'comments':
       if (id === undefined) return { GET: () => listRecentComments(db, url) };
       if (parts.length !== 2) return null;

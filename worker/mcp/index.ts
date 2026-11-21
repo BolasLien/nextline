@@ -4,12 +4,14 @@ import type { Database } from '../core/database';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { hasValidToken } from '../api/auth';
+import { ownerName } from '../api/owner';
 import { registerTools } from './tools';
 
 export interface McpEnv {
   DB: Database;
   API_TOKEN?: string;
   API_TOKEN_SHA256?: string;
+  OWNER_NAME?: string;
 }
 
 export async function handleMcp(request: Request, env: McpEnv): Promise<Response> {
@@ -27,7 +29,7 @@ export async function handleMcp(request: Request, env: McpEnv): Promise<Response
     });
   }
   const server = new McpServer({ name: 'nextline', version: '0.1.0' });
-  registerTools(server, env.DB);
+  registerTools(server, env.DB, ownerName(env));
   const transport = new WebStandardStreamableHTTPServerTransport({ enableJsonResponse: true });
   await server.connect(transport);
   return transport.handleRequest(request);

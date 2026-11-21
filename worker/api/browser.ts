@@ -13,10 +13,11 @@ import { type AccessEnv, checkAccess } from '../web/access';
 import { isSafeMethod, isSameOrigin } from '../web/csrf';
 import { errorResponse } from './http';
 import { routeApi } from './index';
+import { type OwnerEnv, ownerName } from './owner';
 
 export const APP_API = '/app-api';
 
-export interface BrowserApiEnv extends AccessEnv {
+export interface BrowserApiEnv extends AccessEnv, OwnerEnv {
   DB: Database;
 }
 
@@ -28,7 +29,7 @@ export async function handleBrowserApi(request: Request, env: BrowserApiEnv, url
   if (!isSafeMethod(request.method) && !isSameOrigin(request, url)) {
     return withNoStore(errorResponse(403, '請從 Nextline 網頁送出（來源不符）'));
   }
-  return withNoStore(await routeApi(request, env.DB, url));
+  return withNoStore(await routeApi(request, env.DB, url, ownerName(env)));
 }
 
 // 回應帶使用者資料，不給瀏覽器或中間快取存。

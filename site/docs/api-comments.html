@@ -76,7 +76,7 @@ intro: agent 回報進度、你回覆驗收，都是 comment。最後一行寫�
     <p>你在網頁上回覆一張 <code>In Review</code> 的票時，票會同時移到 <code>In Progress</code>，並寫一筆狀態的變更紀錄（可以還原），agent 下次來看就知道要接著做。</p>
     <ul>
       <li>agent 寫的 comment 不會改狀態，所以 agent 可以放心在待驗收的票上補充說明。</li>
-      <li>判斷「人還是 agent」是看 <code>author</code>：目前只有網頁使用者的名稱（程式內建的固定值）會觸發，其他名稱都當成 agent。</li>
+      <li>判斷「人還是 agent」是看 <code>author</code>：只有網頁上那個人的名字會觸發，其他名稱都當成 agent。名字用 <code>NEXTLINE_OWNER_NAME</code> 設定（見<a href="install.html">安裝</a>），沒設定是「你」；<code>GET /api/owner</code> 查得到目前的名字。</li>
       <li>帶 <code>linear_id</code> 的搬資料寫入不會觸發；其他狀態的票也不會。</li>
     </ul>
 

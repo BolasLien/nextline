@@ -148,13 +148,25 @@ describe('/app-api：寫入防 CSRF', () => {
     expect(patch.status).toBe(200);
   });
 
-  it('網頁寫 comment（Bolas）在待驗收的票 → 移到 In Progress（NX-221）', async () => {
+  it('網頁寫 comment（你）在待驗收的票 → 移到 In Progress（NX-221）', async () => {
     const jwt = await signJwt(keys.privateKey);
     await browser('POST', '/app-api/issues', { jwt, headers: sameOrigin, body: { title: '待驗收', status: 'In Review' } });
-    const posted = await browser('POST', '/app-api/issues/NX-1/comments', { jwt, headers: sameOrigin, body: { author: 'Bolas', body: '好' } });
+    const posted = await browser('POST', '/app-api/issues/NX-1/comments', { jwt, headers: sameOrigin, body: { author: '你', body: '好' } });
     expect(posted.status).toBe(201);
     const issue: { status: string } = await (await browser('GET', '/app-api/issues/NX-1', { jwt })).json();
     expect(issue.status).toBe('In Progress');
+  });
+
+  it('GET /app-api/owner 回 OWNER_NAME；網頁用這個名字回覆待驗收的票 → In Progress（NX-244）', async () => {
+    const jwt = await signJwt(keys.privateKey);
+    expect(await (await browser('GET', '/app-api/owner', { jwt })).json()).toEqual({ name: '你' });
+    env = { ...env, OWNER_NAME: 'Alice' };
+    expect(await (await browser('GET', '/app-api/owner', { jwt })).json()).toEqual({ name: 'Alice' });
+    await browser('POST', '/app-api/issues', { jwt, headers: sameOrigin, body: { title: '待驗收', status: 'In Review' } });
+    await browser('POST', '/app-api/issues/NX-1/comments', { jwt, headers: sameOrigin, body: { author: 'Bolas', body: '舊名字' } });
+    expect((await (await browser('GET', '/app-api/issues/NX-1', { jwt })).json<{ status: string }>()).status).toBe('In Review');
+    await browser('POST', '/app-api/issues/NX-1/comments', { jwt, headers: sameOrigin, body: { author: 'Alice', body: '好' } });
+    expect((await (await browser('GET', '/app-api/issues/NX-1', { jwt })).json<{ status: string }>()).status).toBe('In Progress');
   });
 
   it('讀取（GET）不需要 Origin', async () => {
