@@ -74,7 +74,7 @@ function toIssue<T extends { number: number }>(row: T): T & { identifier: string
 
 const LEGACY = /^[A-Z][A-Z0-9]*-\d+$/;
 
-// 票的參照：NX-12、12 都是 NX 編號；其他「字母-數字」（例如 BOL-150）當成舊編號查。不分大小寫。
+// 票的參照：NX-12、12 都是 NX 編號；其他「字母-數字」（例如 ABC-150）當成舊編號查。不分大小寫。
 export async function resolveIssue(db: Database, ref: string): Promise<IssueRow> {
   const upper = ref.trim().toUpperCase();
   const nx = /^(?:NX-)?(\d+)$/.exec(upper)?.[1];
@@ -340,7 +340,7 @@ export async function createIssue(db: Database, request: Request): Promise<Respo
   const legacyRaw = nullableStr(body, 'legacy_identifier');
   const legacy = typeof legacyRaw === 'string' ? legacyRaw.trim().toUpperCase() : null;
   if (legacy !== null && (!LEGACY.test(legacy) || legacy.startsWith('NX-'))) {
-    throw new HttpError(400, 'legacy_identifier 必須像 BOL-150（不能是 NX 編號）');
+    throw new HttpError(400, 'legacy_identifier 必須像 ABC-150（不能是 NX 編號）');
   }
   const createdAt = timestamp(body, 'created_at') ?? now();
   const updatedAt = timestamp(body, 'updated_at') ?? createdAt;
@@ -711,7 +711,7 @@ export async function addBlocker(db: Database, ref: string, request: Request): P
   const issue = await resolveIssue(db, ref);
   const raw = body.blocked_by;
   const blockerRef = typeof raw === 'number' ? String(raw) : typeof raw === 'string' ? raw : undefined;
-  if (blockerRef === undefined || blockerRef.trim() === '') throw new HttpError(400, '缺少 blocked_by（例如 NX-3 或 BOL-150）');
+  if (blockerRef === undefined || blockerRef.trim() === '') throw new HttpError(400, '缺少 blocked_by（例如 NX-3 或 ABC-150）');
   const blocker = await resolveOther(db, blockerRef);
   if (blocker.number === issue.number) throw new HttpError(400, '票不能擋住自己');
   const added = await changeBlocker(db, issue.number, blocker.number, 'add', actorOf(body));

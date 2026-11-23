@@ -129,7 +129,7 @@ export function apiQuery(query: ListQuery): IssueListQuery {
   };
 }
 
-// 關鍵字：票號（NX-12、12、舊編號 BOL-150）或標題，不分大小寫。
+// 關鍵字：票號（NX-12、12、舊編號 ABC-150）或標題，不分大小寫。
 export function matchesText(issue: Issue, q: string): boolean {
   const needle = q.trim().toLowerCase();
   if (needle === '') return true;

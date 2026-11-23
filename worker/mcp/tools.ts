@@ -384,7 +384,7 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
     'get_issue',
     {
       description: '讀一張票的完整內容，含 description 與 blocked by／blocks。',
-      inputSchema: { id: z.string().describe('票號：NX-12、12，或舊編號 BOL-150') },
+      inputSchema: { id: z.string().describe('票號：NX-12、12，或舊編號 ABC-150') },
     },
     async (args) => run(() => issueById(db, args.id)),
   );
@@ -395,7 +395,7 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
       description:
         '不帶 id 是新增票（要 title），帶 id 是修改，只改有帶的欄位。blockedBy／blocks 只會新增關係，要拿掉用 removeBlockedBy／removeBlocks。要人看過的票送 In Review（待驗收）。每個改到的欄位都會寫進變更紀錄，做錯了用 revert_issue_event 還原。不做永久刪除：不要的票用 archived: true 封存（看板、列表都看不到，archived: false 取消封存）。',
       inputSchema: {
-        id: z.string().optional().describe('要修改的票號（NX-12 或 BOL-150）；新增時不要帶'),
+        id: z.string().optional().describe('要修改的票號（NX-12 或 ABC-150）；新增時不要帶'),
         title: z.string().optional().describe('標題（新增時必填）'),
         description: z.string().optional().describe('Markdown 內容'),
         state: z
@@ -478,7 +478,7 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
     {
       description:
         '列出一張票的變更紀錄，舊到新：每筆是一個欄位（title、description、status、project、sprint、due_date、blocked_by、archived）的舊值 from 與新值 to、誰改的。revertOf 是「這筆還原了第幾筆」，revertedBy 不是 null 代表已經被還原。',
-      inputSchema: { issueId: z.string().describe('票號：NX-12 或 BOL-150') },
+      inputSchema: { issueId: z.string().describe('票號：NX-12 或 ABC-150') },
     },
     async (args) =>
       run(async () => {
@@ -493,7 +493,7 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
       description:
         '把一筆變更紀錄的欄位改回舊值（例如誤把票移到 Done，還原那筆狀態變更），並寫一筆「還原了第 N 筆」的新紀錄。已經還原過、或之後同一個欄位又被改過時會失敗並說明原因。',
       inputSchema: {
-        issueId: z.string().describe('票號：NX-12 或 BOL-150'),
+        issueId: z.string().describe('票號：NX-12 或 ABC-150'),
         eventId: z.string().describe('要還原的變更紀錄 id（list_issue_events 的 id）'),
         actor: z.string().optional().describe('誰還原的，寫進變更紀錄（預設 mcp）'),
       },
@@ -519,7 +519,7 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
     'list_comments',
     {
       description: '列出一張票的 comment，舊到新。',
-      inputSchema: { issueId: z.string().describe('票號：NX-12 或 BOL-150') },
+      inputSchema: { issueId: z.string().describe('票號：NX-12 或 ABC-150') },
     },
     async (args) =>
       run(async () => {

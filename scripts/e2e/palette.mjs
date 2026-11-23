@@ -1,6 +1,6 @@
 // NX-157：Cmd+K 指令面板與全域快捷鍵的端對端測試。跑本機 wrangler dev（.dev.vars 的 DEV_SKIP_ACCESS=1），
 // 用一份獨立的本機 D1 灌測試資料，再用 Playwright 在瀏覽器裡實際操作（做法同 scripts/e2e/create.mjs）：
-//   1. Cmd+K → 打票號 → Enter 開右側預覽；BOL 舊票號也找得到
+//   1. Cmd+K → 打票號 → Enter 開右側預覽；舊票號也找得到
 //   2. Cmd+K → 打標題的中文片段 → 找得到
 //   3. 列表頁開著預覽時 Cmd+K →「改狀態成 In Progress」→ API 確認 → Cmd+Z 復原（看板以外）→ API 確認
 //   4. Esc 只關最上層：先關面板，預覽還在；再按才關預覽
@@ -96,7 +96,7 @@ async function seed() {
   const mk = async (title, status, project, extra = {}) => api('POST', '/issues', { title, status, project_id: project?.id ?? null, sprint_id: sprint.id, ...extra });
   const due = await mk('看板卡片加上到期日圖示', 'Todo', nextline);
   const gemTodo = await mk('寶石 3 階的材質再亮一點', 'Todo', gem);
-  const legacy = await mk('從 Linear 搬來的舊票：整理驗收清單', 'Todo', nextline, { legacy_identifier: 'BOL-150' });
+  const legacy = await mk('從 Linear 搬來的舊票：整理驗收清單', 'Todo', nextline, { legacy_identifier: 'ABC-150' });
   await mk('列表頁：篩選與存成 view', 'In Progress', nextline);
   await mk('寶石 4 階模型', 'In Progress', gem);
   await mk('設計系統：深色模式對比修正', 'In Review', nextline);
@@ -185,9 +185,9 @@ try {
 
   await blur(page);
   await openPalette(page);
-  await paletteInput(page).fill('BOL-150');
+  await paletteInput(page).fill('ABC-150');
   await selected(page).filter({ hasText: data.legacy.identifier }).waitFor();
-  step('1. BOL 舊票號也找得到（BOL-150 → ' + data.legacy.identifier + '）', (await selected(page).getAttribute('data-item')) === `issue:${data.legacy.identifier}`);
+  step('1. 舊票號也找得到（ABC-150 → ' + data.legacy.identifier + '）', (await selected(page).getAttribute('data-item')) === `issue:${data.legacy.identifier}`);
   await page.keyboard.press('Escape');
   await palette(page).waitFor({ state: 'detached' });
 

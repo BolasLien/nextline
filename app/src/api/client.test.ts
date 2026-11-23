@@ -48,10 +48,10 @@ describe('API client', () => {
     const { fetch, calls } = fakeFetch(() => Response.json({ number: 1 }));
     const api = createApiClient({ fetch });
     await api.updateIssue('NX-12', { status: 'Done', actor: 'Bolas' });
-    await api.removeBlocker('NX 1', 'BOL/2');
+    await api.removeBlocker('NX 1', 'ABC/2');
     expect(calls[0]).toMatchObject({ url: '/app-api/issues/NX-12', init: { method: 'PATCH', body: '{"status":"Done","actor":"Bolas"}' } });
     expect((calls[0]?.init.headers as Record<string, string>)['Content-Type']).toBe('application/json');
-    expect(calls[1]?.url).toBe('/app-api/issues/NX%201/blockers/BOL%2F2');
+    expect(calls[1]?.url).toBe('/app-api/issues/NX%201/blockers/ABC%2F2');
   });
 
   it('NX-152 的 API：看板排序、還原變更、移除 blocked by 帶 actor', async () => {

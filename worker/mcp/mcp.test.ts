@@ -133,9 +133,9 @@ describe('票', () => {
 
   it('改狀態：收狀態名稱或 state type，id 可以用舊編號', async () => {
     await env.DB.prepare(
-      "INSERT INTO issues (legacy_identifier, title, status, created_at, updated_at) VALUES ('BOL-150', '舊票', 'Todo', '2026-10-01T00:00:00.000Z', '2026-10-01T00:00:00.000Z')",
+      "INSERT INTO issues (legacy_identifier, title, status, created_at, updated_at) VALUES ('ABC-150', '舊票', 'Todo', '2026-10-01T00:00:00.000Z', '2026-10-01T00:00:00.000Z')",
     ).run();
-    const started = await tool<Issue>('save_issue', { id: 'BOL-150', state: 'In Progress' });
+    const started = await tool<Issue>('save_issue', { id: 'ABC-150', state: 'In Progress' });
     expect(started).toMatchObject({ id: 'NX-1', status: 'In Progress' });
     const done = await tool<Issue & { completedAt: string | null }>('save_issue', { id: 'nx-1', state: 'completed' });
     expect(done.status).toBe('Done');

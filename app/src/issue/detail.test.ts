@@ -75,12 +75,12 @@ describe('變更紀錄的文字', () => {
 });
 
 describe('blocked by 搜尋', () => {
-  const list = [issue(3, { title: '看板卡片' }), issue(12, { title: '設計系統' }), issue(120, { title: '看板拖拉', legacy_identifier: 'BOL-150' }), issue(7)];
+  const list = [issue(3, { title: '看板卡片' }), issue(12, { title: '設計系統' }), issue(120, { title: '看板拖拉', legacy_identifier: 'ABC-150' }), issue(7)];
 
   it('票號：NX-12、12 完全相符排第一；也能用舊編號', () => {
     expect(searchIssues(list, 'NX-12', new Set())[0]?.number).toBe(12);
     expect(searchIssues(list, '12', new Set()).map((i) => i.number)).toEqual([12, 120]);
-    expect(searchIssues(list, 'bol-150', new Set())[0]?.number).toBe(120);
+    expect(searchIssues(list, 'abc-150', new Set())[0]?.number).toBe(120);
   });
 
   it('標題關鍵字，排除自己和已經加過的', () => {

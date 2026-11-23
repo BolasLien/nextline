@@ -29,7 +29,7 @@ function issue(number: number, title: string, extra: Partial<Issue> = {}): Issue
 const ISSUES = [
   issue(12, '看板卡片加上到期日圖示'),
   issue(120, '寶石 3 階的材質再亮一點'),
-  issue(148, 'Cmd+K 指令面板與基本快捷鍵', { legacy_identifier: 'BOL-150' }),
+  issue(148, 'Cmd+K 指令面板與基本快捷鍵', { legacy_identifier: 'ABC-150' }),
   issue(30, 'Deploy the worker to production'),
 ];
 
@@ -63,10 +63,10 @@ describe('模糊比對', () => {
 });
 
 describe('票號比對', () => {
-  it('NX-12、12、nx12 都完全對到 NX-12；BOL 舊編號也找得到', () => {
+  it('NX-12、12、nx12 都完全對到 NX-12；舊編號也找得到', () => {
     for (const q of ['NX-12', '12', 'nx12', 'nx-12']) expect(issueScore(ISSUES[0] as Issue, q)).toBe(1000);
-    expect(issueScore(ISSUES[2] as Issue, 'BOL-150')).toBe(1000);
-    expect(issueScore(ISSUES[2] as Issue, 'bol150')).toBe(1000);
+    expect(issueScore(ISSUES[2] as Issue, 'ABC-150')).toBe(1000);
+    expect(issueScore(ISSUES[2] as Issue, 'abc150')).toBe(1000);
   });
 
   it('打 12：NX-12 排第一，NX-120 在後面', () => {
@@ -74,8 +74,8 @@ describe('票號比對', () => {
     expect(tickets?.slice(0, 2)).toEqual(['issue:NX-12', 'issue:NX-120']);
   });
 
-  it('打 BOL-150：結果第一組是票，第一張是 NX-148', () => {
-    const groups = ids('BOL-150');
+  it('打 ABC-150：結果第一組是票，第一張是 NX-148', () => {
+    const groups = ids('ABC-150');
     expect(groups[0]?.key).toBe('issues');
     expect(groups[0]?.items[0]?.id).toBe('issue:NX-148');
   });

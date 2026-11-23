@@ -108,7 +108,7 @@ export function buildItems({ issues, projects, active, theme }: {
   return out;
 }
 
-// 票：票號（NX-12、12）與舊票號（BOL-150）完全對到最優先，再來是票號開頭，最後比標題。
+// 票：票號（NX-12、12）與舊票號（ABC-150）完全對到最優先，再來是票號開頭，最後比標題。
 export function issueScore(issue: Pick<Issue, 'number' | 'legacy_identifier' | 'title'>, query: string): number | null {
   const q = normalize(query);
   if (q === '') return 0;

@@ -123,7 +123,7 @@ Nextline
 | `/zones` | 已拿掉（NX-160），轉到 `/` |
 | `/sprints/:number` | 已拿掉（NX-160，產品不放 Sprint），轉到 `/` |
 | `/projects`、`/projects/:id` | Project 列表、單一 Project（`tab=board`（預設）／`list`／`about`） |
-| `/issues/NX-12` | 票詳細頁；舊編號 `/issues/BOL-150` 轉到 NX 編號（301） |
+| `/issues/NX-12` | 票詳細頁；舊編號 `/issues/ABC-150` 轉到 NX 編號（301） |
 | `/views/:id` | 已拿掉（NX-160，不做 view），轉到 `/` |
 | `/issues?archived=1` | 已封存的票（可以取消封存） |
 | `/settings/*` | 設定 |

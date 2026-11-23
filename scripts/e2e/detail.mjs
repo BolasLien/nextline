@@ -91,7 +91,7 @@ async function seed() {
   const t2 = await mk('看板卡片加上到期日圖示', 'Todo', nextline);
   const t1 = await mk('整理第二版的驗收清單，給 Bolas 一次看完', 'Todo', nextline, {
     description: '## 目標\n\nBolas 一次看完第二版要驗收的東西。\n\n- [x] 看板\n- [ ] 票詳細\n\n參考 `docs/design/ia/flows.md`。',
-    legacy_identifier: 'BOL-301',
+    legacy_identifier: 'ABC-301',
   });
   const p1 = await mk('列表頁：篩選與存成 view', 'In Progress', nextline);
   const r2 = await mk('設計系統：深色模式對比修正', 'In Review', nextline);
@@ -185,7 +185,7 @@ try {
   const focused = await page.evaluate(() => document.activeElement?.classList.contains('ttl-edit') ?? false);
   step('從看板點卡片：右側預覽打開（?peek=NX-n），看板還在，焦點在標題', (await card(d.t1).count()) === 1 && focused && (await peek.locator('.ttl-edit').textContent()) === d.t1.title, { url: page.url() });
   const top = await peek.locator('.meta-row').textContent();
-  step('預覽頂端：狀態、Project、票號、舊編號小字', top.includes('Todo') && top.includes('Nextline 第二版') && top.includes(d.t1.identifier) && (await peek.locator('.meta-row .legacy').textContent()) === 'BOL-301', { top });
+  step('預覽頂端：狀態、Project、票號、舊編號小字', top.includes('Todo') && top.includes('Nextline 第二版') && top.includes(d.t1.identifier) && (await peek.locator('.meta-row .legacy').textContent()) === 'ABC-301', { top });
   step('描述用 Markdown 顯示（標題、核取方塊、行內程式碼）', (await peek.locator('.desc .md h3').count()) === 1 && (await peek.locator('.desc .md code').count()) === 1 && (await peek.locator('.desc .md .task.done').count()) === 1);
   await settle(page);
   await page.screenshot({ path: join(outDir, 'peek-1280-light.png') });
@@ -392,9 +392,9 @@ try {
   await settle(page);
   await page.screenshot({ path: join(outDir, 'page-1280-light.png') });
   measures['page-1280-light'] = await measure(page);
-  await page.goto(`${BASE}/issues/BOL-301`);
+  await page.goto(`${BASE}/issues/ABC-301`);
   await page.waitForURL(`**/issues/${d.t1.identifier}`);
-  step('整頁：舊編號 /issues/BOL-301 轉到 NX 編號', true, { url: page.url() });
+  step('整頁：舊編號 /issues/ABC-301 轉到 NX 編號', true, { url: page.url() });
 
   const unexpected = consoleErrors.filter((m) => !m.includes('status of 500') && !m.includes('status of 409'));
   step('桌面沒有 console 錯誤（故意的 500、409 除外）', unexpected.length === 0, { consoleErrors });

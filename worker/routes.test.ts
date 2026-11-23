@@ -210,7 +210,7 @@ describe('/legacy：舊網頁已移除，轉到新網頁（NX-158）', () => {
       ['/legacy', '/'],
       ['/legacy/', '/'],
       ['/legacy/issues/NX-1', '/issues/NX-1'],
-      ['/legacy/issues/bol-150', '/issues/BOL-150'],
+      ['/legacy/issues/abc-150', '/issues/ABC-150'],
       ['/legacy/issues/NX-1/status', '/issues/NX-1'],
       ['/legacy/projects/3', '/projects/3'],
       ['/legacy/projects/abc', '/'],

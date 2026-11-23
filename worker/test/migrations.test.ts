@@ -12,7 +12,7 @@ function seedV1() {
     INSERT INTO sprints (id, number, starts_at, ends_at) VALUES (1, 1, '2026-11-02T00:00:00.000Z', '2026-11-16T00:00:00.000Z');
     INSERT INTO issues (number, legacy_identifier, title, description, status, project_id, sprint_id, due_date, created_at, updated_at, completed_at)
     VALUES
-      (1, 'BOL-1', '舊的 Todo', '說明', 'Todo', 1, 1, '2026-11-10', '2026-10-01T00:00:00.000Z', '2026-10-01T00:00:00.000Z', NULL),
+      (1, 'ABC-1', '舊的 Todo', '說明', 'Todo', 1, 1, '2026-11-10', '2026-10-01T00:00:00.000Z', '2026-10-01T00:00:00.000Z', NULL),
       (2, NULL, '新的 Todo', '', 'Todo', NULL, NULL, NULL, '2026-10-02T00:00:00.000Z', '2026-10-20T00:00:00.000Z', NULL),
       (3, NULL, '中間的 Todo', '', 'Todo', NULL, NULL, NULL, '2026-10-03T00:00:00.000Z', '2026-10-10T00:00:00.000Z', NULL),
       (5, NULL, '做完', '', 'Done', 1, NULL, NULL, '2026-10-04T00:00:00.000Z', '2026-10-05T00:00:00.000Z', '2026-10-05T00:00:00.000Z');
@@ -62,7 +62,7 @@ describe('migration 0002', () => {
       const res = await worker.fetch(new Request(`https://x${path}`, init) as Request<unknown, IncomingRequestCfProperties>, env);
       return { status: res.status, body: await res.json<Record<string, unknown>>() };
     };
-    const old = await call('GET', '/api/issues/BOL-1');
+    const old = await call('GET', '/api/issues/ABC-1');
     expect(old.body).toMatchObject({ number: 1, title: '舊的 Todo', blocks: [expect.objectContaining({ number: 2 })] });
     expect(((await call('GET', '/api/issues/NX-1/comments')).body.comments as unknown[]).length).toBe(1);
     expect((await call('GET', '/api/issues/NX-5/events')).body.events).toEqual([

@@ -1,4 +1,4 @@
-// blocked by 的 combobox：用票號（NX-12、12、BOL-150）或標題找票。
+// blocked by 的 combobox：用票號（NX-12、12、ABC-150）或標題找票。
 import type { Issue } from '../api/types';
 
 export const MAX_RESULTS = 8;

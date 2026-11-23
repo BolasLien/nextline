@@ -124,9 +124,9 @@ describe('篩選操作', () => {
 });
 
 describe('比對', () => {
-  it('文字搜尋：票號（含純數字、舊 BOL 編號）或標題，不分大小寫', () => {
-    const i = issue(12, { title: 'Gem TD 模型', legacy_identifier: 'BOL-150' });
-    for (const s of ['nx-12', '12', 'bol-150', 'gem td', '模型', '']) expect(matchesText(i, s), s).toBe(true);
+  it('文字搜尋：票號（含純數字、舊編號）或標題，不分大小寫', () => {
+    const i = issue(12, { title: 'Gem TD 模型', legacy_identifier: 'ABC-150' });
+    for (const s of ['nx-12', '12', 'abc-150', 'gem td', '模型', '']) expect(matchesText(i, s), s).toBe(true);
     expect(matchesText(i, '13')).toBe(false);
     expect(matchesText(i, '看板')).toBe(false);
   });

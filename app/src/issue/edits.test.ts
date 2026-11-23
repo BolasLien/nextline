@@ -9,7 +9,7 @@ function detail(extra: Partial<IssueDetail> = {}): IssueDetail {
   return {
     number: 7,
     identifier: 'NX-7',
-    legacy_identifier: 'BOL-77',
+    legacy_identifier: 'ABC-77',
     title: '舊標題',
     description: '',
     status: 'In Review',

@@ -61,7 +61,7 @@ Cloudflare 本機測試：`npm run dev:cloudflare` 前在 `.dev.vars` 放 `API_T
 
 ## 工具
 
-票號參數（`id`、`issueId`、`blockedBy` 等）都收 `NX-12`、`12` 或舊編號 `BOL-150`，不分大小寫。回傳的票 `id` 一律是 `NX-<n>`，舊編號在 `legacyIdentifier`。
+票號參數（`id`、`issueId`、`blockedBy` 等）都收 `NX-12`、`12` 或舊編號 `ABC-150`，不分大小寫。回傳的票 `id` 一律是 `NX-<n>`，舊編號在 `legacyIdentifier`。
 
 | 工具 | 參數 | 回傳 |
 | --- | --- | --- |
@@ -96,7 +96,7 @@ Cloudflare 本機測試：`npm run dev:cloudflare` 前在 `.dev.vars` 放 `API_T
 
 | 項目 | Linear MCP | Nextline MCP |
 | --- | --- | --- |
-| 票號 | `BOL-123` | 新票 `NX-<n>`；搬來的票用舊編號也查得到，回傳的 `id` 是 `NX-<n>`、舊編號在 `legacyIdentifier` |
+| 票號 | `ABC-123` | 新票 `NX-<n>`；搬來的票用舊編號也查得到，回傳的 `id` 是 `NX-<n>`、舊編號在 `legacyIdentifier` |
 | `team`、`teamId` | 開票必填；`list_cycles` 必填 `teamId` | 只有一個 team：可以照舊帶，會忽略 |
 | `list_issues` 的 `state` | 一次一種 | 可用逗號一次查多種（`Backlog,Todo,In Progress,In Review`）；state type `started` 展開成 `In Progress`、`In Review` |
 | 狀態 | 每個 team 自訂 | 固定六種；`In Review`（待驗收）type 是 `started` |

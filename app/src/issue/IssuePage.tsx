@@ -1,4 +1,4 @@
-// /issues/:ref 票詳細整頁。舊編號（/issues/BOL-150）載入後網址換成 NX 編號。手機點卡片直接進這裡。
+// /issues/:ref 票詳細整頁。舊編號（/issues/ABC-150）載入後網址換成 NX 編號。手機點卡片直接進這裡。
 import { useCallback, useEffect, useId } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import type { IssueDetail } from '../api/types';

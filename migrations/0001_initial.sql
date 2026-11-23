@@ -27,7 +27,7 @@ CREATE TABLE sprints (
 -- 票號就是 number：NX-<number>。AUTOINCREMENT 保證刪過的號碼不會被重用。
 CREATE TABLE issues (
   number            INTEGER PRIMARY KEY AUTOINCREMENT,
-  -- 從 Linear 搬過來的舊編號（例如 BOL-150），用舊號也查得到。
+  -- 從 Linear 搬過來的舊編號（例如 ABC-150），用舊號也查得到。
   legacy_identifier TEXT    UNIQUE,
   title             TEXT    NOT NULL,
   description       TEXT    NOT NULL DEFAULT '',

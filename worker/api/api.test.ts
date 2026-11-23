@@ -129,21 +129,21 @@ describe('新增票', () => {
 
   it('搬家用的欄位：保留舊編號與時間', async () => {
     const issue = await newIssue({
-      legacy_identifier: 'bol-150',
+      legacy_identifier: 'abc-150',
       created_at: '2026-01-02T03:04:05Z',
       updated_at: '2026-02-01T00:00:00.000Z',
     });
     expect(issue).toMatchObject({
       identifier: 'NX-1',
-      legacy_identifier: 'BOL-150',
+      legacy_identifier: 'ABC-150',
       created_at: '2026-01-02T03:04:05.000Z',
       updated_at: '2026-02-01T00:00:00.000Z',
     });
   });
 
   it('同一個舊編號重複新增回 409，並告知已存在的 NX 編號', async () => {
-    await newIssue({ legacy_identifier: 'BOL-150' });
-    const r = await call('POST', '/api/issues', { title: 'again', legacy_identifier: 'BOL-150' });
+    await newIssue({ legacy_identifier: 'ABC-150' });
+    const r = await call('POST', '/api/issues', { title: 'again', legacy_identifier: 'ABC-150' });
     expect(r.status).toBe(409);
     expect(r.body).toMatchObject({ identifier: 'NX-1' });
     expect((await call('POST', '/api/issues', { title: 'x', legacy_identifier: 'NX-3' })).status).toBe(400);
@@ -151,19 +151,19 @@ describe('新增票', () => {
 });
 
 describe('查詢單張票', () => {
-  it('用 NX-n、n、舊 BOL 編號都查得到', async () => {
+  it('用 NX-n、n、舊編號都查得到', async () => {
     await newIssue();
-    await newIssue({ title: '舊票', legacy_identifier: 'BOL-150' });
-    for (const ref of ['NX-2', 'nx-2', '2', 'BOL-150', 'bol-150']) {
+    await newIssue({ title: '舊票', legacy_identifier: 'ABC-150' });
+    for (const ref of ['NX-2', 'nx-2', '2', 'ABC-150', 'abc-150']) {
       const r = await call('GET', `/api/issues/${ref}`);
       expect(r.status, ref).toBe(200);
-      expect(r.body).toMatchObject({ number: 2, identifier: 'NX-2', title: '舊票', legacy_identifier: 'BOL-150' });
+      expect(r.body).toMatchObject({ number: 2, identifier: 'NX-2', title: '舊票', legacy_identifier: 'ABC-150' });
     }
   });
 
   it('不存在的票回 404', async () => {
     expect((await call('GET', '/api/issues/NX-9')).status).toBe(404);
-    expect((await call('GET', '/api/issues/BOL-9')).status).toBe(404);
+    expect((await call('GET', '/api/issues/ABC-9')).status).toBe(404);
     expect((await call('GET', '/api/issues/hello')).status).toBe(404);
     expect((await call('GET', '/api/issues/%E0%A4%A')).status).toBe(404);
   });
@@ -237,8 +237,8 @@ describe('修改票與變更紀錄', () => {
   });
 
   it('用舊編號也能修改', async () => {
-    await newIssue({ legacy_identifier: 'BOL-150' });
-    const r = await call('PATCH', '/api/issues/BOL-150', { status: 'Todo' });
+    await newIssue({ legacy_identifier: 'ABC-150' });
+    const r = await call('PATCH', '/api/issues/ABC-150', { status: 'Todo' });
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({ identifier: 'NX-1', status: 'Todo' });
   });
@@ -326,10 +326,10 @@ describe('列表篩選', () => {
 describe('blocked by', () => {
   it('加入、查詢、雙向顯示、移除', async () => {
     await newIssue({ title: 'A' });
-    await newIssue({ title: 'B', legacy_identifier: 'BOL-7' });
+    await newIssue({ title: 'B', legacy_identifier: 'ABC-7' });
     await newIssue({ title: 'C' });
 
-    const add = await call('POST', '/api/issues/NX-1/blockers', { blocked_by: 'BOL-7' });
+    const add = await call('POST', '/api/issues/NX-1/blockers', { blocked_by: 'ABC-7' });
     expect(add.status).toBe(201);
     expect(add.body.blocked_by).toEqual([expect.objectContaining({ identifier: 'NX-2', title: 'B' })]);
     expect((await call('POST', '/api/issues/NX-1/blockers', { blocked_by: 3 })).status).toBe(201);
@@ -365,11 +365,11 @@ describe('blocked by', () => {
 
 describe('comment', () => {
   it('新增、列出、修改', async () => {
-    await newIssue({ legacy_identifier: 'BOL-150' });
+    await newIssue({ legacy_identifier: 'ABC-150' });
     const c1 = await call('POST', '/api/issues/NX-1/comments', { author: 'Bolas', body: '第一則' });
     expect(c1.status).toBe(201);
     expect(c1.body).toMatchObject({ issue_number: 1, author: 'Bolas', body: '第一則' });
-    await call('POST', '/api/issues/BOL-150/comments', { author: '阿澈', body: '第二則' });
+    await call('POST', '/api/issues/ABC-150/comments', { author: '阿澈', body: '第二則' });
 
     const list = (await call('GET', '/api/issues/NX-1/comments')).body.comments as Json[];
     expect(list.map((c) => c.body)).toEqual(['第一則', '第二則']);

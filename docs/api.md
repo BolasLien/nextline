@@ -10,7 +10,7 @@
 
 ## 票的參照 `:ref`
 
-`NX-12`、`12` 都是 NX 編號；其他「字母-數字」（例如 `BOL-150`）當成搬過來的舊編號查。不分大小寫。
+`NX-12`、`12` 都是 NX 編號；其他「字母-數字」（例如 `ABC-150`）當成搬過來的舊編號查。不分大小寫。
 
 ## 票
 
@@ -57,7 +57,7 @@
 | `project_id`、`sprint_id` | | 不存在回 `400` |
 | `due_date` | | `YYYY-MM-DD` |
 | `position`、`before`、`after` | | 看板位置，見下面「看板排序」；沒帶就放在那一欄最上面 |
-| `legacy_identifier` | | 搬家用，例如 `BOL-150`；已存在回 `409` |
+| `legacy_identifier` | | 搬家用，例如 `ABC-150`；已存在回 `409` |
 | `created_at`、`updated_at`、`completed_at`、`canceled_at` | | 搬家用，保留 Linear 的時間；沒帶就用現在（`Done`／`Canceled` 會自動填完成／取消時間） |
 
 `PATCH` 內容：`title`、`description`、`status`、`project_id`（`null` 移出）、`sprint_id`（`null` 移出）、`due_date`（`null` 清掉）、`archived`（`true` 封存、`false` 取消封存）、`position`／`before`／`after`（看板位置），以及 `actor`（誰改的，寫進變更紀錄，預設 `api`）。

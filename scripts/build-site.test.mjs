@@ -51,7 +51,7 @@ describe('官網與文件站', () => {
 
   it('沒有內部用語或私人票號', () => {
     const hits = [];
-    const banned = [/Bolas(?!Lien)/, /阿澈/, /搬家/, /BOL-\d/, /NX-\d{3,}/, /\.scratch\/nx/, /晨報/];
+    const banned = [/Bolas(?!Lien)/, /阿澈/, /搬家/, /BOL[-]\d/, /NX-\d{3,}/, /\.scratch\/nx/, /晨報/];
     for (const [file, html] of pages) {
       for (const re of banned) {
         const m = re.exec(html);
