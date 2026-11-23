@@ -31,8 +31,23 @@ curl -H "Authorization: Bearer $NEXTLINE_API_TOKEN" http://127.0.0.1:3000/api/is
       <li>請求內容與回應都是 JSON（<code>Content-Type: application/json</code>）。</li>
       <li>時間是 ISO 8601，存進去前一律轉成 UTC，例如 <code>2026-11-02T08:29:53.024Z</code>。日期（<code>due_date</code>）是 <code>YYYY-MM-DD</code>。</li>
       <li><code>PATCH</code> 只改有帶的欄位；可以清空的欄位帶 <code>null</code>。</li>
+      <li>帶了不認得的欄位會回 <code>400</code>，不會改任何資料。回應多帶 <code>unknown_fields</code>（不認得的欄位）和 <code>allowed_fields</code>（這個路徑可以帶的欄位）；照 MCP 習慣寫的 <code>state</code>、<code>dueDate</code> 會提示改成 REST 的名稱。</li>
       <li>沒有刪除：不要的票改成 <code>Canceled</code> 或<a href="api-issues.html#archive">封存</a>。</li>
     </ul>
+
+    <h2 id="rest-vs-mcp">REST 與 MCP 的欄位名稱</h2>
+    <p>同一件事，REST 用 snake_case，MCP 照 Linear MCP 用 camelCase。混用時 REST 會回 <code>400</code> 告訴你該用哪個名稱：</p>
+    <div class="table-wrap"><table class="ref">
+      <thead><tr><th>要改什麼</th><th>REST（<code>/api</code>）</th><th>MCP（<code>save_issue</code>）</th></tr></thead>
+      <tbody>
+        <tr><td>狀態</td><td><code>status</code></td><td><code>state</code></td></tr>
+        <tr><td>到期日</td><td><code>due_date</code></td><td><code>dueDate</code></td></tr>
+        <tr><td>Project</td><td><code>project_id</code>（數字 id）</td><td><code>project</code>（名稱或 id）</td></tr>
+        <tr><td>Sprint</td><td><code>sprint_id</code>（數字 id）</td><td><code>cycle</code>（編號、名稱或 id）</td></tr>
+        <tr><td>blocked by</td><td><code>POST /api/issues/:ref/blockers</code> 的 <code>blocked_by</code></td><td><code>blockedBy</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>MCP 對不認得的參數照 Linear MCP 的習慣直接忽略，REST 則回 <code>400</code>。</p>
 
     <h2 id="ref">票號 <code>:ref</code></h2>
     <p>路徑裡的 <code>:ref</code> 收 <code>NX-12</code> 或 <code>12</code>，不分大小寫。從其他系統搬進來的票如果有舊編號（<code>legacy_identifier</code>，格式像 <code>ABC-150</code>），也可以用舊編號查。</p>
@@ -48,7 +63,7 @@ curl -H "Authorization: Bearer $NEXTLINE_API_TOKEN" http://127.0.0.1:3000/api/is
     <div class="table-wrap"><table class="ref wrap-first">
       <thead><tr><th>狀態碼</th><th>什麼時候</th></tr></thead>
       <tbody>
-        <tr><td><code>400</code></td><td>內容不是 JSON 物件、缺必填欄位、值的格式不對、參照的 Project 或票不存在</td></tr>
+        <tr><td><code>400</code></td><td>內容不是 JSON 物件、帶了不認得的欄位、缺必填欄位、值的格式不對、參照的 Project 或票不存在</td></tr>
         <tr><td><code>401</code></td><td>沒有有效的 token</td></tr>
         <tr><td><code>404</code></td><td>票、comment、Project 不存在，或沒有這個路徑</td></tr>
         <tr><td><code>405</code></td><td>這個路徑不支援這個方法；<code>Allow</code> 標頭列出支援的方法</td></tr>
@@ -57,6 +72,13 @@ curl -H "Authorization: Bearer $NEXTLINE_API_TOKEN" http://127.0.0.1:3000/api/is
     </table></div>
 ```json
 { "error": "status 必須是 Backlog、Todo、In Progress、In Review、Done、Canceled 其中之一" }
+```
+```json
+{
+  "error": "不認得的欄位：state。state 請改用 status（REST 用 snake_case，例如 status、due_date）。可以帶的欄位：title、description、status、project_id、sprint_id、due_date、archived、position、before、after、actor",
+  "unknown_fields": ["state"],
+  "allowed_fields": ["title", "description", "status", "project_id", "sprint_id", "due_date", "archived", "position", "before", "after", "actor"]
+}
 ```
 
     <h2 id="health">健康檢查</h2>

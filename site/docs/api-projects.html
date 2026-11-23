@@ -92,4 +92,4 @@ intro: 把票分組。Project 有名稱和長篇說明，可以釘選；沒有�
     </div>
 
     <h2 id="no-status">Project 沒有狀態</h2>
-    <p>Project 沒有「進行中／完成」這類狀態，回應裡也沒有 <code>status</code>。為了相容其他工具的習慣，新增或修改時帶 <code>status</code> 不會報錯，會直接忽略。Project 也不能刪除。</p>
+    <p>Project 沒有「進行中／完成」這類狀態，回應裡也沒有 <code>status</code>。為了相容其他工具的習慣，新增或修改時帶 <code>status</code>（或 <code>state</code>）不會報錯，會直接忽略；其他不認得的欄位回 <code>400</code>。Project 也不能刪除。</p>

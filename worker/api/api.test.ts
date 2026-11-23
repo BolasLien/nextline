@@ -252,6 +252,34 @@ describe('修改票與變更紀錄', () => {
     expect((await call('GET', '/api/issues/NX-1/events')).body.events).toEqual([]);
     expect((await call('PATCH', '/api/issues/NX-9', { status: 'Todo' })).status).toBe(404);
   });
+
+  it('不認得的欄位回 400、列出合法欄位，不改資料（NX-248）', async () => {
+    await newIssue();
+    const r = await call('PATCH', '/api/issues/NX-1', { state: 'In Progress' });
+    expect(r.status).toBe(400);
+    expect(r.body.error).toContain('state 請改用 status');
+    expect(r.body).toMatchObject({ unknown_fields: ['state'] });
+    expect(r.body.allowed_fields).toContain('status');
+    const camel = await call('PATCH', '/api/issues/NX-1', { dueDate: '2026-12-01', priority: 1, assignee: 'me' });
+    expect(camel.status).toBe(400);
+    expect(camel.body).toMatchObject({ unknown_fields: ['dueDate', 'priority', 'assignee'] });
+    expect(camel.body.error).toContain('dueDate 請改用 due_date');
+    expect((await call('POST', '/api/issues', { title: '新票', state: 'Todo' })).status).toBe(400);
+    expect((await call('GET', '/api/issues/NX-1')).body).toMatchObject({ status: 'Backlog', due_date: null });
+    expect((await call('GET', '/api/issues/NX-2')).status).toBe(404);
+    expect((await call('GET', '/api/issues/NX-1/events')).body.events).toEqual([]);
+  });
+
+  it('comment、blocked by、還原、Sprint 也擋不認得的欄位；Project 的 status／state 照舊忽略', async () => {
+    await newIssue();
+    await newIssue();
+    expect((await call('POST', '/api/issues/NX-1/comments', { author: 'a', content: 'x' })).status).toBe(400);
+    expect((await call('POST', '/api/issues/NX-1/blockers', { blocker: 'NX-2' })).status).toBe(400);
+    expect((await call('POST', '/api/issues/NX-1/events/1/revert', { who: 'a' })).status).toBe(400);
+    expect((await call('POST', '/api/sprints', { number: 1, starts_at: '2026-11-02T00:00:00Z', ends_at: '2026-11-16T00:00:00Z', cycle: 1 })).status).toBe(400);
+    expect((await call('POST', '/api/projects', { name: 'P', state: 'started', status: 'planned' })).status).toBe(201);
+    expect((await call('POST', '/api/projects', { name: 'Q', color: 'red' })).status).toBe(400);
+  });
 });
 
 describe('列表篩選', () => {

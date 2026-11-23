@@ -20,7 +20,9 @@ export function errorResponse(status: number, message: string, extra: Record<str
 
 export type Body = Record<string, unknown>;
 
-export async function readBody(request: Request): Promise<Body> {
+// allowed 是這個路徑認得的欄位。帶了其他欄位回 400（NX-248）：靜靜忽略的話，
+// 照 MCP 習慣寫 {"state":"In Progress"} 會拿到 200，但什麼都沒改。
+export async function readBody(request: Request, allowed: readonly string[]): Promise<Body> {
   let body: unknown;
   try {
     body = await request.json();
@@ -30,7 +32,29 @@ export async function readBody(request: Request): Promise<Body> {
   if (typeof body !== 'object' || body === null || Array.isArray(body)) {
     throw new HttpError(400, '內容必須是 JSON 物件');
   }
+  rejectUnknownFields(body as Body, allowed);
   return body as Body;
+}
+
+// MCP 的參數名稱（state、camelCase）在 REST 對應的欄位。
+const REST_NAME: Record<string, string> = { state: 'status', cycle: 'sprint_id', project: 'project_id' };
+
+function restName(key: string): string {
+  return REST_NAME[key] ?? key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+}
+
+function rejectUnknownFields(body: Body, allowed: readonly string[]): void {
+  const unknown = Object.keys(body).filter((k) => !allowed.includes(k));
+  if (unknown.length === 0) return;
+  const hints = unknown.flatMap((k) => {
+    const rest = restName(k);
+    return rest !== k && allowed.includes(rest) ? [`${k} 請改用 ${rest}`] : [];
+  });
+  throw new HttpError(
+    400,
+    `不認得的欄位：${unknown.join('、')}。${hints.length > 0 ? `${hints.join('；')}（REST 用 snake_case，例如 status、due_date）。` : ''}可以帶的欄位：${allowed.join('、')}`,
+    { unknown_fields: unknown, allowed_fields: allowed },
+  );
 }
 
 export function has(body: Body, key: string): boolean {

@@ -5,6 +5,7 @@
 - 每個請求都要帶 `Authorization: Bearer <token>`，Worker 比對 secret `API_TOKEN`（見 `docs/auth.md`）。沒帶、帶錯或 Worker 沒設 `API_TOKEN`，一律回 `401`。
 - 網頁（`app/` 的 React App）打 `/app-api/*`：底下的路徑、參數、回應跟本頁完全相同，只是改驗 Cloudflare Access 的登入（不收 token），寫入要同源（見 `docs/auth.md`「瀏覽器怎麼呼叫 API」）。前端的 client 在 `app/src/api/client.ts`。
 - 請求與回應都是 JSON。錯誤格式：`{ "error": "說明" }`；`409` 會多帶已存在資料的 `id`（票是 `number`、`identifier`），方便搬家腳本重跑時接續。
+- 帶了不認得的欄位回 `400`、不改資料（NX-248），多帶 `unknown_fields`、`allowed_fields`；MCP 習慣的名稱（`state`、`dueDate`、`project`、`cycle`）會提示對應的 REST 欄位（`status`、`due_date`、`project_id`、`sprint_id`）。REST 用 snake_case，MCP 照 Linear MCP 用 camelCase 且忽略不認得的參數。例外：Project 的 `status`／`state` 照 NX-165 忽略（見下方 Project）。
 - 時間是 ISO 8601（例如 `2026-11-02T08:29:53.024Z`），存進去前一律轉成 UTC 的 `toISOString()` 格式；日期（`due_date`）是 `YYYY-MM-DD`。
 - Node 自架：依 [README](../README.md) 初始化與產生 token，API 網址為 `http://127.0.0.1:3000/api/*`；網頁的 `/app-api/*` 改驗本機 session，API 契約相同。Cloudflare 本機測試：`.dev.vars` 放一行 `API_TOKEN=<自己定的值>`，`npm run dev:cloudflare` 後用 `curl -H "Authorization: Bearer <值>" localhost:8787/api/issues`。
 
@@ -153,7 +154,7 @@
 
 Project 的欄位：`id`、`name`、`description`、`linear_id`、`created_at`、`updated_at`、`pinned_at`（釘選時間，`null`＝沒釘選）、`last_activity_at`（NX-162：Project 的 `updated_at`、底下任一張票（含已封存）的 `updated_at`、底下任一張票最新 comment 的 `created_at`，取最新的一個；查詢時即時算，不能寫入）。
 
-Project 沒有狀態（NX-165，2026-11-04 Bolas）：回傳沒有 `status`；`POST`／`PATCH` 帶 `status` 一律忽略、照常成功，不回 400。理由：舊的 agent、Skill 或照 Linear 習慣帶 status 的呼叫不會因此壞掉，而 status 已經沒有任何作用，丟掉不會讓資料錯。網頁側欄不看票的狀態：全部 Project 照這裡的順序（釘選的在前，其餘照 `last_activity_at`）取前 7 個（手機「更多」相同），其餘都在 `/projects` 找得到。
+Project 沒有狀態（NX-165，2026-11-04 Bolas）：回傳沒有 `status`；`POST`／`PATCH` 帶 `status`（或 `state`）一律忽略、照常成功，不回 400（其他不認得的欄位照樣回 400）。理由：舊的 agent、Skill 或照 Linear 習慣帶 status 的呼叫不會因此壞掉，而 status 已經沒有任何作用，丟掉不會讓資料錯。網頁側欄不看票的狀態：全部 Project 照這裡的順序（釘選的在前，其餘照 `last_activity_at`）取前 7 個（手機「更多」相同），其餘都在 `/projects` 找得到。
 
 ## Sprint
 

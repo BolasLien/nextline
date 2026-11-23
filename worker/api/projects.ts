@@ -59,10 +59,13 @@ async function ensureUnique(db: Database, body: { name?: string | undefined; lin
   }
 }
 
+// 帶了會忽略、不回 400 的欄位（見下一段）；其他不認得的欄位回 400（NX-248）。
+const IGNORED = ['status', 'state'];
+
 // NX-165：Project 沒有狀態。POST／PATCH 帶 status 一律忽略（不回 400）：舊的 agent、Skill、照 Linear 習慣帶 status／state 的呼叫照樣成功，
 // 而 status 已經沒有任何作用，丟掉不會讓資料錯。
 export async function createProject(db: Database, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['name', 'description', 'linear_id', 'created_at', 'updated_at', ...IGNORED]);
   const name = requiredStr(body, 'name');
   const description = str(body, 'description') ?? '';
   const linearId = nullableStr(body, 'linear_id') ?? null;
@@ -81,7 +84,7 @@ export async function createProject(db: Database, request: Request): Promise<Res
 }
 
 export async function updateProject(db: Database, id: number, request: Request): Promise<Response> {
-  const body: Body = await readBody(request);
+  const body: Body = await readBody(request, ['name', 'description', 'pinned', ...IGNORED]);
   const current = await getProject(db, id);
   const sets: string[] = [];
   const params: (string | null)[] = [];

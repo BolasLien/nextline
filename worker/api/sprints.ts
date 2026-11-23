@@ -29,7 +29,7 @@ function checkRange(startsAt: string, endsAt: string): void {
 }
 
 export async function createSprint(db: Database, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['number', 'name', 'starts_at', 'ends_at', 'linear_id', 'created_at']);
   const number = requiredInt(body, 'number');
   const name = nullableStr(body, 'name') ?? null;
   const startsAt = requiredTimestamp(body, 'starts_at');
@@ -54,7 +54,7 @@ export async function createSprint(db: Database, request: Request): Promise<Resp
 }
 
 export async function updateSprint(db: Database, id: number, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['name', 'starts_at', 'ends_at']);
   const current = await getSprint(db, id);
   const name = nullableStr(body, 'name');
   const startsAt = timestamp(body, 'starts_at') ?? current.starts_at;

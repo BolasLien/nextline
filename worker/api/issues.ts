@@ -326,10 +326,19 @@ async function resolvePosition(db: Database, self: number, status: IssueStatus, 
 
 // ---- 新增 ----
 
+// POST／PATCH 認得的欄位；其他欄位回 400（http.ts 的 readBody）。新增帶 archived 照文件忽略（開好再封存）。
+const ISSUE_CREATE_FIELDS = [
+  'title', 'description', 'status', 'project_id', 'sprint_id', 'due_date', 'position', 'before', 'after',
+  'legacy_identifier', 'created_at', 'updated_at', 'completed_at', 'canceled_at', 'archived',
+] as const;
+const ISSUE_UPDATE_FIELDS = [
+  'title', 'description', 'status', 'project_id', 'sprint_id', 'due_date', 'archived', 'position', 'before', 'after', 'actor',
+] as const;
+
 // 新開的票自動編號（NX-<n>），放在那一欄最上面（或照 position／before／after）。
 // legacy_identifier、created_at 等欄位給搬家腳本保留 Linear 的舊資料。
 export async function createIssue(db: Database, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ISSUE_CREATE_FIELDS);
   const title = requiredStr(body, 'title');
   const description = str(body, 'description') ?? '';
   const status = oneOf(body, 'status', ISSUE_STATUSES) ?? 'Backlog';
@@ -519,7 +528,7 @@ function actorOf(body: Body, fallback = 'api'): string {
 // 修改票。改了哪些欄位就各寫一筆 issue_events（actor 預設 api）。archived: true／false 封存或取消封存。
 // position、before、after 調整看板順序（不寫變更紀錄）。
 export async function updateIssue(db: Database, ref: string, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ISSUE_UPDATE_FIELDS);
   const current = await resolveIssue(db, ref);
   const title = str(body, 'title')?.trim();
   if (title === '') throw new HttpError(400, 'title 不可以是空的');
@@ -600,7 +609,7 @@ async function currentValue(db: Database, issue: IssueRow, ev: EventRow): Promis
 // 把第 id 筆變更的欄位改回舊值，寫一筆 revert_of_event_id = id 的新紀錄，並把第 id 筆標成已還原。
 // 409：已經還原過；之後同一個欄位又被改過（還原掉的、以及「還原」本身不算）；或欄位現在的值已經不是那筆改完的值。
 export async function revertEvent(db: Database, ref: string, eventId: number, request: Request): Promise<Response> {
-  const body = await readOptionalBody(request);
+  const body = await readOptionalBody(request, ['actor']);
   const actor = actorOf(body);
   const issue = await resolveIssue(db, ref);
   const ev = await getEventRow(db, eventId);
@@ -663,10 +672,10 @@ export async function revertEvent(db: Database, ref: string, eventId: number, re
 }
 
 // 還原的內容可以不帶（沒有 body 或空字串）。
-async function readOptionalBody(request: Request): Promise<Body> {
+async function readOptionalBody(request: Request, allowed: readonly string[]): Promise<Body> {
   const text = await request.clone().text();
   if (text.trim() === '') return {};
-  return readBody(request);
+  return readBody(request, allowed);
 }
 
 // ---- blocked by ----
@@ -707,7 +716,7 @@ async function changeBlocker(
 
 // issue 被 body.blocked_by 擋住。重複加入不算錯（回 200）。
 export async function addBlocker(db: Database, ref: string, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['blocked_by', 'actor']);
   const issue = await resolveIssue(db, ref);
   const raw = body.blocked_by;
   const blockerRef = typeof raw === 'number' ? String(raw) : typeof raw === 'string' ? raw : undefined;
@@ -780,7 +789,7 @@ export async function listRecentComments(db: Database, url: URL): Promise<Respon
 }
 
 export async function createComment(db: Database, ref: string, request: Request, owner: string): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['author', 'body', 'linear_id', 'created_at', 'updated_at']);
   const issue = await resolveIssue(db, ref);
   const author = requiredStr(body, 'author');
   const text = requiredStr(body, 'body');
@@ -823,7 +832,7 @@ export async function getComment(db: Database, id: number): Promise<Response> {
 }
 
 export async function updateComment(db: Database, id: number, request: Request): Promise<Response> {
-  const body = await readBody(request);
+  const body = await readBody(request, ['body']);
   const current = await getCommentRow(db, id);
   const text = requiredStr(body, 'body');
   if (text === current.body) return json(current);
