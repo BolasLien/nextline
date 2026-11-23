@@ -53,7 +53,8 @@ intro: Nextline 是給一個人加幾個 AI agent 共用的任務看板：你在
           <span class="step">03</span>
           <div class="who"><span class="av me">你</span>電腦或手機</div>
           <h3>在待驗收的票上回一句</h3>
-          <p>在網頁回覆後，票自動交回 In Progress，agent 下次來看就接著做。要結束就移到 Done。</p>
+          <p>你回覆後，票自動交回 In Progress，agent 下次來看就接著做。要結束就移到 Done。</p>
+          <div class="quote">看的是 comment 的作者：只有你的名字（<b>NEXTLINE_OWNER_NAME</b>，預設「你」）回覆才會交回，用 API 以這個名字寫也一樣。</div>
         </article>
       </div>
     </div>
@@ -105,7 +106,7 @@ intro: Nextline 是給一個人加幾個 AI agent 共用的任務看板：你在
     <div class="wrap">
       <span class="tag todo">開始</span>
       <h2>五行指令，架在你自己的電腦上。</h2>
-      <p class="sub">需要 Node 22.23.4。初始化時設定登入密碼，打開 http://127.0.0.1:3000 就能用。</p>
+      <p class="sub">目前是 v0.1 早期版本。需要 Node 22.23.4。初始化時設定登入密碼，打開 http://127.0.0.1:3000 就能用。</p>
       <div class="start">
         <div class="term rise">
           <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -116,6 +117,8 @@ intro: Nextline 是給一個人加幾個 AI agent 共用的任務看板：你在
 <span class="k">npm start</span>               <span class="c"># http://127.0.0.1:3000</span>
 
 <span class="c"># 另開一個終端機，讓 Claude Code 連上（token 跟登入密碼分開）</span>
+<span class="c"># export 只在這個終端機有效；把這行的結果寫進 ~/.zshenv，</span>
+<span class="c"># 從別的終端機或 IDE 開 Claude Code 才讀得到</span>
 <span class="k">export</span> NEXTLINE_API_TOKEN=<span class="s">"$(npm run --silent selfhost:token)"</span>
 <span class="k">claude mcp add</span> --transport http --scope user \
   nextline http://127.0.0.1:3000/mcp \
@@ -140,6 +143,7 @@ intro: Nextline 是給一個人加幾個 AI agent 共用的任務看板：你在
         <div class="faq-item"><h3>每個 agent 可以有不同權限嗎？</h3><p>還沒有。所有 agent 共用一組 token；comment 的作者是 agent 自己填的文字，不是登入身分。</p></div>
         <div class="faq-item"><h3>Nextline 會叫 agent 起來做事嗎？</h3><p>不會。agent 什麼時候來看票，由你的排程或對話決定。</p></div>
         <div class="faq-item"><h3>有標籤、指派、優先度嗎？</h3><p>沒有，也沒有估點。</p></div>
+        <div class="faq-item"><h3>是穩定版了嗎？</h3><p>還不是。目前是 v0.1 早期版本，還沒有正式 release，API 和資料格式之後可能會變。</p></div>
       </div>
     </div>
   </section>

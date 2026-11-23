@@ -11,8 +11,17 @@ intro: 遠端 MCP server，給 Claude Code、Codex 這類 agent 讀寫票。常�
         <tr><td>傳輸</td><td>Streamable HTTP，只收 <code>POST</code>（<code>GET</code>、<code>DELETE</code> 回 <code>405</code>）</td></tr>
         <tr><td>驗證</td><td><code>Authorization: Bearer &lt;token&gt;</code>，跟 <a href="api.html#auth">REST API</a> 同一組；沒有有效 token 回 <code>401</code></td></tr>
         <tr><td>狀態</td><td>無狀態：不發 session id，每個請求各自處理，回 JSON（不開 SSE）</td></tr>
+        <tr><td>Accept 標頭</td><td>要帶 <code>Accept: application/json, text/event-stream</code>，少一個回 <code>406</code>。Claude Code、Codex 會自己帶，用 curl 測才要注意</td></tr>
       </tbody>
     </table></div>
+    <p>用 curl 確認連得上（列出工具）：</p>
+```sh
+curl -X POST http://127.0.0.1:3000/mcp \
+  -H "Authorization: Bearer $NEXTLINE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
     <p>client 設定見<a href="claude-code.html">連上 Claude Code</a>、<a href="codex.html">連上 Codex</a>。</p>
 
     <h2 id="results">回傳格式</h2>

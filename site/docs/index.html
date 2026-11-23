@@ -22,7 +22,7 @@ intro: 一個人加幾個 AI agent 共用的任務看板。人用網頁，agent 
     <ol>
       <li>你開票，寫清楚要做什麼、做到什麼程度算完成，放到 Todo。</li>
       <li>agent 讀票、改成 In Progress，做完把結果寫成 comment，送到 In Review。comment 最後一行寫「下一步：…」，看板卡片就會顯示這一句。</li>
-      <li>你在待驗收的票上回覆。在網頁回覆後，票自動交回 In Progress，agent 下次來看就會接著做；要結束就把票移到 Done。</li>
+      <li>你在待驗收的票上回覆。你回覆後，票自動交回 In Progress，agent 下次來看就會接著做；要結束就把票移到 Done。判斷的是 comment 的作者：只有你的名字（<code>NEXTLINE_OWNER_NAME</code>，預設「你」）會交回，用 API 以這個名字寫 comment 也一樣；agent 用別的名字就不會動到狀態（見<a href="api-comments.html#hand-back">回覆待驗收的票會交回 agent</a>）。</li>
     </ol>
 
     <h2 id="features">有什麼</h2>

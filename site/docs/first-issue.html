@@ -11,7 +11,7 @@ export NEXTLINE_API_TOKEN="$(npm run --silent selfhost:token)"
     <ul>
       <li>新 token 只會顯示這一次；服務端只存它的 SHA-256 雜湊。</li>
       <li>每執行一次就換一組新的，<strong>舊的立刻失效</strong>。換了之後要更新 agent 那邊的環境變數並重啟。</li>
-      <li>放在密碼管理器或環境變數（例如 <code>~/.zshenv</code>），不要寫進 Git 或設定檔。</li>
+      <li>放在密碼管理器或 shell 的環境變數（例如寫進 <code>~/.zshenv</code>，從別的終端機或 IDE 開的 agent 才讀得到），不要寫進 Git 或專案的設定檔（例如 <code>.mcp.json</code>）。</li>
     </ul>
 
     <h2 id="create">開一張票</h2>
