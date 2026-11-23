@@ -14,7 +14,7 @@ Nextline 是給「一個人＋幾個 AI agent」一起用的任務看板。人�
 
 ## 本機啟動
 
-使用 Node **22.23.4**（`.nvmrc`／`.node-version`；可依 [Node 官方安裝方式](https://nodejs.org/en/download) 取得）：
+使用 Node **22.22 以上的 22.x 或 24.7 以上的 24.x**（`.nvmrc`／`.node-version` 寫的是實測版 22.23.4，有 nvm 就在 repo 裡 `nvm install && nvm use`；也可依 [Node 官方安裝方式](https://nodejs.org/en/download) 裝 Node 24 LTS）。其他版本在 `npm ci` 就會停下來並說明怎麼切換。`npm ci` 最後列出的 moderate 漏洞都在開發工具（`npm audit --omit=dev` 是 0），不影響執行：
 
 ```sh
 git clone https://github.com/BolasLien/nextline.git
@@ -122,7 +122,7 @@ PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs node scripts/e2e/selfhost.mjs
 
 `verify` 包含 Node 真實 HTTP／MCP client，以及共用核心的 SQLite／本機 workerd D1 測試。驗證 D1 才需要開發依賴中的 Wrangler；正式 Node 服務不匯入或執行它。UI 腳本預設使用 macOS Google Chrome，可用 `CHROMIUM_PATH` 指定其他 Chrome 路徑；產物在 `.scratch/nx194/`。
 
-實測平台、乾淨環境指令與完整 checklist 見 [自架驗收紀錄](docs/self-host-validation.md)。未驗的平台不宣稱支援。Node 22.23.4 的 `node:sqlite` 會顯示實驗性提示。
+實測平台、乾淨環境指令與完整 checklist 見 [自架驗收紀錄](docs/self-host-validation.md)。未驗的平台不宣稱支援。Node 22 的 `node:sqlite` 會顯示實驗性提示。
 
 ## Cloudflare Workers 部署
 

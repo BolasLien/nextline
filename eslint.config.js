@@ -19,9 +19,9 @@ export default tseslint.config(
     files: ['eslint.config.js'],
     ...tseslint.configs.disableTypeChecked,
   },
-  // 搬家腳本（scripts/）是在本機用 Node 跑的 JavaScript，不在 Worker 的 TypeScript 專案裡。
+  // 搬家腳本（scripts/）是在本機用 Node 跑的 JavaScript，不在 Worker 的 TypeScript 專案裡（.d.mts 是給 node/ 引用的型別宣告）。
   {
-    files: ['scripts/**/*.mjs'],
+    files: ['scripts/**/*.mjs', 'scripts/**/*.d.mts'],
     ...tseslint.configs.disableTypeChecked,
     languageOptions: { ...tseslint.configs.disableTypeChecked.languageOptions, globals: globals.node },
   },

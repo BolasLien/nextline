@@ -2,6 +2,7 @@ import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { isIP } from 'node:net';
 import { ownerName } from '../worker/api/owner';
+import { nodeVersionProblem } from '../scripts/check-node.mjs';
 
 export interface Config {
   dataDir: string;
@@ -38,5 +39,6 @@ export function configFromEnv(env = process.env): Config {
 }
 
 export function requireNodeVersion(): void {
-  if (process.versions.node !== '22.23.4') throw new Error('此版已驗證 Node 22.23.4；請依 .nvmrc 切換版本。');
+  const problem = nodeVersionProblem(process.version);
+  if (problem) throw new Error(problem);
 }

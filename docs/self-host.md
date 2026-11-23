@@ -1,6 +1,6 @@
 # 自架備份、還原與更新
 
-先依 [README](../README.md) 安裝 Node 22.23.4、`npm ci`、建置及初始化。正式執行只使用 Node 與 SQLite；Cloudflare 帳號、Keychain、`.dev.vars` 都不需要。使用者與 agent 共用同一份資料，登入密碼和 agent token 各自獨立。
+先依 [README](../README.md) 安裝 Node（22.22 以上的 22.x 或 24.7 以上的 24.x）、`npm ci`、建置及初始化。正式執行只使用 Node 與 SQLite；Cloudflare 帳號、Keychain、`.dev.vars` 都不需要。使用者與 agent 共用同一份資料，登入密碼和 agent token 各自獨立。
 
 ```text
 程式版本目錄（可換）         私人資料目錄（保留）
@@ -59,7 +59,7 @@ npm start
 
 ## Linux HTTPS 與程序管理範例
 
-使用 Caddy＋Supervisor，同機代理到 loopback Node。先由管理者安裝 Node 22.23.4、Caddy、Supervisor；再以專用、非 root 的部署使用者操作。以下是可在沒有公開網域時完整演練的 `localhost:8443` TLS 路徑：
+使用 Caddy＋Supervisor，同機代理到 loopback Node。先由管理者安裝 Node（22.22 以上的 22.x 或 24.7 以上的 24.x）、Caddy、Supervisor；再以專用、非 root 的部署使用者操作。以下是可在沒有公開網域時完整演練的 `localhost:8443` TLS 路徑：
 
 ```sh
 export NEXTLINE_ROOT="$PWD"
