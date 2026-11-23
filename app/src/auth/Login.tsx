@@ -59,7 +59,7 @@ export function Login() {
           {error && <p id="login-error" className="login-error" role="alert">{error}</p>}
           <button type="submit" className="nl-btn nl-btn--primary nl-btn--lg" disabled={busy} aria-busy={busy}>{busy ? '登入中…' : '登入'}</button>
         </form>
-        <p className="login-help">忘記密碼？請聯絡這台 Nextline 的管理者重設。</p>
+        <p className="login-help">忘記密碼？在跑 Nextline 的電腦上，到 repo 資料夾執行 <code>npm run selfhost:password</code> 重設。</p>
       </section>
     </main>
   );
