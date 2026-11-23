@@ -1,97 +1,162 @@
 <!--
-title: Nextline — 你和 AI agent 共用的看板
+title: Nextline — 每張票，現在輪到誰？
 intro: Nextline 是給一個人加幾個 AI agent 共用的任務看板：你在網頁開票、驗收，Claude Code、Codex 透過 REST API 或 MCP 讀票、回報進度。自己架，開源。
 -->
-<main>
+<main id="top">
   <section class="hero">
     <div class="wrap">
-      <h1>你和 <span class="agent">AI agent</span> 共用一塊看板</h1>
-      <p class="lead">你在網頁上開票、驗收；Claude Code、Codex 透過 API 或 MCP 讀票、回報進度。每張票輪到誰，一眼就知道。</p>
+      <span class="hello"><span class="av me">你</span><span class="av ai">AI</span>一個人＋幾個 AI agent 的任務看板</span>
+      <h1><span class="ln">每張票，</span><span class="ln">現在<span class="turn">輪到誰</span>？</span></h1>
+      <p class="lead">你在網頁開票、驗收；Claude Code、Codex 用 API 或 MCP 讀票、做事、把下一步寫在卡片上。不用再翻對話問「做到哪了」。</p>
       <div class="cta">
-        <a class="btn btn-primary" href="docs/install.html">開始安裝
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn btn-ghost" href="https://github.com/BolasLien/nextline">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
-          GitHub</a>
+        <a class="btn btn-fill" href="#start">五行指令架起來 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-out" href="https://github.com/BolasLien/nextline">在 GitHub 看</a>
       </div>
-      <figure class="shot" style="margin-top:48px">
-        <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <img src="assets/board.jpg" width="1280" height="683" alt="Nextline 看板：Todo、In Progress、待驗收、Done 四欄，卡片上顯示 agent 回報的下一步">
-      </figure>
+
+      <div class="hero-board" role="img" aria-label="示意動畫：一張票從 Todo 走到 Done，每一步輪到的人不同">
+        <div class="hcol todo"><h3>Todo <small>你寫</small></h3>
+          <div class="hc hero-card" id="hc"><span class="whose" id="whose"><span class="av me">你</span><span id="whoseT">你開的票</span></span><span class="id"><i></i>NX-2 · 記帳 App</span><span>01 月報表：依分類畫圓餅圖</span><div class="nx" id="hcn" hidden><b>下一步</b> <span id="hcnT"></span></div></div>
+          <div class="hc ghost"><span class="id"><i></i>NX-5 · 記帳 App</span>03 支出分類可以自訂顏色</div>
+        </div>
+        <div class="hcol prog"><h3>In Progress <small>agent 做</small></h3>
+          <div class="hc ghost"><span class="id"><i class="b"></i>NX-4 · 部落格改版</span>舊文章網址轉址到新路徑</div>
+        </div>
+        <div class="hcol rev"><h3>待驗收 <small>輪到你</small></h3></div>
+        <div class="hcol done"><h3>Done <small>完成</small></h3>
+          <div class="hc ghost hide-s"><span class="id"><i></i>NX-1 · 記帳 App</span>06 建立資料表與第一次部署</div>
+        </div>
+      </div>
+      <p class="board-cap">↑ 示意動畫。卡片上的標籤是現在輪到誰。</p>
     </div>
   </section>
 
-  <section class="block" id="how">
+  <section class="sec" id="how">
     <div class="wrap">
-      <p class="eyebrow">怎麼運作</p>
-      <h2>一張票在你和 agent 之間來回</h2>
-      <p class="sub">人和 agent 看的是同一份資料，不用在對話裡轉述進度。</p>
-      <ol class="flow">
-        <li><h3>開票<span class="who">你</span></h3><p>在網頁寫下要做什麼、做到什麼程度算完成，拖到 Todo。</p></li>
-        <li class="is-agent"><h3>做事、回報<span class="who">agent</span></h3><p>agent 用 API 或 MCP 讀票、改狀態，把做了什麼、下一步寫成 comment。卡片上直接顯示「下一步」。</p></li>
-        <li class="is-review"><h3>驗收<span class="who">你</span></h3><p>票到了待驗收，你在票上回一句；票自動交回 In Progress，agent 接著做。</p></li>
-      </ol>
+      <span class="tag prog">怎麼用</span>
+      <h2>你寫一句，agent 做一輪，你再看一眼。</h2>
+      <p class="sub">人和 agent 讀寫同一張票。進度不用你轉述，也不會散在好幾個對話裡。</p>
+      <div class="lane">
+        <article class="big rise">
+          <span class="step">01</span>
+          <div class="who"><span class="av me">你</span>在網頁上</div>
+          <h3>開票，放進 Todo</h3>
+          <p>寫清楚要做什麼、做到什麼程度算完成。拖拉排序，Cmd+K 隨時找票。</p>
+        </article>
+        <article class="big rise">
+          <span class="step">02</span>
+          <div class="who"><span class="av ai">AI</span>用 API 或 MCP</div>
+          <h3>agent 讀票、做事、回報</h3>
+          <p>改成 In Progress，做完把結果寫成 comment、送到待驗收。</p>
+          <div class="quote">comment 最後一行寫「<b>下一步：</b>…」，看板卡片就顯示這一句。</div>
+        </article>
+        <article class="big rise">
+          <span class="step">03</span>
+          <div class="who"><span class="av me">你</span>電腦或手機</div>
+          <h3>在待驗收的票上回一句</h3>
+          <p>在網頁回覆後，票自動交回 In Progress，agent 下次來看就接著做。要結束就移到 Done。</p>
+        </article>
+      </div>
     </div>
   </section>
 
-  <section class="block" id="features">
-    <div class="wrap split">
-      <div>
-        <p class="eyebrow">有什麼</p>
-        <h2>給一個人加幾個 agent 用剛好</h2>
-        <ul class="features" style="grid-template-columns:1fr">
-          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg></span>
-            <div><h3>看板、Project、指令面板</h3><p>拖拉排序、待驗收欄、Cmd+K 找票，手機也能用。介面是繁體中文。</p></div></li>
-          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M8 6 3 12l5 6M16 6l5 6-5 6M14 4l-4 16"/></svg></span>
-            <div><h3>REST API 與遠端 MCP</h3><p>常用的 MCP 工具名稱和參數照 Linear MCP，agent 上手快；不支援的參數見<a href="docs/mcp-linear.html">和 Linear MCP 的差異</a>。</p></div></li>
-          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></span>
-            <div><h3>每次修改都能還原</h3><p>誰改了哪個欄位都有紀錄，agent 改錯一鍵復原。</p></div></li>
-          <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span>
-            <div><h3>資料在你自己手上</h3><p>架在自己的電腦、主機或 Cloudflare 帳號上；用 Node 跑不用註冊任何服務。</p></div></li>
-        </ul>
+  <section class="sec" id="screens">
+    <div class="wrap">
+      <span class="tag rev">實際畫面</span>
+      <h2>電腦上看全局，手機上驗收。</h2>
+      <p class="sub">以下是 Nextline 的實際畫面，資料是示範用的。</p>
+      <div class="screens">
+        <div class="laptop rise">
+          <img class="shot-light" src="assets/home/board-light.jpg" width="2560" height="920" alt="Nextline 看板：四欄，卡片上有 agent 寫的下一步">
+          <img class="shot-dark" src="assets/home/board-dark.jpg" width="2560" height="920" alt="Nextline 看板（深色）">
+        </div>
+        <div class="rise" style="text-align:center">
+          <div class="phone">
+            <img class="shot-light" src="assets/home/phone-issue-light.jpg" width="800" height="1560" alt="手機上的票詳細：等你回覆">
+            <img class="shot-dark" src="assets/home/phone-issue-dark.jpg" width="800" height="1560" alt="手機上的票詳細（深色）">
+          </div>
+          <span class="sticker">手機上也能驗收</span>
+        </div>
       </div>
-      <div class="agent-card" aria-label="Claude Code 連上 Nextline 的設定範例">
-        <div class="ac-head"><b>agent</b> 這一側只要一個指令</div>
-<pre><span class="c"># Claude Code</span>
+    </div>
+  </section>
+
+  <section class="sec" id="features">
+    <div class="wrap">
+      <span class="tag done">有什麼</span>
+      <h2>給一個人加幾個 agent，剛好夠用。</h2>
+      <div class="bento">
+        <div class="bx w4 navy rise">
+          <h3>REST API 與遠端 MCP</h3>
+          <p>常用 MCP 工具的名稱和參數照 Linear MCP，用過的 agent 不用重學。<a href="docs/mcp-linear.html" style="color:inherit">差異在這</a>。</p>
+          <div class="tools"><span>list_issues</span><span>get_issue</span><span>save_issue</span><span>list_comments</span><span>save_comment</span><span>list_issue_events</span><span>revert_issue_event</span></div>
+          <p style="margin-top:14px"><a href="docs/mcp.html" style="color:inherit">看全部 12 個工具 →</a>　<a href="docs/api.html" style="color:inherit">REST API 參考 →</a></p>
+        </div>
+        <div class="bx w2 teal half rise"><span class="big-n" aria-hidden="true">↺</span><h3>改錯一鍵還原</h3><p>每次修改都有紀錄：誰改的、從什麼改成什麼。</p></div>
+        <div class="bx w2 half rise"><h3>看板與全部的票</h3><p>拖拉排序、篩選分組、Project、Cmd+K。</p></div>
+        <div class="bx w2 half rise"><h3>blocked by 與封存</h3><p>票可以設依賴；不要的票封存，不永久刪除。</p></div>
+        <div class="bx w2 rise"><h3>資料在你手上</h3><p>Node＋SQLite 自架，或你自己的 Cloudflare Workers＋D1。兩種跑法同一份程式。</p></div>
+        <div class="bx w3 rise"><h3>繁體中文介面</h3><p>介面和文件是繁體中文。等你看的票就叫「待驗收」。</p></div>
+        <div class="bx w3 rise"><h3>開源</h3><p>Apache License 2.0。程式碼都在 GitHub。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="start">
+    <div class="wrap">
+      <span class="tag todo">開始</span>
+      <h2>五行指令，架在你自己的電腦上。</h2>
+      <p class="sub">需要 Node 22.23.4。初始化時設定登入密碼，打開 http://127.0.0.1:3000 就能用。</p>
+      <div class="start">
+        <div class="term rise">
+          <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+<pre><span class="k">git clone</span> https://github.com/BolasLien/nextline.git
+<span class="k">cd</span> nextline
+<span class="k">npm ci</span> &amp;&amp; <span class="k">npm run</span> build
+<span class="k">npm run</span> selfhost:init   <span class="c"># 設定登入密碼</span>
+<span class="k">npm start</span>               <span class="c"># http://127.0.0.1:3000</span>
+
+<span class="c"># 另開一個終端機，讓 Claude Code 連上（token 跟登入密碼分開）</span>
+<span class="k">export</span> NEXTLINE_API_TOKEN=<span class="s">"$(npm run --silent selfhost:token)"</span>
 <span class="k">claude mcp add</span> --transport http --scope user \
   nextline http://127.0.0.1:3000/mcp \
-  --header 'Authorization: Bearer ${NEXTLINE_API_TOKEN}'
-
-<span class="c"># 之後在對話裡</span>
-「看 Nextline 上 Todo 的票，挑一張做，做完寫 comment 送待驗收」</pre>
+  --header <span class="s">'Authorization: Bearer ${NEXTLINE_API_TOKEN}'</span></pre>
+        </div>
+        <div class="paths">
+          <a class="path rise" href="docs/install.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span><div><h3>Node＋SQLite</h3><p>自己的電腦或任何一台主機</p></div><span class="go" aria-hidden="true">→</span></a>
+          <a class="path rise" href="docs/cloudflare.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9a4.5 4.5 0 0 0 1 9Z"/></svg></span><div><h3>Cloudflare Workers＋D1</h3><p>部署到自己的帳號，用 Access 登入</p></div><span class="go" aria-hidden="true">→</span></a>
+          <a class="path rise" href="docs/codex.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 6 3 12l5 6M16 6l5 6-5 6"/></svg></span><div><h3>連上 Codex</h3><p>一段 config.toml</p></div><span class="go" aria-hidden="true">→</span></a>
+          <a class="path rise" href="docs/index.html"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h10l4 4v12H5Z"/><path d="M9 12h6M9 16h4"/></svg></span><div><h3>完整文件</h3><p>安裝、agent 連線、API 與 MCP 參考</p></div><span class="go" aria-hidden="true">→</span></a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="block" id="start">
+  <section class="sec" id="faq">
     <div class="wrap">
-      <p class="eyebrow">開始</p>
-      <h2>五行指令架起來</h2>
-      <p class="sub">需要 Node 22.23.4。初始化時設定登入密碼，打開 http://127.0.0.1:3000 就能用。</p>
-```sh
-git clone https://github.com/BolasLien/nextline.git
-cd nextline
-npm ci && npm run build
-npm run selfhost:init   # 設定登入密碼
-npm start               # http://127.0.0.1:3000
-```
-      <div class="runs">
-        <div class="run"><h3>Node＋SQLite</h3><p>在自己的電腦或任何一台主機上跑，資料是一個 SQLite 檔。<a href="docs/install.html">安裝步驟</a></p></div>
-        <div class="run"><h3>Cloudflare Workers＋D1</h3><p>部署到自己的 Cloudflare 帳號，用 Access 登入。兩種跑法同一份程式。<a href="docs/cloudflare.html">部署步驟</a></p></div>
+      <span class="tag rev">先說清楚</span>
+      <h2>目前還沒有的。</h2>
+      <div class="faq">
+        <div class="faq-item"><h3>可以多人一起用嗎？</h3><p>不行。只給一個人用，沒有註冊和多人帳號。<a href="docs/single-user.html">為什麼只給一個人用</a></p></div>
+        <div class="faq-item"><h3>每個 agent 可以有不同權限嗎？</h3><p>還沒有。所有 agent 共用一組 token；comment 的作者是 agent 自己填的文字，不是登入身分。</p></div>
+        <div class="faq-item"><h3>Nextline 會叫 agent 起來做事嗎？</h3><p>不會。agent 什麼時候來看票，由你的排程或對話決定。</p></div>
+        <div class="faq-item"><h3>有標籤、指派、優先度嗎？</h3><p>沒有，也沒有估點。</p></div>
       </div>
     </div>
   </section>
 
-  <section class="block" id="limits">
-    <div class="wrap">
-      <div class="limits">
-        <h2 style="font-size:20px;margin-bottom:10px">目前的限制</h2>
-        <ul>
-          <li>只給一個人用，沒有註冊和多人帳號。</li>
-          <li>所有 agent 共用一組 token，還沒有個別權限。</li>
-          <li>agent 什麼時候來看票，由你自己的排程或對話決定，Nextline 不會主動叫醒 agent。</li>
-        </ul>
+  <div class="wrap">
+    <section class="end">
+      <div class="chips" aria-hidden="true">
+        <span style="left:5%;top:16%;transform:rotate(-6deg)">✓ Done</span>
+        <span style="right:6%;top:12%;transform:rotate(5deg)">下一步：你打開 /report 看看</span>
+        <span style="left:9%;bottom:14%;transform:rotate(4deg)">NX-2 → 待驗收</span>
+        <span style="right:8%;bottom:18%;transform:rotate(-4deg)">kakeibo agent 剛剛</span>
       </div>
-    </div>
-  </section>
+      <h2>下一張票，<br>換 agent 做。</h2>
+      <div class="cta">
+        <a class="btn btn-fill" href="docs/install.html">開始安裝</a>
+        <a class="btn btn-out" href="https://github.com/BolasLien/nextline">GitHub</a>
+      </div>
+    </section>
+  </div>
 </main>

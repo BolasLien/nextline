@@ -2,7 +2,7 @@
 // 每一頁 × 1280／375 × 淺色／深色量測沒有整頁橫向捲動、沒有元素超出右緣；再實際操作搜尋、手機目錄、深淺色切換。
 //   PLAYWRIGHT_MODULE=<playwright 的 index.mjs> [CHROMIUM_PATH=…] [E2E_PORT=8801] node scripts/e2e/site.mjs
 // 截圖與結果在 .scratch/screenshots/site/。
-/* global document, getComputedStyle -- page.evaluate 裡的程式在瀏覽器跑 */
+/* global document, getComputedStyle, window -- page.evaluate 裡的程式在瀏覽器跑 */
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -73,6 +73,17 @@ try {
         const res = await page.goto(`${base}/${url}`);
         assert.equal(res?.status(), 200, url);
         await page.waitForLoadState('networkidle');
+        if (url === 'index.html') {
+          // 首頁的區塊捲進畫面才浮上來：先捲過一遍，整頁截圖才看得到全部。
+          await page.evaluate(async () => {
+            for (let y = 0; y < document.body.scrollHeight; y += 400) {
+              window.scrollTo({ top: y, behavior: 'instant' });
+              await new Promise((r) => setTimeout(r, 60));
+            }
+            window.scrollTo({ top: 0, behavior: 'instant' });
+          });
+          await page.waitForTimeout(700);
+        }
         const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
         const o = await overflow(page);
         const ok = o.scrollWidth <= o.vw && o.out.length === 0;

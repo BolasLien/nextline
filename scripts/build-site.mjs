@@ -1,7 +1,7 @@
 // 官網與文件站：把 site/ 的頁面片段套上共用版面，輸出成純靜態檔到 dist/site/（不需要伺服器，file:// 也能開）。
 //   node scripts/build-site.mjs [輸出目錄]
 // 頁面片段開頭用 HTML 註解寫 title／crumb／intro；內文的 ```lang … ``` 區塊會轉成程式碼卡片（內容自動跳脫）。
-import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -249,13 +249,54 @@ ${searchDialog('../')}
 ${footer('../')}`;
 }
 
+// 首頁用自己的版面與樣式（home.css，設計方向 C「輪到誰」）；深淺色切換沿用 site.js 與 theme-init.js。
+const HALF_MOON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16Z" fill="currentColor"/></svg>';
+
 function homePage(page) {
-  return `${head({ title: page.meta.title, description: page.meta.intro, base: '' })}
+  return `<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(page.meta.title)}</title>
+<meta name="description" content="${escapeHtml(page.meta.intro)}">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="assets/home.css">
+<script src="assets/theme-init.js"></script>
+</head>
 <body>
-${topBar({ base: '', wide: false, current: '' })}
-${renderCode(page.body)}
-${searchDialog('')}
-${footer('')}`;
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Nextline 首頁">${LOGO}Nextline</a>
+    <nav aria-label="主要">
+      <a class="hide-s" href="#how">怎麼用</a>
+      <a class="hide-s" href="#start">開始</a>
+      <a href="docs/index.html">文件</a>
+      <a class="gh" href="${GITHUB}">GitHub</a>
+      <button class="theme-btn" type="button" aria-label="切換深淺色" data-theme-toggle>${HALF_MOON}</button>
+    </nav>
+  </div>
+</header>
+${page.body}
+<footer>
+  <div class="wrap">
+    <span>Nextline</span>
+    <a href="docs/index.html">文件</a>
+    <a href="docs/api.html">API</a>
+    <a href="${GITHUB}">GitHub</a>
+    <a href="${GITHUB}/issues">回報問題</a>
+    <span class="r">Apache License 2.0</span>
+  </div>
+</footer>
+<script src="assets/site.js"></script>
+<script src="assets/home.js"></script>
+</body>
+</html>
+`;
 }
 
 export async function buildSite(outDir = join(ROOT, 'dist/site')) {
@@ -281,9 +322,9 @@ export async function buildSite(outDir = join(ROOT, 'dist/site')) {
   await writeFile(join(outDir, 'index.html'), homePage(home));
 
   await writeFile(join(outDir, 'assets', 'search-index.js'), `window.NEXTLINE_SEARCH = ${JSON.stringify(index)};\n`);
-  for (const f of ['site.css', 'site.js', 'theme-init.js']) await copyFile(join(SRC, 'assets', f), join(outDir, 'assets', f));
+  for (const f of ['site.css', 'site.js', 'theme-init.js', 'home.css', 'home.js']) await copyFile(join(SRC, 'assets', f), join(outDir, 'assets', f));
+  await cp(join(SRC, 'assets', 'home'), join(outDir, 'assets', 'home'), { recursive: true });
   await copyFile(join(ROOT, 'app/public/favicon.svg'), join(outDir, 'assets', 'favicon.svg'));
-  await copyFile(join(ROOT, 'docs/images/board.jpg'), join(outDir, 'assets', 'board.jpg'));
   return { outDir, pages: order.length + 1 };
 }
 
