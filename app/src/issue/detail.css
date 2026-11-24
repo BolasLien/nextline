@@ -295,15 +295,32 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 .nl-review .who {
   display: flex;
   gap: 10px;
   align-items: flex-start;
+  min-width: 0;
+}
+.nl-review .who-text {
+  min-width: 0;
+  flex: 1;
+}
+.nl-review .who-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.nl-review .who-head small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
 }
 .nl-review .rv-ic {
   color: var(--color-review-icon);
   display: inline-flex;
+  flex: none;
   padding-top: 1px;
 }
 .nl-review .who p {
@@ -320,15 +337,56 @@
 .nl-review textarea {
   min-height: 72px;
 }
-/* 「要你決定」的選項：照原文列出，跟問題同一欄對齊（圖示 20px＋間距 10px） */
-.nl-review .rv-options {
-  margin: 0;
-  padding-left: calc(30px + 1.4em);
+/* 最新 comment 全文容器：長文預設限高 240px，底部漸層收尾 */
+.nl-review .rv-ctx {
+  position: relative;
+  min-width: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+.nl-review .rv-ctx .md {
   font-size: var(--font-size-sm);
-  display: flex;
-  flex-direction: column;
+  line-height: 1.65;
+}
+.nl-review .rv-ctx.is-clamped {
+  max-height: 240px;
+  overflow: hidden;
+}
+.nl-review .rv-ctx.is-clamped::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52px;
+  background: linear-gradient(to bottom, transparent, var(--color-surface) 88%);
+  pointer-events: none;
+}
+.nl-review .rv-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
-  overflow-wrap: anywhere;
+  margin-top: -4px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-link);
+  font: var(--font-weight-semibold) var(--font-size-xs) / 1 var(--font-sans);
+  cursor: pointer;
+}
+.nl-review .rv-toggle:hover {
+  text-decoration: underline;
+}
+.nl-review .rv-toggle:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.nl-review .rv-toggle[aria-expanded='true'] .nl-icon {
+  transform: rotate(180deg);
 }
 
 /* 欄位 */

@@ -1,11 +1,11 @@
 // 票詳細：右側預覽面板（layout="peek"）與整頁 /issues/NX-n（layout="page"）共用。
 // 版面與互動照 早期設計原型（未收進公開版） 的 renderPeek／renderDetailPage、components.md 第 14 節：
-//   標題列 → 「等你回覆」（只在待驗收：最新的下一步或「要你決定」的問題與選項＋回覆框，NX-239）→ 狀態／Project／票號 → 標題（就地編輯）→ 最新的下一步（待驗收時不顯示，NX-161）→ 描述（Markdown）
+//   標題列 → 「等你回覆」（只在待驗收：最新一則 comment 完整 Markdown，長文限高 240px 可展開＋回覆框）→ 狀態／Project／票號 → 標題（就地編輯）→ 最新的下一步（待驗收時不顯示）→ 描述（Markdown）
 //   → 欄位（狀態、Project、到期日、blocked by；整頁放右欄。產品不放 Sprint，NX-160）→ 變更紀錄（每筆可還原）→ comment。
 // 負責人、代做 agent、session 是階段二，這裡不做。
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { ISSUE_STATUSES, type IssueDetail, type IssueEvent, type IssueSummary, type Project } from '../api/types';
+import { ISSUE_STATUSES, type Comment, type IssueDetail, type IssueEvent, type IssueSummary, type Project } from '../api/types';
 import { useRegisterActiveIssue } from '../palette/activeIssue';
 import { projectColorClass } from '../shell/sprints';
 import { Icon } from '../ui/Icon';
@@ -15,9 +15,9 @@ import { EmptyState, ErrorState, Skeleton, Delayed } from '../ui/states';
 import { STATUS_ICON, STATUS_LABEL, STATUS_TOKEN } from '../ui/status';
 import { fullTime, relativeTime } from '../ui/time';
 import { BlockerPicker } from './BlockerPicker';
-import { type Decision, latestDecision } from './decision';
 import type { EditActions } from './edits';
 import { canRevert, type EventNames, eventText, newestFirst, revertLabel } from './events';
+import { latestComment } from './latestComment';
 import { Markdown, MarkdownEditor } from './Markdown';
 import { type DetailData, useIssueDetail } from './useIssueDetail';
 import '../ui/button.css';
@@ -187,9 +187,9 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
   // 指令面板的「改狀態成…」「移回…」用這張票的寫入流程
   useRegisterActiveIssue({ issue, events, actions });
 
-  // 待驗收：人只回覆，狀態由 agent 讀了回覆再決定（NX-239）。回覆框放頂端，comment 區就不再放第二個。
-  const decision = useMemo(() => (inReview ? latestDecision(comments) : null), [inReview, comments]);
-  const review = inReview ? <ReplyBar issue={issue} decision={decision} actions={actions} /> : null;
+  // 待驗收：人只回覆，狀態由 agent 讀了回覆再決定；頂端直接顯示最新一則 comment 全文。
+  const latest = useMemo(() => (inReview ? latestComment(comments) : null), [inReview, comments]);
+  const review = inReview ? <ReplyBar issue={issue} latest={latest} actions={actions} /> : null;
 
   const fields = (
     <Fields
@@ -275,14 +275,41 @@ function DetailBody({ data, actions, layout, links, headingId, onClose }: {
   );
 }
 
-// ---- 等你回覆（NX-239）----
-// 待驗收的票頂端只有回覆：摘要是最新的下一步；最新 comment 有「要你決定」時改列問題與選項（純文字）。
-// 回覆的 author 是 Bolas，後端照 NX-221 把票移到 In Progress，之後的狀態交給 agent。
+// ---- 等你回覆 ----
+// 待驗收的票頂端直接完整渲染最新一則 comment（含作者與時間），超過 240px 預設限高＋漸層收尾＋展開全文／收合；
+// 沒有 comment 時退回顯示 issue.next_step 或預設提示。
+// 回覆的 author 是設定的人名（預設「你」），後端把票移到 In Progress，之後的狀態交給 agent。
 
-function ReplyBar({ issue, decision, actions }: { issue: IssueDetail; decision: Decision | null; actions: EditActions }) {
+const REVIEW_CLAMP_PX = 240;
+
+function ReplyBar({ issue, latest, actions }: { issue: IssueDetail; latest: Comment | null; actions: EditActions }) {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const ctxRef = useRef<HTMLDivElement>(null);
+  const ctxId = useId();
+  const latestId = latest?.id;
+  const latestBody = latest?.body;
+
   useEffect(() => { setDraft(''); }, [issue.number]);
+  useEffect(() => { setExpanded(false); }, [issue.number, latestId]);
+
+  useLayoutEffect(() => {
+    const el = ctxRef.current;
+    if (el === null || latestId === undefined) {
+      setOverflows(false);
+      return;
+    }
+    const measure = () => {
+      setOverflows(el.scrollHeight > REVIEW_CLAMP_PX + 2);
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => { ro.disconnect(); };
+  }, [latestId, latestBody]);
 
   async function send() {
     if (sending || draft.trim() === '') return;
@@ -292,25 +319,44 @@ function ReplyBar({ issue, decision, actions }: { issue: IssueDetail; decision: 
     if (ok) setDraft('');
   }
 
+  const clamped = overflows && !expanded;
+
   return (
     <div className="nl-review" role="group" aria-label="等你回覆">
       <div className="who">
         <span className="rv-ic" aria-hidden="true">
           <Icon name="status-in-review" />
         </span>
-        <div>
-          <b>等你回覆</b>
-          <p>{decision === null ? (issue.next_step ?? '看完後回覆你的意思，agent 會接著處理。') : `要你決定：${decision.question}`}</p>
+        <div className="who-text">
+          <div className="who-head">
+            <b>等你回覆</b>
+            {latest !== null && (
+              <small title={fullTime(latest.created_at)}>
+                {latest.author} · {relativeTime(latest.created_at)}
+              </small>
+            )}
+          </div>
+          {latest === null && <p>{issue.next_step ?? '看完後回覆你的意思，agent 會接著處理。'}</p>}
         </div>
       </div>
-      {decision !== null && (
-        <ol className="rv-options" aria-label="選項">
-          {decision.options.map((o) => (
-            <li key={o.n} value={o.n}>
-              {o.text}
-            </li>
-          ))}
-        </ol>
+      {latest !== null && (
+        <>
+          <div ref={ctxRef} id={ctxId} className={clamped ? 'rv-ctx is-clamped' : 'rv-ctx'}>
+            <Markdown source={latest.body} />
+          </div>
+          {overflows && (
+            <button
+              type="button"
+              className="rv-toggle"
+              aria-expanded={expanded}
+              aria-controls={ctxId}
+              onClick={() => { setExpanded((v) => !v); }}
+            >
+              {expanded ? '收合' : '展開全文'}
+              <Icon name="chev-down" size="sm" />
+            </button>
+          )}
+        </>
       )}
       <MarkdownEditor label="回覆" value={draft} onChange={setDraft} onSubmit={() => void send()} placeholder="直接寫你的意思，agent 會決定下一步" hint="⌘↵ 送出" />
       <div className="acts">
