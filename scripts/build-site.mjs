@@ -24,6 +24,7 @@ export const NAV = [
     pages: [
       { slug: 'claude-code', title: '連上 Claude Code' },
       { slug: 'codex', title: '連上 Codex' },
+      { slug: 'agents-md', title: '給 agent 的協作規範' },
       { slug: 'server', title: '架在伺服器上（HTTPS）' },
       { slug: 'cloudflare', title: '部署到 Cloudflare' },
       { slug: 'backup', title: '備份、還原與更新' },
@@ -83,7 +84,9 @@ export function parsePage(source) {
 // ```lang … ``` → 程式碼卡片。sh 的 # 註解、json 的 key 上色，其餘原樣（跳脫後）輸出。
 export function renderCode(body) {
   return body.replace(/^```(\w*)\n([\s\S]*?)\n```$/gm, (_all, lang, code) => {
+    // 反引號也轉成實體：範本裡的 ``` 才不會被當成沒轉到的程式碼區塊，複製時仍是原字。
     const lines = escapeHtml(code)
+      .replace(/`/g, '&#96;')
       .split('\n')
       .map((line) => {
         if (lang === 'sh' || lang === 'toml' || lang === 'caddyfile') {
@@ -97,7 +100,7 @@ export function renderCode(body) {
         return line;
       })
       .join('\n');
-    return `<div class="code-card"><button class="copy" type="button">複製</button><pre class="code"><code>${lines}</code></pre></div>`;
+    return `<div class="code-card"><button class="copy" type="button">複製</button><pre class="code${lang === 'markdown' ? ' wrap' : ''}"><code>${lines}</code></pre></div>`;
   });
 }
 

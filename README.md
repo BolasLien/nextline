@@ -43,6 +43,8 @@ curl -H "Authorization: Bearer $NEXTLINE_API_TOKEN" http://127.0.0.1:3000/api/is
 
 指令只回傳一次新 token。這個動作**會立刻撤銷舊 agent token**；更新 client 的環境變數後重啟 client。把 token 放在自己的密碼管理器或安全環境變數，不放進 Git。服務端只保存 SHA-256 雜湊；前端不持有 token。此版仍是單一部署共用的 agent 憑證，不提供每個 agent 的權限隔離。
 
+要讓每個 agent 照同一套格式開票、回報、送待驗收，把 [協作規範範本](docs/agents-template.md) 貼進 repo 的 `AGENTS.md`／`CLAUDE.md`（官網「給 agent 的協作規範」同一份）。
+
 MCP 使用 Streamable HTTP：網址 `http://127.0.0.1:3000/mcp`、header `Authorization: Bearer <token>`。[MCP 文件](docs/mcp.md) 列出完整 client 設定及工具；[API 文件](docs/api.md) 列出所有路徑。Codex 範例：
 
 ```toml

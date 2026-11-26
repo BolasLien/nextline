@@ -61,6 +61,14 @@ describe('官網與文件站', () => {
     expect(hits).toEqual([]);
   });
 
+  it('協作規範頁的範本和 docs/agents-template.md 一字不差', async () => {
+    const md = await readFile(new URL('../docs/agents-template.md', import.meta.url), 'utf8');
+    const template = /^````markdown\n([\s\S]*?)\n````$/m.exec(md)?.[1];
+    expect(template).toBeDefined();
+    const page = await readFile(new URL('../site/docs/agents-md.html', import.meta.url), 'utf8');
+    expect(page).toContain('```markdown\n' + template + '\n```');
+  });
+
   it('沒有漏轉的程式碼區塊', () => {
     for (const [file, html] of pages) expect(html.includes('```'), file).toBe(false);
   });
