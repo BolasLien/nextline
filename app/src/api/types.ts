@@ -156,6 +156,19 @@ export interface ProjectUpdate {
   pinned?: boolean;
 }
 
+export interface ProjectMerge {
+  target_project_id: number;
+  append_description?: boolean;
+}
+
+export interface ProjectMergeResult {
+  target: Project;
+  merged_project_id: number;
+  merged_project_name: string;
+  moved_issues: number;
+  description_appended: boolean;
+}
+
 export interface Sprint {
   id: number;
   number: number;

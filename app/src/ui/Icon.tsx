@@ -110,6 +110,15 @@ const PATHS = {
   filter: <path d="M4 6h16M7 12h10M10 18h4" />,
   // 圖釘（NX-162 釘選 Project）
   pin: <path d="M9 3.5h6M10 3.5v5.5l-3.5 4h11L14 9V3.5M12 13v7.5" />,
+  // 合併 Project
+  merge: (
+    <>
+      <circle cx="6.5" cy="6" r="2.2" />
+      <circle cx="17.5" cy="6" r="2.2" />
+      <circle cx="12" cy="18" r="2.2" />
+      <path d="M6.5 8.2v2.3a3 3 0 003 3h5a3 3 0 003-3V8.2M12 13.5v2.3" />
+    </>
+  ),
   archive: (
     <>
       <rect x="3" y="4" width="18" height="5" rx="2" />

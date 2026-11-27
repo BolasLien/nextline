@@ -19,7 +19,7 @@ import {
   updateIssue,
 } from './issues';
 import { DEFAULT_OWNER_NAME, ownerName } from './owner';
-import { createProject, getProject, listProjects, updateProject } from './projects';
+import { createProject, getProject, listProjects, mergeProject, updateProject } from './projects';
 import { createSprint, getSprint, listSprints, updateSprint } from './sprints';
 
 export interface ApiEnv {
@@ -110,11 +110,16 @@ function match(request: Request, db: Database, url: URL, owner: string): Routes 
       };
     case 'projects':
       if (id === undefined) return { GET: () => listProjects(db), POST: () => createProject(db, request) };
-      if (parts.length !== 2) return null;
-      return {
-        GET: async () => Response.json(await getProject(db, parseId(id, ' Project'))),
-        PATCH: () => updateProject(db, parseId(id, ' Project'), request),
-      };
+      if (parts.length === 2) {
+        return {
+          GET: async () => Response.json(await getProject(db, parseId(id, ' Project'))),
+          PATCH: () => updateProject(db, parseId(id, ' Project'), request),
+        };
+      }
+      if (parts.length === 3 && sub === 'merge') {
+        return { POST: () => mergeProject(db, parseId(id, ' Project'), request) };
+      }
+      return null;
     case 'sprints':
       if (id === undefined) return { GET: () => listSprints(db), POST: () => createSprint(db, request) };
       if (parts.length !== 2) return null;

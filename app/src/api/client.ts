@@ -20,6 +20,8 @@ import type {
   Owner,
   Project,
   ProjectCreate,
+  ProjectMerge,
+  ProjectMergeResult,
   ProjectUpdate,
   RevertResult,
   Sprint,
@@ -169,6 +171,7 @@ export function createApiClient(options: ApiClientOptions = {}) {
     getProject: (id: number) => request<Project>('GET', `/projects/${seg(id)}`),
     createProject: (body: ProjectCreate) => request<Project>('POST', '/projects', { body }),
     updateProject: (id: number, body: ProjectUpdate) => request<Project>('PATCH', `/projects/${seg(id)}`, { body }),
+    mergeProject: (id: number, body: ProjectMerge) => request<ProjectMergeResult>('POST', `/projects/${seg(id)}/merge`, { body }),
 
     // Sprint
     listSprints: () => request<{ sprints: Sprint[] }>('GET', '/sprints'),

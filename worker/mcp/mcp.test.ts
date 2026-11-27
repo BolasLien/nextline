@@ -81,6 +81,7 @@ describe('連線與驗證', () => {
         'list_cycles',
         'list_issues',
         'list_projects',
+        'merge_project',
         'save_comment',
         'save_issue',
         'save_project',
@@ -416,5 +417,37 @@ describe('待驗收、看板排序、變更紀錄', () => {
     await tool('save_issue', { id: 'NX-1', archived: true });
     expect((await tool<Issue & { archivedAt: string | null }>('save_issue', { id: 'NX-1', archived: false })).archivedAt).toBeNull();
     expect((await callTool('save_issue', { title: '新票', archived: true })).isError).toBe(true);
+  });
+
+  it('merge_project：可用名稱或 id 合併 Project，移轉票與說明，合併自己或找不到回 isError', async () => {
+    const target = await tool<{ id: string; name: string }>('save_project', { name: '核心專案', description: '原本說明' });
+    const source = await tool<{ id: string; name: string }>('save_project', { name: '第二階段', description: '階段說明' });
+    await tool('save_issue', { title: '階段票', project: '第二階段' });
+
+    const merged = await tool<{
+      target: { id: string; name: string; description: string };
+      mergedProjectId: string;
+      mergedProjectName: string;
+      movedIssues: number;
+      descriptionAppended: boolean;
+    }>('merge_project', { source: '第二階段', target: '核心專案' });
+
+    expect(merged).toMatchObject({
+      mergedProjectId: source.id,
+      mergedProjectName: '第二階段',
+      movedIssues: 1,
+      descriptionAppended: true,
+    });
+    expect(merged.target.id).toBe(target.id);
+    expect(merged.target.description).toContain('## 合併自「第二階段」');
+    expect(merged.target.description).toContain('階段說明');
+
+    const { projects } = await tool<{ projects: { id: string; name: string }[] }>('list_projects');
+    expect(projects.map((p) => p.name)).toEqual(['核心專案']);
+    const { issues } = await tool<{ issues: Issue[] }>('list_issues', { project: '核心專案' });
+    expect(issues.map((i) => i.title)).toEqual(['階段票']);
+
+    expect((await callTool('merge_project', { source: target.id, target: target.id })).isError).toBe(true);
+    expect((await callTool('merge_project', { source: '不存在', target: '核心專案' })).isError).toBe(true);
   });
 });

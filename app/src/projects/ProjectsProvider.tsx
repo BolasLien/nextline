@@ -9,7 +9,7 @@ import type { Project } from '../api/types';
 import { useIssueUpdates } from '../issue/issueSync';
 import { REFRESH_MS } from '../issues/useIssues';
 import { useToast } from '../toast/ToastProvider';
-import { touchProject, upsertProject, withPinned } from './projects';
+import { applyProjectMerge, touchProject, upsertProject, withPinned } from './projects';
 
 export type ProjectsState =
   | { status: 'loading'; projects: null; error: null }
@@ -19,6 +19,8 @@ export type ProjectsState =
 type ProjectsValue = ProjectsState & {
   reload: () => void;
   upsert: (project: Project) => void;
+  // 合併後移除來源 Project 並更新目標 Project
+  applyMerge: (sourceId: number, target: Project) => void;
   // 這個 Project 底下有新動靜（例如寫了 comment），at 是那個時間
   touch: (projectId: number, at: string) => void;
   // 釘選或取消：畫面先變，API 失敗退回並跳 toast
@@ -90,6 +92,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     setAttempt((n) => n + 1);
   }, []);
   const upsert = useCallback((project: Project) => { update((list) => upsertProject(list, project)); }, [update]);
+  const applyMerge = useCallback((sourceId: number, target: Project) => { update((list) => applyProjectMerge(list, sourceId, target)); }, [update]);
   const touch = useCallback((projectId: number, at: string) => { update((list) => touchProject(list, projectId, at)); }, [update]);
 
   // 票改了（看板、票詳細、開票都會 publish）：那個 Project 往上推
@@ -110,7 +113,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     [api, show, upsert],
   );
 
-  const value = useMemo<ProjectsValue>(() => ({ ...state, reload, upsert, touch, setPinned }), [state, reload, upsert, touch, setPinned]);
+  const value = useMemo<ProjectsValue>(() => ({ ...state, reload, upsert, applyMerge, touch, setPinned }), [state, reload, upsert, applyMerge, touch, setPinned]);
   return <ProjectsContext value={value}>{children}</ProjectsContext>;
 }
 

@@ -23,7 +23,7 @@ import {
   updateComment,
   updateIssue,
 } from '../api/issues';
-import { createProject, getProject, listProjects, updateProject } from '../api/projects';
+import { createProject, getProject, listProjects, mergeProject, updateProject } from '../api/projects';
 import { listSprints } from '../api/sprints';
 
 // ---- API 回傳的 JSON ----
@@ -641,6 +641,40 @@ export function registerTools(server: McpServer, db: Database, owner: string): v
         const current = await resolveProject(db, args.id);
         const patch = { ...fields, pinned: args.pinned };
         return projectOut(await data<ApiProject>(updateProject(db, current.id, jsonRequest('PATCH', patch))), true);
+      }),
+  );
+
+  server.registerTool(
+    'merge_project',
+    {
+      description:
+        '把來源 Project 合併進目標 Project：來源底下所有票（含已封存）會移到目標 Project（不改動票的 updatedAt、不新增變更紀錄），非空的來源說明預設附加到目標說明，最後移除來源 Project。此操作無法復原。',
+      inputSchema: {
+        source: z.string().describe('要被合併的來源 Project 名稱或 id（合併後會移除）'),
+        target: z.string().describe('要保留的目標 Project 名稱或 id'),
+        appendDescription: z.boolean().optional().describe('是否把來源 Project 的非空說明附加到目標 Project 說明（預設 true）'),
+      },
+    },
+    async (args) =>
+      run(async () => {
+        const source = await resolveProject(db, args.source);
+        const target = await resolveProject(db, args.target);
+        const body: Record<string, unknown> = { target_project_id: target.id };
+        if (args.appendDescription !== undefined) body.append_description = args.appendDescription;
+        const res = await data<{
+          target: ApiProject;
+          merged_project_id: number;
+          merged_project_name: string;
+          moved_issues: number;
+          description_appended: boolean;
+        }>(mergeProject(db, source.id, jsonRequest('POST', body)));
+        return {
+          target: projectOut(res.target, true),
+          mergedProjectId: String(res.merged_project_id),
+          mergedProjectName: res.merged_project_name,
+          movedIssues: res.moved_issues,
+          descriptionAppended: res.description_appended,
+        };
       }),
   );
 

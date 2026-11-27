@@ -136,3 +136,43 @@
     min-width: 0;
   }
 }
+
+/* 合併 Project 對話框 */
+.merge-modal {
+  max-width: 480px;
+}
+.merge-summary {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+}
+.merge-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-snug);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.merge-check input[type='checkbox'] {
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+  flex: none;
+}
+.merge-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-snug);
+}
+.merge-warn .nl-icon {
+  flex: none;
+  margin-top: 2px;
+}

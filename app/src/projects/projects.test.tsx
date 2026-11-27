@@ -2,7 +2,7 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { Issue, Project } from '../api/types';
 import { ProjectAbout } from './ProjectPage';
-import { SIDEBAR_LIMIT, sidebarProjects, openCountByProject, parseTab, projectNameError, sortProjects, touchProject, upsertProject, withPinned } from './projects';
+import { SIDEBAR_LIMIT, applyProjectMerge, sidebarProjects, openCountByProject, parseTab, projectNameError, sortProjects, touchProject, upsertProject, withPinned } from './projects';
 
 function project(id: number, name: string, last = '', pinned: string | null = null): Project {
   return { id, name, description: '', linear_id: null, created_at: '', updated_at: '', pinned_at: pinned, last_activity_at: last };
@@ -87,5 +87,11 @@ describe('Project 頁', () => {
     expect(counts.get(2)).toBe(2);
     expect(counts.get(1)).toBeUndefined();
     expect(counts.get(null)).toBe(1);
+  });
+
+  it('合併 Project：移除來源 Project 並更新目標 Project 後重新排序', () => {
+    const list = [project(1, 'Nextline', T(2)), project(2, 'Nextline v2', T(5)), project(3, '其他', T(3))];
+    const updatedTarget = project(1, 'Nextline', T(6));
+    expect(applyProjectMerge(list, 2, updatedTarget).map((p) => p.id)).toEqual([1, 3]);
   });
 });

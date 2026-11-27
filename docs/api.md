@@ -151,6 +151,7 @@
 | `POST /api/projects` | 內容 `name`（必填、不可重複）、`description`、`linear_id`、`created_at`、`updated_at`。帶 `status` 會忽略（見下方） |
 | `GET /api/projects/:id` | 單一 Project（含長篇 `description`） |
 | `PATCH /api/projects/:id` | 內容 `name`、`description`、`pinned`（`true` 釘選、`false` 取消；已經是這個狀態就不動，也不改 `updated_at`） |
+| `POST /api/projects/:id/merge` | 把 `:id`（來源 Project）合併進目標 Project。內容：`target_project_id`（必填正整數）、`append_description`（選填布林，預設 `true`）。同一個 batch／transaction 內把來源底下全部票（含已封存）改指向目標（不改票的 `updated_at`、不寫新 `issue_events`）、把既有 `issue_events` 的 `project` 紀錄改指向目標、若 `append_description` 為 `true` 且來源說明非空則附標題附加到目標說明，最後刪除來源 Project。合併自己或參數不合法回 `400`，找不到來源或目標回 `404`。回傳 `{ "target": 目標 Project, "merged_project_id", "merged_project_name", "moved_issues", "description_appended" }` |
 
 Project 的欄位：`id`、`name`、`description`、`linear_id`、`created_at`、`updated_at`、`pinned_at`（釘選時間，`null`＝沒釘選）、`last_activity_at`（NX-162：Project 的 `updated_at`、底下任一張票（含已封存）的 `updated_at`、底下任一張票最新 comment 的 `created_at`，取最新的一個；查詢時即時算，不能寫入）。
 
@@ -169,4 +170,4 @@ Project 沒有狀態（NX-165，2026-11-04 Bolas）：回傳沒有 `status`；`P
 
 ## 不做
 
-刪除票、Project、Sprint、comment（不要的票改成 `Canceled` 或封存）。
+刪除票、單純刪除 Project（整併請用 `POST /api/projects/:id/merge`）、刪除 Sprint、刪除 comment（不要的票改成 `Canceled` 或封存）。

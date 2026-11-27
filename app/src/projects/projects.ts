@@ -29,6 +29,12 @@ export function upsertProject(list: readonly Project[], project: Project): Proje
   return sortProjects(next);
 }
 
+// 合併 Project：移除來源 Project、更新目標 Project，重新排序。
+export function applyProjectMerge(list: readonly Project[], sourceId: number, target: Project): Project[] {
+  const withoutSource = list.filter((p) => p.id !== sourceId);
+  return upsertProject(withoutSource, target);
+}
+
 // 這個 Project 底下有票改了或寫了 comment：last_activity_at 往新的推（不會變舊），重新排序。沒變就回原陣列。
 export function touchProject(list: readonly Project[], projectId: number, at: string): readonly Project[] {
   const p = list.find((x) => x.id === projectId);

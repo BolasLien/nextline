@@ -76,6 +76,7 @@ Cloudflare 本機測試：`npm run dev:cloudflare` 前在 `.dev.vars` 放 `API_T
 | `list_projects` | `query`、`state`（忽略）、`team`（忽略） | `{ projects }`，釘選的在最上面（照釘選時間新到舊），其餘照 `lastActivityAt` 新到舊，不含 `description`；每個有 `pinnedAt`（`null`＝沒釘選）與 `lastActivityAt`（Project、底下的票、底下票的 comment 最新時間） |
 | `get_project` | `query`（必填，名稱或 id） | Project，含 `description` |
 | `save_project` | `id`（名稱或 id，帶了是修改）、`name`（新增必填）、`description`、`pinned`（`true` 釘選、`false` 取消，只能修改時帶）、`state`（忽略） | 存完的 Project |
+| `merge_project` | `source`（必填，來源 Project 名稱或 id）、`target`（必填，目標 Project 名稱或 id）、`appendDescription`（選填布林，預設 `true`） | `{ target, mergedProjectId, mergedProjectName, movedIssues, descriptionAppended }`：將來源所有票（含已封存）移到目標（不動票的 `updatedAt`）、附加非空說明並移除來源（Nextline 自己的工具） |
 | `list_cycles` | `type`（`current`、`previous`、`next`）、`teamId`（忽略） | `{ cycles }`，依編號新到舊 |
 
 參數細節：
@@ -107,6 +108,7 @@ Cloudflare 本機測試：`npm run dev:cloudflare` 前在 `.dev.vars` 放 `API_T
 | 封存 | `save_issue` 沒有封存參數 | `save_issue` 的 `archived` 封存／取消封存（`list_issues` 的 `includeArchived` 跟 Linear 一樣、預設 `false`） |
 | 看板順序 | 沒有對應參數 | `save_issue` 的 `before`、`after`、`position`；回傳的票有 `position` |
 | 跨票列 comment | 沒有，`list_comments` 只能查一張票 | `list_recent_comments` 列出某個時間之後所有票的新 comment（Nextline 自己的工具） |
+| 合併 Project | 沒有 | `merge_project` 把來源 Project 的票與說明整併進目標 Project 並移除來源（Nextline 自己的工具） |
 | 變更紀錄 | 沒有工具 | `list_issue_events` 列出、`revert_issue_event` 一鍵還原單一欄位（Nextline 自己的工具） |
 | `list_issues` 的 `limit` | 最多 250 | 最多 200 |
 | `save_issue` 的 `assignee`、`labels`、`priority`、`estimate`、`parentId`、`relatedTo`、`duplicateOf`、`patch`、`links`、`template` 等 | 支援 | 不支援，帶了會被忽略（Nextline 沒有這些欄位） |

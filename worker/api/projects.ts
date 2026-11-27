@@ -6,6 +6,7 @@ import {
   json,
   now,
   readBody,
+  requiredInt,
   requiredStr,
   str,
   timestamp,
@@ -113,4 +114,52 @@ export async function updateProject(db: Database, id: number, request: Request):
   }
   await db.batch(statements);
   return json(await getProject(db, id));
+}
+
+// 合併說明：來源說明非空時附標題與分隔線附加到目標說明尾端；來源空白回 null 表示不動目標說明。
+export function mergeProjectDescription(targetDescription: string, sourceName: string, sourceDescription: string): string | null {
+  const src = sourceDescription.trim();
+  if (src === '') return null;
+  const section = `## 合併自「${sourceName}」\n\n${src}`;
+  const dst = targetDescription.trimEnd();
+  return dst === '' ? section : `${dst}\n\n---\n\n${section}`;
+}
+
+export async function mergeProject(db: Database, sourceId: number, request: Request): Promise<Response> {
+  const body: Body = await readBody(request, ['target_project_id', 'append_description']);
+  const targetId = requiredInt(body, 'target_project_id');
+  const appendDescription = bool(body, 'append_description') ?? true;
+  const source = await getProject(db, sourceId);
+  if (targetId === sourceId) throw new HttpError(400, '不能把 Project 合併到自己');
+  const target = await getProject(db, targetId);
+
+  const sourceIdText = String(source.id);
+  const targetIdText = String(target.id);
+  const mergedDescription = appendDescription
+    ? mergeProjectDescription(target.description, source.name, source.description)
+    : null;
+
+  const statements: PreparedStatement[] = [
+    // 同一個 batch 內移轉全部票（含已封存），不改 updated_at、不寫新 issue_events，避免汙染排序與統計。
+    db.prepare('UPDATE issues SET project_id = ? WHERE project_id = ?').bind(target.id, source.id),
+    // 既有的 project 變更紀錄改指向目標 id，避免刪除來源後退回顯示 Project <id>。
+    db.prepare("UPDATE issue_events SET from_value = ? WHERE field = 'project' AND from_value = ?").bind(targetIdText, sourceIdText),
+    db.prepare("UPDATE issue_events SET to_value = ? WHERE field = 'project' AND to_value = ?").bind(targetIdText, sourceIdText),
+  ];
+  if (mergedDescription !== null) {
+    statements.push(
+      db.prepare('UPDATE projects SET description = ?, updated_at = ? WHERE id = ?').bind(mergedDescription, now(), target.id),
+    );
+  }
+  statements.push(db.prepare('DELETE FROM projects WHERE id = ?').bind(source.id));
+
+  const results = await db.batch(statements);
+  const movedIssues = results[0]?.meta.changes ?? 0;
+  return json({
+    target: await getProject(db, target.id),
+    merged_project_id: source.id,
+    merged_project_name: source.name,
+    moved_issues: movedIssues,
+    description_appended: mergedDescription !== null,
+  });
 }

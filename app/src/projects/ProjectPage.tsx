@@ -2,8 +2,8 @@
 // - 看板：沿用首頁看板元件，只放這個 Project 的票
 // - 列表：「全部的票」的列表，Project 篩選固定是這個 Project
 // - 說明：Project 的長篇說明（Markdown；原文的 HTML 一律跳脫，見 issue/Markdown.tsx）
-import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useApi } from '../api/ApiProvider';
 import { ApiError } from '../api/client';
 import type { Project } from '../api/types';
@@ -16,6 +16,8 @@ import { EmptyState, ErrorState, LoadingBlock } from '../ui/states';
 import { useOpenIssues } from '../issues/OpenIssuesProvider';
 import { useToast } from '../toast/ToastProvider';
 import { Icon } from '../ui/Icon';
+import { Menu } from '../ui/Menu';
+import { MergeProjectDialog } from './MergeProjectDialog';
 import { PinButton } from './PinButton';
 import { ProjectDialog } from './ProjectDialog';
 import { openCountByProject, PROJECT_TABS, parseTab, TAB_LABEL } from './projects';
@@ -24,6 +26,7 @@ import './projects.css';
 
 export function ProjectPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const projectId = /^\d+$/.test(id) ? Number(id) : null;
   const [params] = useSearchParams();
   const tab = parseTab(params.get('tab'));
@@ -37,6 +40,9 @@ export function ProjectPage() {
   // 在這頁改過的 Project（編輯對話框存好的），蓋過一開始抓的
   const [edited, setEdited] = useState<Project | null>(null);
   const [editing, setEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [merging, setMerging] = useState(false);
+  const moreBtnRef = useRef<HTMLButtonElement>(null);
   const current = edited !== null && edited.id === projectId ? edited : project.data;
   const name = current?.name;
 
@@ -80,6 +86,7 @@ export function ProjectPage() {
   const p = current ?? project.data;
   // 釘選狀態看共用的 Project 清單（側欄同一份），按了兩邊一起變（NX-162）
   const listed = shared.projects?.find((x) => x.id === p.id);
+  const canMerge = (shared.projects?.filter((x) => x.id !== p.id).length ?? 0) > 0;
   const openCount = open.status === 'success' ? (openCountByProject(open.issues).get(p.id) ?? 0) : null;
 
   return (
@@ -98,6 +105,21 @@ export function ProjectPage() {
           <Icon name="edit" size="sm" />
         </button>
         {listed !== undefined && <PinButton project={listed} />}
+        {canMerge && (
+          <button
+            ref={moreBtnRef}
+            type="button"
+            className="nl-btn nl-btn--icon nl-btn--sm"
+            aria-label="更多操作"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            title="更多操作"
+            data-project-more
+            onClick={() => { setMenuOpen((o) => !o); }}
+          >
+            <Icon name="more" size="sm" />
+          </button>
+        )}
         <span className="sp" />
         <nav className="proj-tabs" aria-label="Project 分頁">
           {PROJECT_TABS.map((t) => (
@@ -107,6 +129,28 @@ export function ProjectPage() {
           ))}
         </nav>
       </header>
+      {menuOpen && moreBtnRef.current !== null && (
+        <Menu
+          anchor={moreBtnRef.current}
+          label="Project 操作"
+          groups={[
+            {
+              items: [
+                {
+                  key: 'merge',
+                  label: '合併到其他 Project…',
+                  icon: 'merge',
+                  onSelect: () => { setMerging(true); },
+                },
+              ],
+            },
+          ]}
+          onClose={(opts) => {
+            setMenuOpen(false);
+            if (opts?.restoreFocus !== false) moreBtnRef.current?.focus();
+          }}
+        />
+      )}
       {tab === 'board' && <BoardPage project={p.id} />}
       {tab === 'list' && <IssueListView fixedProject={p.id} />}
       {tab === 'about' && <ProjectAbout description={p.description} />}
@@ -118,6 +162,19 @@ export function ProjectPage() {
             setEditing(false);
             setEdited(saved);
             show({ message: `已更新 Project「${saved.name}」` });
+          }}
+        />
+      )}
+      {merging && (
+        <MergeProjectDialog
+          project={p}
+          onClose={() => { setMerging(false); }}
+          onMerged={(result) => {
+            setMerging(false);
+            show({
+              message: `已將「${result.merged_project_name}」合併到「${result.target.name}」（移轉 ${String(result.moved_issues)} 張票）`,
+            });
+            void navigate(`/projects/${String(result.target.id)}`, { replace: true });
           }}
         />
       )}

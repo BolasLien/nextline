@@ -951,3 +951,84 @@ describe('封存（NX-160，不做永久刪除）', () => {
     expect((await call('GET', '/api/issues/NX-1')).body.archived_at).toBeNull();
   });
 });
+
+describe('合併 Project', () => {
+  it('移轉來源底下全部票（含已封存）且不動 updated_at、改寫 project 變更紀錄不新增事件、附加非空說明並刪除來源', async () => {
+    const targetRes = await call('POST', '/api/projects', { name: '核心專案', description: '主規格' });
+    const sourceRes = await call('POST', '/api/projects', { name: '第二階段', description: '階段設計重點' });
+    const targetId = targetRes.body.id as number;
+    const sourceId = sourceRes.body.id as number;
+
+    const oldUpdated1 = '2026-10-01T08:00:00.000Z';
+    const oldUpdated2 = '2026-10-02T09:00:00.000Z';
+    const i1 = await newIssue({ title: '一般票', status: 'In Progress', project_id: sourceId, created_at: oldUpdated1, updated_at: oldUpdated1 });
+    const i2 = await newIssue({ title: '已封存票', status: 'Done', project_id: sourceId, created_at: oldUpdated2, updated_at: oldUpdated2 });
+    await call('PATCH', `/api/issues/${String(i2.identifier)}`, { archived: true, actor: '你' });
+    const archivedUpdatedAt = (await call('GET', `/api/issues/${String(i2.identifier)}`)).body.updated_at as string;
+
+    const i3 = await newIssue({ title: '曾經改過 Project 的票' });
+    await call('PATCH', `/api/issues/${String(i3.identifier)}`, { project_id: sourceId, actor: '你' });
+    const i3UpdatedBefore = (await call('GET', `/api/issues/${String(i3.identifier)}`)).body.updated_at as string;
+    const i3EventsBefore = ((await call('GET', `/api/issues/${String(i3.identifier)}/events`)).body.events as Json[]).length;
+
+    const merged = await call('POST', `/api/projects/${String(sourceId)}/merge`, { target_project_id: targetId });
+    expect(merged.status).toBe(200);
+    expect(merged.body).toMatchObject({
+      merged_project_id: sourceId,
+      merged_project_name: '第二階段',
+      moved_issues: 3,
+      description_appended: true,
+    });
+    expect((merged.body.target as Json).description).toBe('主規格\n\n---\n\n## 合併自「第二階段」\n\n階段設計重點');
+
+    expect((await call('GET', `/api/projects/${String(sourceId)}`)).status).toBe(404);
+    const list = (await call('GET', '/api/projects')).body.projects as { id: number }[];
+    expect(list.map((p) => p.id)).toEqual([targetId]);
+
+    const after1 = (await call('GET', `/api/issues/${String(i1.identifier)}`)).body;
+    expect(after1.project_id).toBe(targetId);
+    expect(after1.updated_at).toBe(oldUpdated1);
+    expect((await call('GET', `/api/issues/${String(i1.identifier)}/events`)).body.events).toEqual([]);
+
+    const after2 = (await call('GET', `/api/issues/${String(i2.identifier)}`)).body;
+    expect(after2.project_id).toBe(targetId);
+    expect(after2.archived_at).not.toBeNull();
+    expect(after2.updated_at).toBe(archivedUpdatedAt);
+
+    const after3 = (await call('GET', `/api/issues/${String(i3.identifier)}`)).body;
+    expect(after3.project_id).toBe(targetId);
+    expect(after3.updated_at).toBe(i3UpdatedBefore);
+    const i3EventsAfter = (await call('GET', `/api/issues/${String(i3.identifier)}/events`)).body.events as Json[];
+    expect(i3EventsAfter).toHaveLength(i3EventsBefore);
+    expect(i3EventsAfter[0]?.to_value).toBe(String(targetId));
+  });
+
+  it('append_description=false 或來源說明空白時不動目標說明與 updated_at；目標說明空白時直接寫入標題段', async () => {
+    const t1 = (await call('POST', '/api/projects', { name: '目標A', description: '原本說明', updated_at: '2026-10-01T00:00:00.000Z' })).body;
+    const s1 = (await call('POST', '/api/projects', { name: '來源A', description: '不想附加的內容' })).body;
+    const r1 = await call('POST', `/api/projects/${String(s1.id)}/merge`, { target_project_id: t1.id, append_description: false });
+    expect(r1.status).toBe(200);
+    expect(r1.body.description_appended).toBe(false);
+    expect((r1.body.target as Json).description).toBe('原本說明');
+    expect((r1.body.target as Json).updated_at).toBe('2026-10-01T00:00:00.000Z');
+
+    const t2 = (await call('POST', '/api/projects', { name: '目標B', description: '' })).body;
+    const s2 = (await call('POST', '/api/projects', { name: '來源B', description: '來源內容' })).body;
+    const r2 = await call('POST', `/api/projects/${String(s2.id)}/merge`, { target_project_id: t2.id });
+    expect(r2.status).toBe(200);
+    expect(r2.body.description_appended).toBe(true);
+    expect((r2.body.target as Json).description).toBe('## 合併自「來源B」\n\n來源內容');
+  });
+
+  it('不合法參數、未知欄位或合併自己回 400、找不到來源或目標回 404', async () => {
+    const p1 = await newProject('P1');
+    const p2 = await newProject('P2');
+    expect((await call('POST', `/api/projects/${String(p1)}/merge`, {})).status).toBe(400);
+    expect((await call('POST', `/api/projects/${String(p1)}/merge`, { target_project_id: p1 })).status).toBe(400);
+    expect((await call('POST', `/api/projects/${String(p1)}/merge`, { target_project_id: p2, append_description: 'yes' })).status).toBe(400);
+    expect((await call('POST', `/api/projects/${String(p1)}/merge`, { target_project_id: p2, unknown_field: true })).status).toBe(400);
+    expect((await call('POST', '/api/projects/999/merge', { target_project_id: p1 })).status).toBe(404);
+    expect((await call('POST', `/api/projects/${String(p1)}/merge`, { target_project_id: 999 })).status).toBe(404);
+    expect((await call('GET', `/api/projects/${String(p1)}/merge`)).status).toBe(405);
+  });
+});
